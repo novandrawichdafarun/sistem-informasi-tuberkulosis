@@ -1,6 +1,6 @@
-# 🏥 Aplikasi Manajemen Tuberkulosis (TB)
+# 🏥 Sistem Informasi Tuberkulosis (SITB)
 
-Proyek ini dibangun menggunakan [Next.js](https://nextjs.org) (App Router) dan terintegrasi dengan **Supabase Cloud** sebagai penyedia database relasional (PostgreSQL) serta modul autentikasi.
+Proyek ini dibangun menggunakan [Next.js](https://nextjs.org) (App Router) dan terintegrasi dengan **Supabase Cloud** sebagai penyedia database relasional (PostgreSQL).
 
 ---
 
