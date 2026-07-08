@@ -1,0 +1,17 @@
+CREATE TABLE pemeriksaan_klinis (
+  id_periksa SERIAL PRIMARY KEY,
+  id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
+  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL NOT NULL,
+  tanggal_periksa DATE DEFAULT CURRENT_DATE NOT NULL,
+  keluhan_utama TEXT,
+  tensi VARCHAR(20),
+  suhu DECIMAL(4,2),
+  pernapasan INTEGER,
+  nadi INTEGER,
+  saturasi_o2 INTEGER,
+  berat_badan_saat_ini DECIMAL(5,2),
+  hasil_fisik TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+ALTER TABLE pemeriksaan_klinis ENABLE ROW LEVEL SECURITY;
