@@ -9,3 +9,14 @@ CREATE TABLE medication_log (
 );
 
 ALTER TABLE medication_log ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Pasien kelola log sendiri" ON medication_log
+  FOR ALL TO authenticated USING (
+    id_jadwal IN (
+      SELECT id_jadwal FROM jadwal_minum_obat j
+      JOIN resep_pengobatan r ON j.id_resep = r.id_resep
+      JOIN episode_pengobatan e ON r.id_episode = e.id_episode
+      JOIN pasien p ON e.id_pasien = p.id_pasien
+      WHERE p.id_user = auth.uid()
+    )
+  );
