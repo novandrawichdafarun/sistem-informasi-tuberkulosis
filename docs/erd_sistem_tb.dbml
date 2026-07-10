@@ -1,0 +1,169 @@
+// ERD Sistem Monitoring & Pelaporan Pasien TB
+// Revisi: PMO strict 1:1, tambah fitur chat pasien-nakes
+// Import langsung ke https://dbdiagram.io
+
+Table users {
+  id_user integer [pk, increment]
+  email_hp varchar [unique, not null]
+  password_hash varchar [not null]
+  role varchar [note: 'pasien / pmo / nakes']
+  created_at timestamp
+}
+
+Table faskes {
+  id_faskes integer [pk, increment]
+  nama_faskes varchar
+  jenis varchar [note: 'puskesmas / rs / klinik']
+  alamat varchar
+}
+
+Table nakes {
+  id_nakes integer [pk, increment]
+  id_user integer [ref: - users.id_user, unique]
+  id_faskes integer [ref: > faskes.id_faskes]
+  nama varchar
+  no_str_sip varchar
+  jabatan varchar [note: 'dokter / perawat / analis lab']
+  no_hp varchar
+}
+
+Table pasien {
+  id_pasien integer [pk, increment]
+  id_user integer [ref: - users.id_user, unique]
+  id_nakes integer [ref: > nakes.id_nakes, note: 'nakes penanggung jawab tetap']
+  id_faskes integer [ref: > faskes.id_faskes]
+  no_rm varchar [unique]
+  nik varchar [unique, not null]
+  nama_lengkap varchar
+  tanggal_lahir date
+  jenis_kelamin varchar
+  alamat varchar
+  no_telp varchar
+  tinggi_badan_awal float
+  berat_badan_awal float
+  created_at timestamp
+}
+
+Table pmo {
+  id_pmo integer [pk, increment]
+  id_user integer [ref: - users.id_user, unique]
+  id_pasien integer [ref: - pasien.id_pasien, unique, note: 'strict 1:1, satu pasien hanya satu PMO']
+  nama varchar
+  hubungan varchar [note: 'keluarga / tetangga / kader kesehatan']
+  no_hp varchar
+}
+
+Table episode_pengobatan {
+  id_episode integer [pk, increment]
+  id_pasien integer [ref: > pasien.id_pasien]
+  tanggal_mulai_episode date
+  tipe_pasien varchar [note: 'kasus baru / kambuh / gagal pengobatan']
+  status_episode varchar [note: 'aktif / selesai']
+}
+
+Table pemeriksaan_klinis {
+  id_periksa integer [pk, increment]
+  id_pasien integer [ref: > pasien.id_pasien]
+  id_episode integer [ref: > episode_pengobatan.id_episode, note: 'nullable, kosong = masih tahap skrining']
+  tanggal_periksa date
+  keluhan_utama varchar
+  tensi varchar
+  suhu float
+  pernapasan integer
+  nadi integer
+  saturasi_o2 integer
+  berat_badan_saat_ini float
+  hasil_fisik varchar
+}
+
+Table tes_lab {
+  id_tes integer [pk, increment]
+  id_pasien integer [ref: > pasien.id_pasien]
+  id_episode integer [ref: > episode_pengobatan.id_episode, note: 'nullable']
+  jenis_tes varchar [note: 'TCM / BTA / Rontgen / Mantoux / IGRA']
+  tanggal_tes date
+  hasil_tes varchar [note: 'positif / negatif / resisten rifampisin']
+  tahap_tes varchar [note: 'diagnostik awal / follow-up bulan ke-2 / ke-5']
+  berkas_pendukung varchar
+}
+
+Table diagnosis {
+  id_diagnosis integer [pk, increment]
+  id_episode integer [ref: - episode_pengobatan.id_episode, unique]
+  id_tes integer [ref: > tes_lab.id_tes]
+  id_nakes integer [ref: > nakes.id_nakes]
+  tanggal_diagnosis date
+  kode_icd10 varchar
+  jenis_tb varchar [note: 'TB paru / TB ekstraparu']
+  status_resistensi varchar [note: 'sensitif obat / resisten obat']
+}
+
+Table pengobatan_resep {
+  id_resep integer [pk, increment]
+  id_episode integer [ref: > episode_pengobatan.id_episode]
+  id_nakes integer [ref: > nakes.id_nakes]
+  tanggal_mulai_obat date
+  kategori_regimen varchar [note: 'kategori 1 / kategori 2 / resisten obat']
+  durasi_hari integer
+}
+
+Table detail_obat {
+  id_detail integer [pk, increment]
+  id_resep integer [ref: > pengobatan_resep.id_resep]
+  nama_obat varchar
+  dosis varchar
+}
+
+Table jadwal_minum_obat {
+  id_jadwal integer [pk, increment]
+  id_resep integer [ref: > pengobatan_resep.id_resep]
+  tanggal_jadwal date
+  jam_jadwal time
+}
+
+Table medication_log {
+  id_log integer [pk, increment]
+  id_jadwal integer [ref: - jadwal_minum_obat.id_jadwal, unique]
+  id_pasien integer [ref: > pasien.id_pasien]
+  status varchar [note: 'diminum / terlewat']
+  reported_by varchar [note: 'pasien / pmo']
+  catatan_efek_samping varchar
+  bukti_foto varchar
+}
+
+Table hasil_akhir {
+  id_hasil integer [pk, increment]
+  id_episode integer [ref: - episode_pengobatan.id_episode, unique]
+  tanggal_selesai date
+  status_akhir varchar [note: 'sembuh / lengkap / gagal / putus obat / meninggal / pindah']
+}
+
+Table notifikasi {
+  id_notifikasi integer [pk, increment]
+  id_pasien integer [ref: > pasien.id_pasien]
+  jenis varchar [note: 'pengingat obat / edukasi']
+  jadwal_alarm varchar
+  status_terkirim varchar
+}
+
+Table modul_edukasi {
+  id_modul integer [pk, increment]
+  judul varchar
+  kategori varchar
+}
+
+Table riwayat_edukasi {
+  id_pasien integer [ref: > pasien.id_pasien]
+  id_modul integer [ref: > modul_edukasi.id_modul]
+  tanggal_dibaca date
+}
+
+Table pesan_chat {
+  id_pesan integer [pk, increment]
+  id_pasien integer [ref: > pasien.id_pasien, note: 'menentukan thread percakapan pasien-nakes']
+  id_pengirim integer [ref: > users.id_user, note: 'pengirim pesan: pasien atau nakes']
+  isi_pesan text
+  lampiran_file varchar [note: 'opsional, foto/dokumen']
+  waktu_kirim timestamp
+  status_baca varchar [note: 'dibaca / belum dibaca']
+}

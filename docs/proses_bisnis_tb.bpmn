@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" id="Definitions_TB" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Web Modeler" exporterVersion="3820f06" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
+  <bpmn:process id="Process_TB" name="Proses Bisnis Penanganan Pasien TB" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Pasien" name="Pasien / Pendamping">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Daftar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SubProcess_Monitoring</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Nakes" name="Nakes">
+        <bpmn:flowNodeRef>Task_Registrasi</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PemeriksaanKlinis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RujukLab</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_HasilTB</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_BukanTB</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Diagnosis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_KontrolLanjutan</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ResponsTarget</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SesuaikanRegimen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_HasilAkhir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1vfcoyz</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1ikpq4r</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Selesai</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Sistem" name="Sistem">
+        <bpmn:flowNodeRef>Activity_10bdd4m</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_GenerateJadwal</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SimpanHasilTes</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:task id="Activity_10bdd4m" name="Simpan data pasien &#38; buka rekam medis">
+      <bpmn:incoming>Flow_0mldvkl</bpmn:incoming>
+      <bpmn:outgoing>Flow_11qs1gx</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Activity_1ikpq4r" name="Registrasi data pasien">
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_0mldvkl</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_0mldvkl" sourceRef="Activity_1ikpq4r" targetRef="Activity_10bdd4m" />
+    <bpmn:task id="Activity_1vfcoyz" name="Tentukan Diagnosis Alternatif">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_1v1z82p</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_HasilAkhir" name="Tentukan status hasil akhir episode">
+      <bpmn:incoming>Flow_15</bpmn:incoming>
+      <bpmn:outgoing>Flow_16</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_16" sourceRef="Task_HasilAkhir" targetRef="EndEvent_Selesai" />
+    <bpmn:task id="Task_SesuaikanRegimen" name="Sesuaikan regimen obat">
+      <bpmn:incoming>Flow_13</bpmn:incoming>
+      <bpmn:outgoing>Flow_14</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_ResponsTarget" name="Respons pengobatan sesuai target?">
+      <bpmn:incoming>Flow_12</bpmn:incoming>
+      <bpmn:outgoing>Flow_15</bpmn:outgoing>
+      <bpmn:outgoing>Flow_13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_15" name="tercapai" sourceRef="Gateway_ResponsTarget" targetRef="Task_HasilAkhir" />
+    <bpmn:sequenceFlow id="Flow_13" name="belum tercapai" sourceRef="Gateway_ResponsTarget" targetRef="Task_SesuaikanRegimen" />
+    <bpmn:task id="Task_KontrolLanjutan" name="Kontrol &#38; evaluasi lab lanjutan (bulan ke-2 / ke-5)">
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+      <bpmn:outgoing>Flow_12</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Task_KontrolLanjutan" targetRef="Gateway_ResponsTarget" />
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="SubProcess_Monitoring" targetRef="Task_KontrolLanjutan" />
+    <bpmn:task id="Task_GenerateJadwal" name="Generate jadwal minum obat">
+      <bpmn:incoming>Flow_11qs1gx</bpmn:incoming>
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_GenerateJadwal" targetRef="SubProcess_Monitoring" />
+    <bpmn:sequenceFlow id="Flow_14" sourceRef="Task_SesuaikanRegimen" targetRef="Task_Diagnosis" />
+    <bpmn:sequenceFlow id="Flow_11qs1gx" sourceRef="Activity_10bdd4m" targetRef="Task_GenerateJadwal" />
+    <bpmn:task id="Task_Diagnosis" name="Tegakkan diagnosis, buat episode &#38; resep OAT">
+      <bpmn:incoming>Flow_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Task_Diagnosis" targetRef="Task_GenerateJadwal" />
+    <bpmn:endEvent id="EndEvent_BukanTB" name="Bukan kasus TB">
+      <bpmn:incoming>Flow_1v1z82p</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1v1z82p" sourceRef="Activity_1vfcoyz" targetRef="EndEvent_BukanTB" />
+    <bpmn:exclusiveGateway id="Gateway_HasilTB" name="Hasil tes positif TB?">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_8" name="ya" sourceRef="Gateway_HasilTB" targetRef="Activity_1ikpq4r" />
+    <bpmn:sequenceFlow id="Flow_7" name="tidak" sourceRef="Gateway_HasilTB" targetRef="Activity_1vfcoyz" />
+    <bpmn:task id="Task_SimpanHasilTes" name="Input hasil tes laboratorium">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_SimpanHasilTes" targetRef="Gateway_HasilTB" />
+    <bpmn:task id="Task_RujukLab" name="Rujuk tes laboratorium">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Task_RujukLab" targetRef="Task_SimpanHasilTes" />
+    <bpmn:task id="Task_PemeriksaanKlinis" name="Pemeriksaan klinis awal">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_PemeriksaanKlinis" targetRef="Task_RujukLab" />
+    <bpmn:task id="Task_Registrasi" name="verifikasi data pasien">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_Registrasi" targetRef="Task_PemeriksaanKlinis" />
+    <bpmn:task id="Task_Daftar" name="Isi formulir pendaftaran">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Daftar" targetRef="Task_Registrasi" />
+    <bpmn:startEvent id="StartEvent_1" name="Pasien datang / dirujuk dengan keluhan">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_Daftar" />
+    <bpmn:endEvent id="EndEvent_Selesai" name="Episode pengobatan selesai">
+      <bpmn:incoming>Flow_16</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess_Monitoring" name="Monitoring kepatuhan harian (lapor mandiri, dipantau nakes)">
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_11</bpmn:outgoing>
+      <bpmn:subProcess id="Activity_0a2dyvl" name="Monitoring kepatuhan harian (lapor mandiri, dipantau nakes)">
+        <bpmn:startEvent id="Event_1e1cse6" name="Login ke Sistem">
+          <bpmn:outgoing>Flow_0ehnz4w</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:task id="Activity_1ko404w" name="Kirim laporan minum obat harian">
+          <bpmn:incoming>Flow_0ehnz4w</bpmn:incoming>
+          <bpmn:outgoing>Flow_0vace9z</bpmn:outgoing>
+        </bpmn:task>
+        <bpmn:sequenceFlow id="Flow_0ehnz4w" sourceRef="Event_1e1cse6" targetRef="Activity_1ko404w" />
+        <bpmn:task id="Activity_136hzc4" name="Verifikasi log &#38; perbarui persentase kepatuhan">
+          <bpmn:incoming>Flow_0vace9z</bpmn:incoming>
+          <bpmn:outgoing>Flow_02bm3s0</bpmn:outgoing>
+        </bpmn:task>
+        <bpmn:sequenceFlow id="Flow_0vace9z" sourceRef="Activity_1ko404w" targetRef="Activity_136hzc4" />
+        <bpmn:endEvent id="Event_15mpi59" name="Simpan ke database">
+          <bpmn:incoming>Flow_02bm3s0</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="Flow_02bm3s0" sourceRef="Activity_136hzc4" targetRef="Event_15mpi59" />
+      </bpmn:subProcess>
+    </bpmn:subProcess>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_TB">
+      <bpmndi:BPMNShape id="Lane_Pasien_di" bpmnElement="Lane_Pasien" isHorizontal="true" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="160" y="80" width="2170" height="150" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Nakes_di" bpmnElement="Lane_Nakes" isHorizontal="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
+        <dc:Bounds x="160" y="230" width="2170" height="370" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Sistem_di" bpmnElement="Lane_Sistem" isHorizontal="true" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
+        <dc:Bounds x="160" y="600" width="2170" height="130" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="227" y="137" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="207" y="177" width="77" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Diagnosis_di" bpmnElement="Task_Diagnosis">
+        <dc:Bounds x="1455" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_KontrolLanjutan_di" bpmnElement="Task_KontrolLanjutan">
+        <dc:Bounds x="1755" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ResponsTarget_di" bpmnElement="Gateway_ResponsTarget" isMarkerVisible="true">
+        <dc:Bounds x="1930" y="295" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1920" y="251" width="70" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SesuaikanRegimen_di" bpmnElement="Task_SesuaikanRegimen">
+        <dc:Bounds x="1905" y="460" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_HasilAkhir_di" bpmnElement="Task_HasilAkhir">
+        <dc:Bounds x="2055" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Selesai_di" bpmnElement="EndEvent_Selesai">
+        <dc:Bounds x="2237" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2226" y="347" width="59" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ikpq4r_di" bpmnElement="Activity_1ikpq4r">
+        <dc:Bounds x="1290" y="280" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Daftar_di" bpmnElement="Task_Daftar">
+        <dc:Bounds x="315" y="115" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Registrasi_di" bpmnElement="Task_Registrasi">
+        <dc:Bounds x="465" y="280" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_PemeriksaanKlinis_di" bpmnElement="Task_PemeriksaanKlinis">
+        <dc:Bounds x="615" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RujukLab_di" bpmnElement="Task_RujukLab">
+        <dc:Bounds x="765" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_HasilTB_di" bpmnElement="Gateway_HasilTB" isMarkerVisible="true">
+        <dc:Bounds x="1090" y="295" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1078" y="264" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_BukanTB_di" bpmnElement="EndEvent_BukanTB">
+        <dc:Bounds x="1212" y="522" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1194" y="563" width="81" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1vfcoyz_di" bpmnElement="Activity_1vfcoyz">
+        <dc:Bounds x="1065" y="430" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_10bdd4m_di" bpmnElement="Activity_10bdd4m">
+        <dc:Bounds x="1290" y="625" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_GenerateJadwal_di" bpmnElement="Task_GenerateJadwal">
+        <dc:Bounds x="1455" y="625" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SimpanHasilTes_di" bpmnElement="Task_SimpanHasilTes">
+        <dc:Bounds x="915" y="625" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1d66exs_di" bpmnElement="SubProcess_Monitoring">
+        <dc:Bounds x="1610" y="115" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="263" y="155" />
+        <di:waypoint x="315" y="155" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="1140" y="320" />
+        <di:waypoint x="1290" y="320" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1198" y="302" width="12" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14">
+        <di:waypoint x="1905" y="500" />
+        <di:waypoint x="1630" y="500" />
+        <di:waypoint x="1630" y="320" />
+        <di:waypoint x="1555" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="1505" y="360" />
+        <di:waypoint x="1505" y="625" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
+        <di:waypoint x="1555" y="665" />
+        <di:waypoint x="1580" y="665" />
+        <di:waypoint x="1580" y="155" />
+        <di:waypoint x="1610" y="155" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
+        <di:waypoint x="1660" y="195" />
+        <di:waypoint x="1660" y="320" />
+        <di:waypoint x="1755" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12">
+        <di:waypoint x="1855" y="320" />
+        <di:waypoint x="1930" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13">
+        <di:waypoint x="1955" y="345" />
+        <di:waypoint x="1955" y="460" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1963" y="393" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15">
+        <di:waypoint x="1980" y="320" />
+        <di:waypoint x="2055" y="320" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1998" y="295" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16">
+        <di:waypoint x="2155" y="320" />
+        <di:waypoint x="2237" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="415" y="155" />
+        <di:waypoint x="440" y="155" />
+        <di:waypoint x="440" y="320" />
+        <di:waypoint x="465" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="565" y="320" />
+        <di:waypoint x="615" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="715" y="320" />
+        <di:waypoint x="765" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="865" y="320" />
+        <di:waypoint x="890" y="320" />
+        <di:waypoint x="890" y="665" />
+        <di:waypoint x="915" y="665" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="1015" y="665" />
+        <di:waypoint x="1040" y="665" />
+        <di:waypoint x="1040" y="320" />
+        <di:waypoint x="1090" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1115" y="345" />
+        <di:waypoint x="1115" y="430" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1120" y="374" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1v1z82p_di" bpmnElement="Flow_1v1z82p">
+        <di:waypoint x="1115" y="510" />
+        <di:waypoint x="1115" y="540" />
+        <di:waypoint x="1212" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mldvkl_di" bpmnElement="Flow_0mldvkl">
+        <di:waypoint x="1340" y="360" />
+        <di:waypoint x="1340" y="625" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11qs1gx_di" bpmnElement="Flow_11qs1gx">
+        <di:waypoint x="1390" y="665" />
+        <di:waypoint x="1455" y="665" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_0asazdp">
+    <bpmndi:BPMNPlane id="BPMNPlane_02rrhef" bpmnElement="SubProcess_Monitoring">
+      <bpmndi:BPMNShape id="Activity_0a2dyvl_di" bpmnElement="Activity_0a2dyvl" isExpanded="true" bioc:stroke="#5b176d" bioc:fill="#e1bee7" color:background-color="#e1bee7" color:border-color="#5b176d">
+        <dc:Bounds x="30" y="120" width="540" height="200" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1e1cse6_di" bpmnElement="Event_1e1cse6">
+        <dc:Bounds x="70" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="49" y="245" width="79" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ko404w_di" bpmnElement="Activity_1ko404w">
+        <dc:Bounds x="160" y="180" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_136hzc4_di" bpmnElement="Activity_136hzc4">
+        <dc:Bounds x="320" y="180" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_15mpi59_di" bpmnElement="Event_15mpi59">
+        <dc:Bounds x="482" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="474" y="245" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0ehnz4w_di" bpmnElement="Flow_0ehnz4w">
+        <di:waypoint x="106" y="220" />
+        <di:waypoint x="160" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vace9z_di" bpmnElement="Flow_0vace9z">
+        <di:waypoint x="260" y="220" />
+        <di:waypoint x="320" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02bm3s0_di" bpmnElement="Flow_02bm3s0">
+        <di:waypoint x="420" y="220" />
+        <di:waypoint x="482" y="220" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
