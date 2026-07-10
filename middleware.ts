@@ -7,6 +7,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.{0,}\.(?:svg|png|jpg|jpeg|gif|webp)$).{0,})",
+    //? Masukkan route yang HANYA boleh diakses kalau sudah login
+    "/dashboard/:path*",
+    // "/rekam-medis/:path*", //! contoh lain
   ],
 };

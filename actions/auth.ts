@@ -1,31 +1,9 @@
 "use server";
 
 import {
-  loginUser,
   requestPasswordReset,
   verifyAndResetPassword,
 } from "@/services/auth.service";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-
-export async function loginAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const rememberMe = formData.get("rememberMe") === "on";
-
-  if (!email || !password) {
-    return { error: "Email dan Password harus diisi!" };
-  }
-
-  const result = await loginUser({ email, password, rememberMe });
-
-  if (!result.success) {
-    return { error: result.message };
-  }
-
-  revalidatePath("/", "layout");
-  redirect("/dashboard");
-}
 
 export async function requestOtpAction(formData: FormData) {
   const email = formData.get("email") as string;

@@ -1,28 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import { loginAction } from "@/actions/auth";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
     setErrorMessage(null);
 
-    const result = await loginAction(formData);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
     if (result?.error) {
       setErrorMessage(result.error);
       setIsLoading(false);
+    } else if (result?.ok) {
+      router.push("/dashboard");
+      router.refresh();
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg border border-gray-100">
-        {/* Bagian Judul */}
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">Selamat Datang</h1>
           <p className="mt-2 text-sm text-gray-600">
@@ -30,9 +42,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Formulir Login */}
         <form action={handleSubmit} className="space-y-4">
-          {/* Input Email */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700"
@@ -50,7 +60,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Input Password */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700"
@@ -68,7 +77,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Opsi Ingat Saya & Lupa Password */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center">
               <input
@@ -86,23 +94,21 @@ export default function LoginPage() {
             </div>
 
             <div className="text-sm">
-              <a
+              <Link
                 href="/forgot-password"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Lupa kata sandi?
-              </a>
+              </Link>
             </div>
           </div>
 
-          {/* Area Pesan Error */}
           {errorMessage && (
             <div className="rounded-md bg-red-50 p-3">
               <p className="text-sm text-red-600">{errorMessage}</p>
             </div>
           )}
 
-          {/* Tombol Submit */}
           <button
             type="submit"
             disabled={isLoading}

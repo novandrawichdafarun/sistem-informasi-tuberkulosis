@@ -1,34 +1,11 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-import { LoginPayLoad, ResetPasswordPayload } from "@/types/auth";
+import { ResetPasswordPayload } from "@/types/auth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
 );
-
-export const loginUser = async (payload: LoginPayLoad) => {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: payload.email,
-    password: payload.password,
-  });
-
-  if (error) {
-    return {
-      success: false,
-      message: error.message,
-    };
-  }
-
-  return {
-    success: true,
-    message: "Anda berhasil login",
-    data: data.user,
-  };
-};
 
 export const requestPasswordReset = async (email: string) => {
   const { data: user } = await supabase
