@@ -33,13 +33,16 @@ export async function resetPasswordAction(formData: FormData) {
   const email = formData.get("email") as string;
   const token = formData.get("token") as string;
   const newPassword = formData.get("newPassword") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
 
   if (!email || !token || !newPassword)
     return { error: "Semua kolom harus diisi!" };
   if (newPassword.length < 6)
     return { error: "Kata sandi minimal 6 karakter!" };
+  if (newPassword !== confirmPassword)
+    return { error: "Kata sandi dan konfirmasi kata sandi tidak cocok!" };
 
-  const result = await ResetPassword({ email, newPassword });
+  const result = await ResetPassword({ email, token, newPassword });
   if (!result.success) return { error: result.message };
 
   return { success: true };

@@ -10,8 +10,12 @@ import Link from "next/link";
 
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -134,6 +138,7 @@ export default function ForgotPasswordPage() {
                 id="token"
                 name="token"
                 type="text"
+                autoComplete="off"
                 required
                 maxLength={6}
                 placeholder="123456"
@@ -177,8 +182,27 @@ export default function ForgotPasswordPage() {
                 id="newPassword"
                 name="newPassword"
                 type="password"
+                autoComplete="off"
                 required
                 placeholder="Minimal 6 karakter"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700"
+                htmlFor="confirmPassword"
+              >
+                Konfirmasi Kata Sandi
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="off"
+                required
+                placeholder="Ketik ulang kata sandi baru"
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
