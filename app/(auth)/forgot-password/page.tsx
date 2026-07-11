@@ -13,9 +13,7 @@ export default function ForgotPasswordPage() {
 
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
+  
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

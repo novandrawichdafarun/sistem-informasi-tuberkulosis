@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import Link from "next/link";
-import LogoutButton from "@/components/LogoutButton";
+import LogoutButton from "@/components/buttons/LogoutButton";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -12,7 +12,7 @@ export default async function DashboardPage() {
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="flex-shrink-0 flex items-center">
+            <div className="shrink-0 flex items-center">
               <h1 className="text-xl font-bold text-blue-600">PantauTB</h1>
             </div>
 
