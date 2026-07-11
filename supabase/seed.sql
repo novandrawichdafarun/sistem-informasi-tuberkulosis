@@ -4,19 +4,21 @@
 -- Catatan: Password untuk kedua user ini adalah "password123" 
 -- (sudah di-hash menggunakan Bcrypt)
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 INSERT INTO users (id_user, email, password_hash, role, created_at)
 VALUES
   (
     '11111111-1111-1111-1111-111111111111', 
     'dr.budi@faskes.go.id', 
-    '$2a$10$7v1bSWRGv1zR9EaFkKvxbeK6J9bA5q2rPTe5O1C2mG3eWvN7L6BQi', 
+    crypt('password123', gen_salt('bf', 10)), 
     'nakes', 
     NOW()
   ),
   (
     '22222222-2222-2222-2222-222222222222', 
     'budi.pasien@gmail.com', 
-    '$2a$10$7v1bSWRGv1zR9EaFkKvxbeK6J9bA5q2rPTe5O1C2mG3eWvN7L6BQi', 
+    crypt('password123', gen_salt('bf', 10)), 
     'pasien', 
     NOW()
   )
