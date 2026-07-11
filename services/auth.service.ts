@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-import { ResetPasswordPayload } from "@/types/auth";
+import { OtpPayload, ResetPasswordPayload } from "@/types/auth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,8 +37,8 @@ export const requestPasswordReset = async (email: string) => {
   return { success: true, message: "Kode OTP telah dikirim ke email." };
 };
 
-export const verifyAndResetPassword = async (payload: ResetPasswordPayload) => {
-  const { email, token, newPassword } = payload;
+export const verifyOtp = async (payload: OtpPayload) => {
+  const { email, token } = payload;
 
   const { data: resetRecord, error } = await supabase
     .from("password_resets")
@@ -53,6 +53,24 @@ export const verifyAndResetPassword = async (payload: ResetPasswordPayload) => {
       success: false,
       message: "Kode OTP salah atau sudah kedaluwarsa.",
     };
+  }
+
+  return { success: true, message: "Kode OTP valid." };
+};
+
+export const ResetPassword = async (payload: ResetPasswordPayload) => {
+  const { email, token, newPassword } = payload;
+
+  const { data: resetRecord, error } = await supabase
+    .from("password_resets")
+    .select("*")
+    .eq("email", email)
+    .eq("token", token)
+    .gte("expires_at", new Date().toISOString())
+    .single();
+
+  if (error || !resetRecord) {
+    return { success: false, message: "Akses ditolak: Token tidak sah." };
   }
 
   const salt = await bcrypt.genSalt(10);

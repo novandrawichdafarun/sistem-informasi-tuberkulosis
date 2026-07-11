@@ -19,3 +19,8 @@ export interface ResetPasswordPayload {
   token: string;
   newPassword: string;
 }
+
+export interface OtpPayload {
+  email: string;
+  token: string;
+}

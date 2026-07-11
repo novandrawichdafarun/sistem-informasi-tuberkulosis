@@ -1,6 +1,10 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "./utils/supabase/middleware";
-export { default } from "next-auth/middleware";
+import { withAuth } from "next-auth/middleware";
+
+export default withAuth({
+  pages: {
+    signIn: "/login",
+  },
+});
 
 export const config = {
   matcher: [
