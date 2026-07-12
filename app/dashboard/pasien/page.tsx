@@ -15,23 +15,22 @@ export default async function ManajemenPasienPage() {
   const pasienList = (response.data as PasienData[]) || {};
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Bagian Header */}
-        <div className="sm:flex sm:items-center sm:justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Manajemen Pasien
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Daftar seluruh pasien TB yang berada di bawah pantauan Anda.
-            </p>
-          </div>
-          <div className="mt-4 sm:mt-0">
-            {/* Tombol Tambah Pasien */}
-            <TambahPasienModal />
-          </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Bagian Header */}
+      <div className="sm:flex sm:items-center sm:justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Manajemen Pasien
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Daftar seluruh pasien TB yang berada di bawah pantauan Anda.
+          </p>
         </div>
+        <div className="mt-4 sm:mt-0">
+          {/* Tombol Tambah Pasien */}
+          <TambahPasienModal />
+        </div>
+      </div>
 
         {/* Bagian Tabel (Bawaan Tailwind UI) */}
         {response.success === false ? (
@@ -158,7 +157,6 @@ export default async function ManajemenPasienPage() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
