@@ -1,26 +1,34 @@
+export type UserRole = "pasien" | "nakes" | "super_admin";
+
+export interface UserAuthData {
+  id: string;
+  email: string;
+  role: UserRole;
+}
+
 export interface LoginPayLoad {
   email: string;
   password: string;
   rememberMe: boolean;
 }
 
-export interface AuthResponse {
+export interface AuthResponse<T = UserAuthData> {
   success: boolean;
   message: string;
-  data?: any;
+  data?: T;
 }
 
 export interface ForgetPasswordPayload {
   email: string;
 }
 
+export interface OtpPayload {
+  email: string;
+  token: string;
+}
+
 export interface ResetPasswordPayload {
   email: string;
   token: string;
   newPassword: string;
-}
-
-export interface OtpPayload {
-  email: string;
-  token: string;
 }
