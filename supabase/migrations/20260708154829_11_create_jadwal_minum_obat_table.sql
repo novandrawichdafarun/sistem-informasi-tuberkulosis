@@ -6,4 +6,6 @@ CREATE TABLE jadwal_minum_obat (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_jadwal_minum_obat_resep ON jadwal_minum_obat(id_resep);
+CREATE INDEX idx_jadwal_minum_obat_tanggal ON jadwal_minum_obat(tanggal_jadwal);
 ALTER TABLE jadwal_minum_obat ENABLE ROW LEVEL SECURITY;

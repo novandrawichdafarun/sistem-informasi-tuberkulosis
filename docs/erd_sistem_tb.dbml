@@ -1,169 +1,157 @@
-// ERD Sistem Monitoring & Pelaporan Pasien TB
-// Revisi: PMO strict 1:1, tambah fitur chat pasien-nakes
-// Import langsung ke https://dbdiagram.io
+// ==========================================
+// 1. ENTITAS PENGGUNA & FASILITAS KESEHATAN
+// ==========================================
 
 Table users {
   id_user integer [pk, increment]
-  email_hp varchar [unique, not null]
-  password_hash varchar [not null]
-  role varchar [note: 'pasien / pmo / nakes']
-  created_at timestamp
+  email varchar(100) [unique, not null]
+  password varchar(255) [not null]
+  role varchar(20) [note: 'pasien / nakes / super_admin']
 }
 
 Table faskes {
   id_faskes integer [pk, increment]
-  nama_faskes varchar
-  jenis varchar [note: 'puskesmas / rs / klinik']
-  alamat varchar
+  nama_faskes varchar(100) [not null]
+  jenis varchar(50) [note: 'puskesmas / rs / klinik']
+  alamat text
 }
 
 Table nakes {
   id_nakes integer [pk, increment]
   id_user integer [ref: - users.id_user, unique]
   id_faskes integer [ref: > faskes.id_faskes]
-  nama varchar
-  no_str_sip varchar
-  jabatan varchar [note: 'dokter / perawat / analis lab']
-  no_hp varchar
+  nama varchar(100) [not null]
+  no_str varchar(50) [note: 'Nomor Surat Tanda Registrasi (STR)']
+  no_sip varchar(50) [note: 'Surat Izin Praktik (SIP)']
+  jabatan varchar(50) [note: 'dokter / perawat / analis lab']
+  no_hp varchar(20)
 }
+
+// ==========================================
+// 2. ENTITAS UTAMA PASIEN & MEDIS
+// ==========================================
 
 Table pasien {
   id_pasien integer [pk, increment]
   id_user integer [ref: - users.id_user, unique]
   id_nakes integer [ref: > nakes.id_nakes, note: 'nakes penanggung jawab tetap']
   id_faskes integer [ref: > faskes.id_faskes]
-  no_rm varchar [unique]
-  nik varchar [unique, not null]
-  nama_lengkap varchar
+  no_rm varchar(50) [unique]
+  nik varchar(16) [unique, not null]
+  nama_lengkap varchar(100) [not null]
   tanggal_lahir date
-  jenis_kelamin varchar
-  alamat varchar
-  no_telp varchar
-  tinggi_badan_awal float
-  berat_badan_awal float
-  created_at timestamp
-}
-
-Table pmo {
-  id_pmo integer [pk, increment]
-  id_user integer [ref: - users.id_user, unique]
-  id_pasien integer [ref: - pasien.id_pasien, unique, note: 'strict 1:1, satu pasien hanya satu PMO']
-  nama varchar
-  hubungan varchar [note: 'keluarga / tetangga / kader kesehatan']
-  no_hp varchar
+  jenis_kelamin varchar(1) [note: 'L / P']
+  alamat text
+  no_telp varchar(20)
+  tinggi_badan_awal integer [note: 'Dalam satuan cm, angka bulat']
+  berat_badan_awal decimal(5,2) [note: 'Menggunakan desimal presisi, contoh 45.50 kg']
 }
 
 Table episode_pengobatan {
   id_episode integer [pk, increment]
   id_pasien integer [ref: > pasien.id_pasien]
-  tanggal_mulai_episode date
-  tipe_pasien varchar [note: 'kasus baru / kambuh / gagal pengobatan']
-  status_episode varchar [note: 'aktif / selesai']
+  tanggal_mulai date
+  tanggal_selesai date
+  tipe_pasien varchar(50) [note: 'kasus baru / kambuh / gagal pengobatan']
+  status_episode varchar(20) [note: 'aktif / selesai']
 }
+
+// ==========================================
+// 3. TRANSAKSI PEMERIKSAAN KESEHATAN
+// ==========================================
 
 Table pemeriksaan_klinis {
   id_periksa integer [pk, increment]
-  id_pasien integer [ref: > pasien.id_pasien]
-  id_episode integer [ref: > episode_pengobatan.id_episode, note: 'nullable, kosong = masih tahap skrining']
-  tanggal_periksa date
-  keluhan_utama varchar
-  tensi varchar
-  suhu float
-  pernapasan integer
-  nadi integer
-  saturasi_o2 integer
-  berat_badan_saat_ini float
-  hasil_fisik varchar
+  id_episode integer [ref: > episode_pengobatan.id_episode, note: 'Terkunci ke episode untuk riwayat runtun waktu']
+  id_nakes integer [ref: > nakes.id_nakes]
+  tanggal_periksa date [not null]
+  keluhan text
+  tensi varchar(20) [note: 'Disimpan teks, contoh: 120/80 mmHg']
+  suhu decimal(4,2) [note: 'Desimal presisi, contoh: 36.60']
+  pernapasan integer [note: 'Angka bulat per menit']
+  nadi integer [note: 'Angka bulat bpm']
+  saturasi_o2 integer [note: 'Persentase 0-100']
+  tinggi_badan_saat_ini integer
+  berat_badan_saat_ini decimal(5,2)
 }
 
-Table tes_lab {
+Table pemeriksaan_lab {
   id_tes integer [pk, increment]
-  id_pasien integer [ref: > pasien.id_pasien]
-  id_episode integer [ref: > episode_pengobatan.id_episode, note: 'nullable']
-  jenis_tes varchar [note: 'TCM / BTA / Rontgen / Mantoux / IGRA']
+  id_episode integer [ref: > episode_pengobatan.id_episode]
+  id_nakes integer [ref: > nakes.id_nakes]
+  jenis_tes varchar(50) [note: 'TCM / IGRA / Mantoux / BTA / Rontgen']
   tanggal_tes date
-  hasil_tes varchar [note: 'positif / negatif / resisten rifampisin']
-  tahap_tes varchar [note: 'diagnostik awal / follow-up bulan ke-2 / ke-5']
-  berkas_pendukung varchar
+  hasil_tes varchar(100) [note: 'positif / negatif']
+  pemeriksaan_ke varchar(50) [note: 'diagnostik awal / follow-up bulan ke-2 / ke-5']
+  berkas_pendukung_url varchar(255)
 }
 
 Table diagnosis {
   id_diagnosis integer [pk, increment]
   id_episode integer [ref: - episode_pengobatan.id_episode, unique]
-  id_tes integer [ref: > tes_lab.id_tes]
+  id_tes integer [ref: > pemeriksaan_lab.id_tes]
   id_nakes integer [ref: > nakes.id_nakes]
   tanggal_diagnosis date
-  kode_icd10 varchar
-  jenis_tb varchar [note: 'TB paru / TB ekstraparu']
-  status_resistensi varchar [note: 'sensitif obat / resisten obat']
+  kode_icd10 varchar(10) [note: 'Contoh: A15']
+  jenis_tb varchar(50) [note: 'TB paru / TB ekstraparu']
+  status_resistensi varchar(50) [note: 'sensitif obat / resisten obat']
 }
 
-Table pengobatan_resep {
+Table resep_pengobatan {
   id_resep integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode]
   id_nakes integer [ref: > nakes.id_nakes]
   tanggal_mulai_obat date
-  kategori_regimen varchar [note: 'kategori 1 / kategori 2 / resisten obat']
+  kategori_regimen varchar(50) [note: 'kategori 1 / kategori 2 / Kategori 3 / OAT Sisipan / OAT Anak']
   durasi_hari integer
 }
 
 Table detail_obat {
   id_detail integer [pk, increment]
-  id_resep integer [ref: > pengobatan_resep.id_resep]
-  nama_obat varchar
-  dosis varchar
+  id_resep integer [ref: > resep_pengobatan.id_resep]
+  nama_obat varchar(100)
+  dosis varchar(50)
 }
 
 Table jadwal_minum_obat {
   id_jadwal integer [pk, increment]
-  id_resep integer [ref: > pengobatan_resep.id_resep]
+  id_resep integer [ref: > resep_pengobatan.id_resep]
   tanggal_jadwal date
   jam_jadwal time
 }
 
 Table medication_log {
   id_log integer [pk, increment]
-  id_jadwal integer [ref: - jadwal_minum_obat.id_jadwal, unique]
-  id_pasien integer [ref: > pasien.id_pasien]
-  status varchar [note: 'diminum / terlewat']
-  reported_by varchar [note: 'pasien / pmo']
-  catatan_efek_samping varchar
-  bukti_foto varchar
+  id_jadwal integer [ref: - jadwal_minum_obat.id_jadwal, unique, note: 'Cukup lewat jadwal untuk tahu relasi pasien']
+  status varchar(20) [note: 'diminum / terlewat']
+  reported_by varchar(20) [note: 'pasien / pendamping']
 }
 
 Table hasil_akhir {
   id_hasil integer [pk, increment]
   id_episode integer [ref: - episode_pengobatan.id_episode, unique]
   tanggal_selesai date
-  status_akhir varchar [note: 'sembuh / lengkap / gagal / putus obat / meninggal / pindah']
+  status_akhir varchar(50) [note: 'sembuh / lengkap / gagal / putus obat / meninggal / pindah']
 }
 
-Table notifikasi {
-  id_notifikasi integer [pk, increment]
-  id_pasien integer [ref: > pasien.id_pasien]
-  jenis varchar [note: 'pengingat obat / edukasi']
-  jadwal_alarm varchar
-  status_terkirim varchar
-}
+// ==========================================
+// 4. ENTITAS PENDUKUNG (NOTIFIKASI & CHAT)
+// ==========================================
 
-Table modul_edukasi {
-  id_modul integer [pk, increment]
-  judul varchar
-  kategori varchar
-}
-
-Table riwayat_edukasi {
-  id_pasien integer [ref: > pasien.id_pasien]
-  id_modul integer [ref: > modul_edukasi.id_modul]
-  tanggal_dibaca date
+Table notifikasi_wa {
+  id_notifikasi_wa integer [pk, increment]
+  id_user integer [ref: > users.id_user, note: 'Mengarah ke id_user penerima email/notif']
+  jenis varchar(50) [note: 'pengingat obat / edukasi']
+  waktu_kirim timestamp
+  status_terkirim varchar(20)
 }
 
 Table pesan_chat {
   id_pesan integer [pk, increment]
-  id_pasien integer [ref: > pasien.id_pasien, note: 'menentukan thread percakapan pasien-nakes']
-  id_pengirim integer [ref: > users.id_user, note: 'pengirim pesan: pasien atau nakes']
+  id_pasien integer [ref: > pasien.id_pasien, note: 'Menentukan room chat pasien tersebut']
+  id_pengirim integer [ref: > users.id_user, note: 'ID akun yang mengetik pesan']
   isi_pesan text
-  lampiran_file varchar [note: 'opsional, foto/dokumen']
-  waktu_kirim timestamp
-  status_baca varchar [note: 'dibaca / belum dibaca']
+  lampiran_file_url varchar(255)
+  waktu_kirim timestamp [default: `now()` ]
+  status_baca varchar(20) [note: 'dibaca / belum dibaca']
 }

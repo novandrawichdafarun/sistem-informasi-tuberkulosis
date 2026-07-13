@@ -10,4 +10,5 @@ CREATE TABLE diagnosis (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_diagnosis_id_tes ON diagnosis(id_tes);
 ALTER TABLE diagnosis ENABLE ROW LEVEL SECURITY;

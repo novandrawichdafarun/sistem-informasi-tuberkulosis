@@ -8,4 +8,5 @@ CREATE TABLE episode_pengobatan (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_episode_pengobatan_pasien ON episode_pengobatan(id_pasien);
 ALTER TABLE episode_pengobatan ENABLE ROW LEVEL SECURITY;

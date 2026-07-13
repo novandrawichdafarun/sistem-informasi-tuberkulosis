@@ -5,9 +5,10 @@ CREATE TABLE pemeriksaan_lab (
   jenis_tes VARCHAR(50) NOT NULL, -- TCM, IGRA, Mantoux, BTA, Rontgen
   tanggal_tes DATE NOT NULL,
   hasil_tes VARCHAR(100) NOT NULL, -- Positif, Negatif, dll
-  tahap_tes VARCHAR(50), -- Akhir Bulan ke-2, ke-5, ke-6
+  periode_bulanan VARCHAR(50), -- Bulan ke-2, ke-5, ke-6
   berkas_pendukung_url VARCHAR(255), -- Link berkas di Supabase Storage
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_pemeriksaan_lab_episode ON pemeriksaan_lab(id_episode);
 ALTER TABLE pemeriksaan_lab ENABLE ROW LEVEL SECURITY;

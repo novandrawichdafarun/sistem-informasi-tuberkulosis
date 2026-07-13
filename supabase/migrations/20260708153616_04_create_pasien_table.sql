@@ -15,6 +15,9 @@ CREATE TABLE pasien (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_pasien_id_user ON pasien(id_user);
+CREATE INDEX idx_pasien_id_nakes ON pasien(id_nakes);
+CREATE INDEX idx_pasien_id_faskes ON pasien(id_faskes);
 ALTER TABLE pasien ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Pasien melihat data sendiri atau Nakes melihat data pasien binaannya" ON pasien

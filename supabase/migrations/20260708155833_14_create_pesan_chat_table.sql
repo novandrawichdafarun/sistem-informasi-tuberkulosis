@@ -8,4 +8,5 @@ CREATE TABLE pesan_chat (
   status_baca VARCHAR(20) DEFAULT 'belum dibaca' CHECK (status_baca IN ('dibaca', 'belum dibaca')) NOT NULL
 );
 
+CREATE INDEX idx_pesan_chat_pasien_waktu ON pesan_chat(id_pasien, waktu_kirim DESC);
 ALTER TABLE pesan_chat ENABLE ROW LEVEL SECURITY;

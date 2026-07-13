@@ -9,6 +9,8 @@ CREATE TABLE nakes (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_nakes_id_user ON nakes(id_user);
+create INDEX idx_nakes_id_faskes ON nakes(id_faskes);
 ALTER TABLE nakes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Nakes bisa melihat profil nakes lain se-faskes" ON nakes

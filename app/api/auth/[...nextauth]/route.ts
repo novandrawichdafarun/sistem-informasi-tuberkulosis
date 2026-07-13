@@ -2,6 +2,10 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
+import { headers } from "next/headers";
+import { randomUUID } from "crypto";
+import { Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,10 +44,40 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Kata sandi salah");
         }
 
+        const headersList = await headers();
+        const userAgent =
+          headersList.get("user-agent") || "Perangkat Tidak Dikenal";
+        const newSessionToken = randomUUID();
+
+        const { data: activeSessions } = await supabase
+          .from("user_sessions")
+          .select("id, session_token")
+          .eq("id_user", user.id_user)
+          .order("last_active_at", { ascending: true });
+
+        if (activeSessions && activeSessions.length >= 3) {
+          const overLimitCount = activeSessions.length - 2;
+          const sessionsToKick = activeSessions
+            .slice(0, overLimitCount)
+            .map((s) => s.session_token);
+
+          await supabase
+            .from("user_sessions")
+            .delete()
+            .in("session_token", sessionsToKick);
+        }
+
+        await supabase.from("user_sessions").insert({
+          id_user: user.id_user,
+          session_token: newSessionToken,
+          device_info: userAgent,
+        });
+
         return {
           id: user.id_user,
           email: user.email,
           role: user.role,
+          sessionToken: newSessionToken,
         };
       },
     }),
@@ -53,13 +87,35 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.sessionId = user.sessionToken;
       }
+
+      if (token.sessionToken) {
+        const { data: sessionData } = await supabase
+          .from("active_sessions")
+          .select("session_id")
+          .eq("session_id", token.sessionId)
+          .single();
+
+        if (!sessionData) {
+          return {} as JWT;
+        }
+
+        await supabase
+          .from("user_sessions")
+          .update({ last_active_at: new Date().toISOString() })
+          .eq("session_token", token.sessionToken);
+      }
+
       return token;
     },
     async session({ session, token }) {
+      if (!token.id) return {} as Session;
+
       if (session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.sessionToken = token.sessionToken as string;
       }
       return session;
     },

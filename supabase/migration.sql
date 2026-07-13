@@ -15,6 +15,28 @@ CREATE POLICY "Pengguna dapat melihat profil mereka sendiri" ON users
       current_setting('my.custom.user_id', true) = id_user::text
     );
 
+CREATE TABLE password_resets (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(100) NOT NULL,
+  token VARCHAR(6) NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_password_resets_email ON password_resets(email);
+ALTER TABLE password_resets ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE user_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_user UUID REFERENCES users(id_user) ON DELETE CASCADE,
+  session_token TEXT UNIQUE NOT NULL, 
+  device_info TEXT, 
+  last_active_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX idx_user_sessions_user ON user_sessions(id_user);
+ALTER TABLE user_sessions ENABLE ROW LEVEL SECURITY;
+
 CREATE TABLE faskes (
   id_faskes SERIAL PRIMARY KEY,
   nama_faskes VARCHAR(100) NOT NULL,
@@ -39,6 +61,8 @@ CREATE TABLE nakes (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_nakes_id_user ON nakes(id_user);
+create INDEX idx_nakes_id_faskes ON nakes(id_faskes);
 ALTER TABLE nakes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Nakes bisa melihat profil nakes lain se-faskes" ON nakes
@@ -61,6 +85,9 @@ CREATE TABLE pasien (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_pasien_id_user ON pasien(id_user);
+CREATE INDEX idx_pasien_id_nakes ON pasien(id_nakes);
+CREATE INDEX idx_pasien_id_faskes ON pasien(id_faskes);
 ALTER TABLE pasien ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Pasien melihat data sendiri atau Nakes melihat data pasien binaannya" ON pasien
@@ -79,6 +106,7 @@ CREATE TABLE episode_pengobatan (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_episode_pengobatan_pasien ON episode_pengobatan(id_pasien);
 ALTER TABLE episode_pengobatan ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE pemeriksaan_klinis (
@@ -86,17 +114,18 @@ CREATE TABLE pemeriksaan_klinis (
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
   id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL NOT NULL,
   tanggal_periksa DATE DEFAULT CURRENT_DATE NOT NULL,
-  keluhan_utama TEXT,
+  keluhan TEXT,
   tensi VARCHAR(20),
   suhu DECIMAL(4,2),
   pernapasan INTEGER,
   nadi INTEGER,
   saturasi_o2 INTEGER,
+  tinggi_badan_saat_ini INTEGER,
   berat_badan_saat_ini DECIMAL(5,2),
-  hasil_fisik TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_pemeriksaan_klinis_episode ON pemeriksaan_klinis(id_episode);
 ALTER TABLE pemeriksaan_klinis ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE pemeriksaan_lab (
@@ -106,11 +135,12 @@ CREATE TABLE pemeriksaan_lab (
   jenis_tes VARCHAR(50) NOT NULL, -- TCM, IGRA, Mantoux, BTA, Rontgen
   tanggal_tes DATE NOT NULL,
   hasil_tes VARCHAR(100) NOT NULL, -- Positif, Negatif, dll
-  tahap_tes VARCHAR(50), -- Akhir Bulan ke-2, ke-5, ke-6
+  periode_bulanan VARCHAR(50), -- Bulan ke-2, ke-5, ke-6
   berkas_pendukung_url VARCHAR(255), -- Link berkas di Supabase Storage
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_pemeriksaan_lab_episode ON pemeriksaan_lab(id_episode);
 ALTER TABLE pemeriksaan_lab ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE diagnosis (
@@ -125,6 +155,7 @@ CREATE TABLE diagnosis (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_diagnosis_id_tes ON diagnosis(id_tes);
 ALTER TABLE diagnosis ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE resep_pengobatan (
@@ -137,6 +168,7 @@ CREATE TABLE resep_pengobatan (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_resep_pengobatan_episode ON resep_pengobatan(id_episode);
 ALTER TABLE resep_pengobatan ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE detail_obat (
@@ -147,6 +179,7 @@ CREATE TABLE detail_obat (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_detail_obat_resep ON detail_obat(id_resep);
 ALTER TABLE detail_obat ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE jadwal_minum_obat (
@@ -157,6 +190,8 @@ CREATE TABLE jadwal_minum_obat (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_jadwal_minum_obat_resep ON jadwal_minum_obat(id_resep);
+CREATE INDEX idx_jadwal_minum_obat_tanggal ON jadwal_minum_obat(tanggal_jadwal);
 ALTER TABLE jadwal_minum_obat ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE medication_log (
@@ -170,6 +205,17 @@ CREATE TABLE medication_log (
 );
 
 ALTER TABLE medication_log ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Pasien kelola log sendiri" ON medication_log
+  FOR ALL TO authenticated USING (
+    id_jadwal IN (
+      SELECT id_jadwal FROM jadwal_minum_obat j
+      JOIN resep_pengobatan r ON j.id_resep = r.id_resep
+      JOIN episode_pengobatan e ON r.id_episode = e.id_episode
+      JOIN pasien p ON e.id_pasien = p.id_pasien
+      WHERE p.id_user = auth.uid()
+    )
+  );
 
 CREATE TABLE hasil_akhir (
   id_hasil SERIAL PRIMARY KEY,
@@ -191,4 +237,5 @@ CREATE TABLE pesan_chat (
   status_baca VARCHAR(20) DEFAULT 'belum dibaca' CHECK (status_baca IN ('dibaca', 'belum dibaca')) NOT NULL
 );
 
+CREATE INDEX idx_pesan_chat_pasien_waktu ON pesan_chat(id_pasien, waktu_kirim DESC);
 ALTER TABLE pesan_chat ENABLE ROW LEVEL SECURITY;

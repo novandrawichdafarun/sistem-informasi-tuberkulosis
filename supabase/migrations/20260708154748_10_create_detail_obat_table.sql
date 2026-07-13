@@ -6,4 +6,5 @@ CREATE TABLE detail_obat (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+CREATE INDEX idx_detail_obat_resep ON detail_obat(id_resep);
 ALTER TABLE detail_obat ENABLE ROW LEVEL SECURITY;
