@@ -18,9 +18,14 @@ export const requestPasswordReset = async (email: string) => {
     return { success: false, message: "Email tidak terdaftar." };
   }
 
+  await supabase
+    .from("password_resets")
+    .delete()
+    .lt("expires_at", new Date().toISOString());
+  await supabase.from("password_resets").delete().eq("email", email);
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 menit
 
   const { error } = await supabase.from("password_resets").insert({
     email,

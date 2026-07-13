@@ -3,6 +3,7 @@ import { DefaultJWT } from "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
+    error?: "ForceLogout";
     user: {
       id: string;
       role: string;
@@ -22,5 +23,6 @@ declare module "next-auth/jwt" {
     id: string;
     role: string;
     sessionToken: string;
+    error?: "ForceLogout";
   }
 }

@@ -87,18 +87,19 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.sessionId = user.sessionToken;
+        token.sessionToken = user.sessionToken;
       }
 
       if (token.sessionToken) {
         const { data: sessionData } = await supabase
-          .from("active_sessions")
-          .select("session_id")
-          .eq("session_id", token.sessionId)
+          .from("user_sessions")
+          .select("session_token")
+          .eq("session_token", token.sessionToken)
           .single();
 
         if (!sessionData) {
-          return {} as JWT;
+          token.error = "ForceLogout";
+          return token;
         }
 
         await supabase
@@ -110,7 +111,18 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (!token.id) return {} as Session;
+      if (token.error === "ForceLogout") {
+        session.error = "ForceLogout";
+        session.user = {
+          id: "",
+          role: "",
+          sessionToken: "",
+          name: "",
+          email: "",
+          image: "",
+        };
+        return session;
+      }
 
       if (session.user) {
         session.user.id = token.id as string;
