@@ -2,6 +2,7 @@
 
 import { bukaEpisodeAction } from "@/actions/episodePengobatan";
 import { useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 
 interface BukaEpisodeModalProps {
   id_pasien: number;
@@ -16,8 +17,9 @@ export default function BukaEpisoodeModal({
 }: BukaEpisodeModalProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const todayDate = new Date().toLocaleDateString("en-CA");
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ export default function BukaEpisoodeModal({
     });
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 text-left">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
@@ -59,6 +61,7 @@ export default function BukaEpisoodeModal({
             <input
               type="date"
               name="tanggal_mulai"
+              defaultValue={todayDate}
               required
               className="w-full rounded border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
             />
@@ -100,6 +103,7 @@ export default function BukaEpisoodeModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

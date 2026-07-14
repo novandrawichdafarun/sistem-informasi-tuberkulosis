@@ -2,9 +2,9 @@
 
 import { PasienEpisodeOverview } from "@/types/episodePengobatan";
 import { useState } from "react";
-import BukaEpisoodeModal from "./BukaEpisodeModal";
+import BukaEpisodeModal from "./BukaEpisodeModal";
 import TutupEpisodeModal from "./TutupEpisodeModal";
-import RiwayatEpisodeModal from "./RiwayatEpisodeModal";
+import RiwayatSubRow from "./RiwayatSubRow";
 
 interface EpisodeRowViewProps {
   item: PasienEpisodeOverview;
@@ -13,91 +13,122 @@ interface EpisodeRowViewProps {
 export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
   const [isModalBukaOpen, setIsModalBukaOpen] = useState(false);
   const [isModalTutupOpen, setIsModalTutupOpen] = useState(false);
-  const [isModalRiwayatOpen, setIsModalRiwayatOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { id_pasien, no_rm, nama_lengkap, nik, episodeAktif, riwayat_episode } =
     item;
+  const hasRiwayat = riwayat_episode && riwayat_episode.length > 0;
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors">
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="font-medium text-gray-900">{no_rm || "-"}</div>
-        <div className="text-xs text-gray-400">NIK {nik}</div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
-        {nama_lengkap}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        {episodeAktif ? (
-          <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 border border-blue-100">
-            Aktif
-          </span>
-        ) : (
-          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 border border-slate-200">
-            Tidak Ada Episode
-          </span>
-        )}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
-        {episodeAktif ? (
-          <div className="flex flex-col">
-            <span className="font-semibold text-gray-700">
-              {episodeAktif.tipe_pasien}
+    <>
+      <tr className="hover:bg-gray-50 transition-colors">
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="font-medium text-gray-900">{no_rm || "-"}</div>
+          <div className="text-xs text-gray-400">NIK {nik}</div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
+          {nama_lengkap}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          {episodeAktif ? (
+            <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 border border-blue-100">
+              Aktif
             </span>
-            <span className="text-gray-400">
-              Mulai {episodeAktif.tanggal_mulai}
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 border border-slate-200">
+              Tidak Ada Episode
             </span>
-          </div>
-        ) : (
-          <span className="text-gray-400">-</span>
-        )}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-xs space-x-2">
-        <button
-          onClick={() => setIsModalRiwayatOpen(true)}
-          className="rounded bg-gray-100 px-3 py-1.5 font-semibold text-gray-700 border border-gray-200 hover:bg-gray-200 transition"
-        >
-          Lihat Log
-        </button>
-
-        {episodeAktif ? (
+          )}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+          {episodeAktif ? (
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700">
+                {episodeAktif.tipe_pasien}
+              </span>
+              <span className="text-gray-400">
+                Mulai {episodeAktif.tanggal_mulai}
+              </span>
+            </div>
+          ) : (
+            <span className="text-gray-400">-</span>
+          )}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-right text-xs space-x-2">
           <button
-            onClick={() => setIsModalTutupOpen(true)}
-            className="rounded bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition"
+            onClick={() => setIsExpanded(!isExpanded)}
+            disabled={!hasRiwayat}
+            className={`rounded px-3 py-1.5 font-semibold transition border ${hasRiwayat ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200" : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"}`}
           >
-            Selesaikan
+            {isExpanded ? "Tutup Log ▴" : "Lihat Log ▾"}
           </button>
-        ) : (
-          <button
-            onClick={() => setIsModalBukaOpen(true)}
-            className="rounded bg-blue-600 px-3 py-1.5 font-semibold text-white hover:bg-blue-700 transition"
+
+          {episodeAktif ? (
+            <button
+              onClick={() => setIsModalTutupOpen(true)}
+              className="rounded bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition"
+            >
+              Selesaikan
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsModalBukaOpen(true)}
+              className="rounded bg-blue-600 px-3 py-1.5 font-semibold text-white hover:bg-blue-700 transition"
+            >
+              Buka Episode
+            </button>
+          )}
+        </td>
+      </tr>
+
+      {/* TAMPILAN DROPDOWN ROW RIWAYAT */}
+      {isExpanded && (
+        <tr>
+          <td
+            colSpan={5}
+            className="bg-slate-50 border-b border-gray-200 p-0 shadow-inner"
           >
-            Buka Episode
-          </button>
-        )}
+            <div className="p-4 pl-10 border-l-4 border-blue-400">
+              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                Histori Pengobatan ({riwayat_episode.length})
+              </h4>
+              <div className="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
+                <table className="w-full text-left text-sm text-gray-600">
+                  <thead className="bg-gray-100 text-xs font-semibold text-gray-700">
+                    <tr>
+                      <th className="px-4 py-2 border-b">Tipe Kasus</th>
+                      <th className="px-4 py-2 border-b">Tanggal Mulai</th>
+                      <th className="px-4 py-2 border-b">Tanggal Selesai</th>
+                      <th className="px-4 py-2 border-b">Status</th>
+                      <th className="px-4 py-2 border-b text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {riwayat_episode.map((ep) => (
+                      <RiwayatSubRow key={ep.id_episode} episode={ep} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
 
-        <BukaEpisoodeModal
-          id_pasien={id_pasien}
-          isOpen={isModalBukaOpen}
-          onClose={() => setIsModalBukaOpen(false)}
+      {/* Modal Buka & Tutup */}
+      <BukaEpisodeModal
+        id_pasien={id_pasien}
+        isOpen={isModalBukaOpen}
+        onClose={() => setIsModalBukaOpen(false)}
+      />
+      {episodeAktif && (
+        <TutupEpisodeModal
+          id_episode={episodeAktif.id_episode}
+          tipePasienSekarang={episodeAktif.tipe_pasien}
+          isOpen={isModalTutupOpen}
+          onClose={() => setIsModalTutupOpen(false)}
         />
-
-        {episodeAktif && (
-          <TutupEpisodeModal
-            id_episode={episodeAktif.id_episode}
-            tipePasienSekarang={episodeAktif.tipe_pasien}
-            isOpen={isModalTutupOpen}
-            onClose={() => setIsModalTutupOpen(false)}
-          />
-        )}
-
-        <RiwayatEpisodeModal
-          isOpen={isModalRiwayatOpen}
-          onClose={() => setIsModalRiwayatOpen(false)}
-          namaPasien={nama_lengkap}
-          riwayat={riwayat_episode}
-        />
-      </td>
-    </tr>
+      )}
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import {
   BukaEpisodePayload,
+  EditEpisodePayload,
   EpisodePengobatanData,
   PasienEpisodeOverview,
   TutupEpisodePayload,
@@ -235,4 +236,79 @@ export const tutupEpisode = async (
     success: true,
     message: "Episode pengobatan berhasil diselesaikan!",
   };
+};
+
+export const editEpisode = async (
+  payload: EditEpisodePayload,
+  id_user_nakes: string,
+) => {
+  const { data: nakes } = await supabase
+    .from("nakes")
+    .select("id_nakes")
+    .eq("id_user", id_user_nakes)
+    .single();
+  if (!nakes) return { success: false, message: "Otoritas tidak valid." };
+
+  const { data: episode } = await supabase
+    .from("episode_pengobatan")
+    .select("id_pasien")
+    .eq("id_episode", payload.id_episode)
+    .single();
+  if (!episode) return { success: false, message: "Episode tidak ditemukan." };
+
+  const { data: pasien } = await supabase
+    .from("pasien")
+    .select("id_pasien")
+    .eq("id_pasien", episode.id_pasien)
+    .eq("id_nakes", nakes.id_nakes)
+    .single();
+  if (!pasien) return { success: false, message: "Akses ditolak." };
+
+  const { error } = await supabase
+    .from("episode_pengobatan")
+    .update({
+      tanggal_mulai: payload.tanggal_mulai,
+      tanggal_selesai: payload.tanggal_selesai || null,
+      tipe_pasien: payload.tipe_pasien,
+    })
+    .eq("id_episode", payload.id_episode);
+
+  if (error) return { success: false, message: "Gagal memperbarui episode." };
+  return { success: true, message: "Data episode berhasil diperbarui!" };
+};
+
+export const hapusEpisode = async (
+  id_episode: number,
+  id_user_nakes: string,
+) => {
+  const { data: nakes } = await supabase
+    .from("nakes")
+    .select("id_nakes")
+    .eq("id_user", id_user_nakes)
+    .single();
+  if (!nakes) return { success: false, message: "Otoritas tidak valid." };
+
+  const { data: episode } = await supabase
+    .from("episode_pengobatan")
+    .select("id_pasien")
+    .eq("id_episode", id_episode)
+    .single();
+  if (!episode) return { success: false, message: "Episode tidak ditemukan." };
+
+  const { data: pasien } = await supabase
+    .from("pasien")
+    .select("id_pasien")
+    .eq("id_pasien", episode.id_pasien)
+    .eq("id_nakes", nakes.id_nakes)
+    .single();
+  if (!pasien) return { success: false, message: "Akses ditolak." };
+
+  const { error } = await supabase
+    .from("episode_pengobatan")
+    .delete()
+    .eq("id_episode", id_episode);
+
+  if (error)
+    return { success: false, message: "Gagal menghapus episode pengobatan." };
+  return { success: true, message: "Episode pengobatan berhasil dihapus." };
 };

@@ -28,3 +28,10 @@ export interface TutupEpisodePayload {
   tanggal_selesai: string; // Format: YYYY-MM-DD
   tipe_pasien: string;
 }
+
+export interface EditEpisodePayload {
+  id_episode: number;
+  tanggal_mulai: string;
+  tanggal_selesai?: string | null;
+  tipe_pasien: string;
+}

@@ -3,12 +3,15 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import {
   bukaEpisode,
+  editEpisode,
   getDaftarPasienDanEpisodeByNakes,
   getEpisodeAktifByPasienId,
+  hapusEpisode,
   tutupEpisode,
 } from "@/services/episodePengobatan.service";
 import {
   BukaEpisodePayload,
+  EditEpisodePayload,
   TutupEpisodePayload,
 } from "@/types/episodePengobatan";
 import { getServerSession } from "next-auth";
@@ -94,4 +97,41 @@ export async function tutupEpisodeAction(formData: FormData) {
   } else {
     return { error: result.message };
   }
+}
+
+export async function editEpisodeAction(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "nakes")
+    return { error: "Akses ditolak." };
+
+  const payload: EditEpisodePayload = {
+    id_episode: Number(formData.get("id_episode")),
+    tanggal_mulai: formData.get("tanggal_mulai") as string,
+    tanggal_selesai: (formData.get("tanggal_selesai") as string) || null,
+    tipe_pasien: formData.get("tipe_pasien") as string,
+  };
+
+  if (!payload.id_episode || !payload.tanggal_mulai || !payload.tipe_pasien) {
+    return { error: "Kolom wajib (Tanggal Mulai & Tipe) harus diisi!" };
+  }
+
+  const result = await editEpisode(payload, session.user.id);
+  if (result.success) {
+    revalidatePath("/dashboard/episode-pengobatan");
+    return { success: true };
+  }
+  return { error: result.message };
+}
+
+export async function hapusEpisodeAction(id_episode: number) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "nakes")
+    return { error: "Akses ditolak." };
+
+  const result = await hapusEpisode(id_episode, session.user.id);
+  if (result.success) {
+    revalidatePath("/dashboard/episode-pengobatan");
+    return { success: true };
+  }
+  return { error: result.message };
 }
