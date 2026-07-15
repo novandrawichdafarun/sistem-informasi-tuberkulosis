@@ -52,7 +52,7 @@ export async function createPasienAction(
     if (result.success) revalidatePath("/dashboard/pasien");
 
     return result;
-  } catch (error: unknown) {
+  } catch (error) {
     return {
       success: false,
       error:
@@ -77,7 +77,7 @@ export async function updatePasienAction(formData: FormData) {
     if (result.success) revalidatePath("/dashboard/pasien");
 
     return result;
-  } catch (error: unknown) {
+  } catch (error) {
     return {
       success: false,
       error:
@@ -97,7 +97,7 @@ export async function deletePasienAction(
     if (result.success) revalidatePath("/dashboard/pasien");
 
     return result;
-  } catch (error: unknown) {
+  } catch (error) {
     return {
       success: false,
       error:

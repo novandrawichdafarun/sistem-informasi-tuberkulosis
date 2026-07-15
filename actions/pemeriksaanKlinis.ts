@@ -1,125 +1,107 @@
 "use server";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import {
+  createPemeriksaanSchema,
+  updatePemeriksaanSchema,
+} from "@/schemas/pemeriksaanKlinis.schema";
 import {
   createPemeriksaanKlinis,
   deletePemeriksaanKlinis,
   getDaftarPemeriksaanByNakes,
   updatePemeriksaanKlinis,
 } from "@/services/pemeriksaanKlinis.service";
+import { ActionResponse } from "@/types/action";
 import {
-  CreatePemeriksaanPayload,
-  UpdatePemeriksaanPayload,
+  PasienPemeriksaanOverview,
 } from "@/types/pemeriksaanKlinis";
-import { parseOptionalNumber } from "@/utils/number";
-import { getServerSession } from "next-auth";
+import { requireNakesSession } from "@/utils/session";
 import { revalidatePath } from "next/cache";
 
-export async function getDaftarPemeriksaanAction() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || session.user.role !== "nakes") {
+export async function getDaftarPemeriksaanAction(): Promise<
+  ActionResponse<PasienPemeriksaanOverview[]>
+> {
+  try {
+    const nakesId = await requireNakesSession();
+    return await getDaftarPemeriksaanByNakes(nakesId);
+  } catch (error) {
     return {
       success: false,
-      message: "Akses ditolak: Hanya Nakes yang diizinkan.",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan yang tidak diketahui",
     };
   }
-
-  return await getDaftarPemeriksaanByNakes(session.user.id);
 }
 
 export async function createPemeriksaanAction(formData: FormData) {
-  const session = await getServerSession(authOptions);
+  try {
+    const nakesId = await requireNakesSession();
 
-  if (!session || session.user.role !== "nakes") {
-    return { error: "Akses ditolak: Anda tidak memiliki wewenang." };
-  }
+    const rawData = Object.fromEntries(formData.entries());
 
-  const payload: CreatePemeriksaanPayload = {
-    id_episode: Number(formData.get("id_episode")),
-    tanggal_periksa: formData.get("tanggal_periksa") as string,
-    keluhan: (formData.get("keluhan") as string) || undefined,
-    tensi: (formData.get("tensi") as string) || undefined,
-    suhu: parseOptionalNumber(formData.get("suhu")),
-    pernapasan: parseOptionalNumber(formData.get("pernapasan")),
-    nadi: parseOptionalNumber(formData.get("nadi")),
-    saturasi_o2: parseOptionalNumber(formData.get("saturasi_o2")),
-    tinggi_badan_saat_ini: parseOptionalNumber(
-      formData.get("tinggi_badan_saat_ini"),
-    ),
-    berat_badan_saat_ini: parseOptionalNumber(
-      formData.get("berat_badan_saat_ini"),
-    ),
-  };
+    const validation = createPemeriksaanSchema.safeParse(rawData);
 
-  if (!payload.id_episode || !payload.tanggal_periksa) {
+    if (!validation.success) {
+      const firstError = validation.error.issues[0].message;
+      return { success: false, error: firstError };
+    }
+
+    const result = await createPemeriksaanKlinis(validation.data, nakesId);
+
+    if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
+
+    return result;
+  } catch (error) {
     return {
-      error: "Sistem mendeteksi data ID Episode atau Tanggal yang kosong!",
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Terjadi kesalahan server",
     };
-  }
-
-  const result = await createPemeriksaanKlinis(payload, session.user.id);
-
-  if (result.success) {
-    revalidatePath("/dashboard/pemeriksaan-klinis");
-    return { success: true, message: result.message };
-  } else {
-    return { error: result.message };
   }
 }
 
 export async function updatePemeriksaanAction(formData: FormData) {
-  const session = await getServerSession(authOptions);
+  try {
+    const nakesId = await requireNakesSession();
 
-  if (!session || session.user.role !== "nakes") {
-    return { error: "Akses ditolak." };
-  }
+    const rawData = Object.fromEntries(formData.entries());
 
-  const payload: UpdatePemeriksaanPayload = {
-    id_periksa: Number(formData.get("id_periksa")),
-    id_episode: Number(formData.get("id_episode")), // Dibutuhkan untuk validasi keamanan di service
-    tanggal_periksa: formData.get("tanggal_periksa") as string,
-    keluhan: (formData.get("keluhan") as string) || undefined,
-    tensi: (formData.get("tensi") as string) || undefined,
-    suhu: parseOptionalNumber(formData.get("suhu")),
-    pernapasan: parseOptionalNumber(formData.get("pernapasan")),
-    nadi: parseOptionalNumber(formData.get("nadi")),
-    saturasi_o2: parseOptionalNumber(formData.get("saturasi_o2")),
-    tinggi_badan_saat_ini: parseOptionalNumber(
-      formData.get("tinggi_badan_saat_ini"),
-    ),
-    berat_badan_saat_ini: parseOptionalNumber(
-      formData.get("berat_badan_saat_ini"),
-    ),
-  };
+    const validation = updatePemeriksaanSchema.safeParse(rawData);
 
-  if (!payload.id_periksa || !payload.id_episode || !payload.tanggal_periksa) {
-    return { error: "Data utama tidak lengkap." };
-  }
+    if (!validation.success) {
+      const firstError = validation.error.issues[0].message;
+      return { success: false, error: firstError };
+    }
 
-  const result = await updatePemeriksaanKlinis(payload, session.user.id);
+    const result = await updatePemeriksaanKlinis(validation.data, nakesId);
 
-  if (result.success) {
-    revalidatePath("/dashboard/pemeriksaan-klinis");
-    return { success: true, message: result.message };
-  } else {
-    return { error: result.message };
+    if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
+
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Terjadi kesalahan server",
+    };
   }
 }
 
 export async function deletePemeriksaanAction(id_periksa: number) {
-  const session = await getServerSession(authOptions);
+  try {
+    const nakesId = await requireNakesSession();
 
-  if (!session || session.user.role !== "nakes") {
-    return { error: "Akses ditolak." };
-  }
+    const result = await deletePemeriksaanKlinis(id_periksa, nakesId);
 
-  const result = await deletePemeriksaanKlinis(id_periksa, session.user.id);
+    if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 
-  if (result.success) {
-    revalidatePath("/dashboard/pemeriksaan-klinis");
-    return { success: true, message: result.message };
-  } else {
-    return { error: result.message };
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Terjadi kesalahan server",
+    };
   }
 }
