@@ -1,6 +1,10 @@
 "use server";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import {
+  bukaEpisodeSchema,
+  editEpisodeSchema,
+  tutupEpisodeSchema,
+} from "@/schemas/episodePengobatan.schema";
 import {
   bukaEpisode,
   editEpisode,
@@ -9,129 +13,128 @@ import {
   hapusEpisode,
   tutupEpisode,
 } from "@/services/episodePengobatan.service";
+import { ActionResponse } from "@/types/action";
 import {
-  BukaEpisodePayload,
-  EditEpisodePayload,
-  TutupEpisodePayload,
+  EpisodePengobatanData,
+  PasienEpisodeOverview,
 } from "@/types/episodePengobatan";
-import { getServerSession } from "next-auth";
+import { requireNakesSession } from "@/utils/session";
 import { revalidatePath } from "next/cache";
 
-export async function getDaftarEpisodeOverviewAction() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || session.user.role !== "nakes") {
+export async function getDaftarEpisodeOverviewAction(): Promise<
+  ActionResponse<PasienEpisodeOverview[]>
+> {
+  try {
+    const nakesId = await requireNakesSession();
+    return await getDaftarPasienDanEpisodeByNakes(nakesId);
+  } catch (error) {
     return {
       success: false,
-      message: "Akses ditolak: Hanya Nakes yang diizinkan.",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan yang tidak diketahui",
     };
   }
-
-  return await getDaftarPasienDanEpisodeByNakes(session.user.id);
 }
 
-export async function getEpisodeAktifAction(id_pasien: number) {
-  const session = await getServerSession(authOptions);
-
-  if (!session || session.user.role !== "nakes") {
+export async function getEpisodeAktifAction(
+  id_pasien: number,
+): Promise<ActionResponse<EpisodePengobatanData>> {
+  try {
+    const nakesId = await requireNakesSession();
+    return await getEpisodeAktifByPasienId(id_pasien, nakesId);
+  } catch (error) {
     return {
       success: false,
-      message: "Akses ditolak: Hanya Nakes yang diizinkan.",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan yang tidak diketahui",
     };
   }
-
-  return await getEpisodeAktifByPasienId(id_pasien, session.user.id);
 }
 
-export async function bukaEpisodeAction(formData: FormData) {
-  const session = await getServerSession(authOptions);
+export async function bukaEpisodeAction(
+  formData: FormData,
+): Promise<ActionResponse> {
+  try {
+    const nakesId = await requireNakesSession();
+    const rawData = Object.fromEntries(formData.entries());
+    const validation = bukaEpisodeSchema.safeParse(rawData);
 
-  if (!session || session.user.role !== "nakes") {
-    return { error: "Akses ditolak: Anda tidak memiliki wewenang." };
-  }
+    if (!validation.success)
+      return { success: false, error: validation.error.issues[0].message };
 
-  const payload: BukaEpisodePayload = {
-    id_pasien: Number(formData.get("id_pasien")),
-    tanggal_mulai: formData.get("tanggal_mulai") as string,
-    tipe_pasien: formData.get("tipe_pasien") as string,
-  };
-
-  if (!payload.id_pasien || !payload.tanggal_mulai || !payload.tipe_pasien) {
-    return { error: "Semua kolom wajib diisi!" };
-  }
-
-  const result = await bukaEpisode(payload, session.user.id);
-
-  if (result.success) {
-    //! Sesuaikan path ini dengan halaman fitur episode
-    revalidatePath("/dashboard/episde-pengobatan");
-    return { success: true, message: result.message };
-  } else {
-    return { error: result.message };
+    const result = await bukaEpisode(validation.data, nakesId);
+    if (result.success) revalidatePath("/dashboard/episode-pengobatan");
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Terjadi kesalahan.",
+    };
   }
 }
 
 export async function tutupEpisodeAction(formData: FormData) {
-  const session = await getServerSession(authOptions);
+  try {
+    const nakesId = await requireNakesSession();
+    const rawData = Object.fromEntries(formData.entries());
+    const validation = tutupEpisodeSchema.safeParse(rawData);
 
-  if (!session || session.user.role !== "nakes") {
-    return { error: "Akses ditolak." };
-  }
+    if (!validation.success)
+      return { success: false, error: validation.error.issues[0].message };
 
-  const payload: TutupEpisodePayload = {
-    id_episode: Number(formData.get("id_episode")),
-    tanggal_selesai: formData.get("tanggal_selesai") as string,
-    tipe_pasien: formData.get("tipe_pasien") as string,
-  };
-
-  if (!payload.id_episode || !payload.tanggal_selesai) {
-    return { error: "Tanggal selesai wajib diisi!" };
-  }
-
-  const result = await tutupEpisode(payload, session.user.id);
-
-  if (result.success) {
-    //! Sesuaikan path ini dengan halaman fitur episode
-    revalidatePath("/dashboard/episode-pengobatan");
-    return { success: true, message: result.message };
-  } else {
-    return { error: result.message };
+    const result = await tutupEpisode(validation.data, nakesId);
+    if (result.success) revalidatePath("/dashboard/episode-pengobatan");
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Terjadi kesalahan.",
+    };
   }
 }
 
-export async function editEpisodeAction(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "nakes")
-    return { error: "Akses ditolak." };
+export async function editEpisodeAction(
+  formData: FormData,
+): Promise<ActionResponse> {
+  try {
+    const nakesId = await requireNakesSession();
+    const rawData = Object.fromEntries(formData.entries());
+    const validation = editEpisodeSchema.safeParse(rawData);
 
-  const payload: EditEpisodePayload = {
-    id_episode: Number(formData.get("id_episode")),
-    tanggal_mulai: formData.get("tanggal_mulai") as string,
-    tanggal_selesai: (formData.get("tanggal_selesai") as string) || null,
-    tipe_pasien: formData.get("tipe_pasien") as string,
-  };
+    if (!validation.success) {
+      return { success: false, error: validation.error.issues[0].message };
+    }
 
-  if (!payload.id_episode || !payload.tanggal_mulai || !payload.tipe_pasien) {
-    return { error: "Kolom wajib (Tanggal Mulai & Tipe) harus diisi!" };
+    const result = await editEpisode(validation.data, nakesId);
+
+    if (result.success) revalidatePath("/dashboard/episode-pengobatan");
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Terjadi kesalahan.",
+    };
   }
-
-  const result = await editEpisode(payload, session.user.id);
-  if (result.success) {
-    revalidatePath("/dashboard/episode-pengobatan");
-    return { success: true };
-  }
-  return { error: result.message };
 }
 
-export async function hapusEpisodeAction(id_episode: number) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "nakes")
-    return { error: "Akses ditolak." };
+export async function hapusEpisodeAction(
+  id_episode: number,
+): Promise<ActionResponse> {
+  try {
+    const nakesId = await requireNakesSession();
+    const result = await hapusEpisode(id_episode, nakesId);
 
-  const result = await hapusEpisode(id_episode, session.user.id);
-  if (result.success) {
-    revalidatePath("/dashboard/episode-pengobatan");
-    return { success: true };
+    if (result.success) revalidatePath("/dashboard/episode-pengobatan");
+
+    return result;
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Terjadi kesalahan.",
+    };
   }
-  return { error: result.message };
 }

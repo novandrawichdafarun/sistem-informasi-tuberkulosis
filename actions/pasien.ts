@@ -1,133 +1,107 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import {
   createPasien,
   deletePasien,
   getPasienByNakesId,
   updatePasien,
 } from "@/services/pasien.service";
-import { CreatePasienPayload, UpdatePasienPayload } from "@/types/pasien";
+import { PasienData } from "@/types/pasien";
 import { revalidatePath } from "next/cache";
+import { ActionResponse } from "@/types/action";
+import { requireNakesSession } from "@/utils/session";
+import {
+  createPasienSchema,
+  updatePasienSchema,
+} from "@/schemas/pasien.schema";
 
-export async function getDaftarPasienAction() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || session.user.role !== "nakes") {
+export async function getDaftarPasienAction(): Promise<
+  ActionResponse<PasienData[]>
+> {
+  try {
+    const nakesId = await requireNakesSession();
+    return await getPasienByNakesId(nakesId);
+  } catch (error) {
     return {
       success: false,
-      message: "Akses ditolak: Hanya Nakes yang diizinkan.",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan yang tidak diketahui",
     };
   }
-
-  return await getPasienByNakesId(session.user.id);
 }
 
-export async function createPasienAction(formData: FormData) {
-  const session = await getServerSession(authOptions);
+export async function createPasienAction(
+  formData: FormData,
+): Promise<ActionResponse> {
+  try {
+    const nakesId = await requireNakesSession();
 
-  if (!session || session.user.role !== "nakes") {
+    const rawData = Object.fromEntries(formData.entries());
+
+    const validation = createPasienSchema.safeParse(rawData);
+
+    if (!validation.success) {
+      const firstError = validation.error.issues[0].message;
+      return { success: false, error: firstError };
+    }
+
+    const result = await createPasien(validation.data, nakesId);
+
+    if (result.success) revalidatePath("/dashboard/pasien");
+
+    return result;
+  } catch (error: unknown) {
     return {
-      error: "Akses ditolak: Anda tidak memiliki wewenang mendaftarkan pasien.",
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Terjadi kesalahan server",
     };
   }
-
-  const payload: CreatePasienPayload = {
-    nama_lengkap: formData.get("nama_lengkap") as string,
-    nik: formData.get("nik") as string,
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    no_rm: (formData.get("no_rm") as string) || "",
-    tanggal_lahir: formData.get("tanggal_lahir") as string,
-    jenis_kelamin: formData.get("jenis_kelamin") as "L" | "P",
-    alamat: (formData.get("alamat") as string) || "",
-    no_telp: (formData.get("no_telp") as string) || "",
-    tinggi_badan_awal: formData.get("tinggi_badan_awal")
-      ? Number(formData.get("tinggi_badan_awal"))
-      : 0,
-    berat_badan_awal: formData.get("berat_badan_awal")
-      ? Number(formData.get("berat_badan_awal"))
-      : 0,
-  };
-
-  if (
-    !payload.nama_lengkap ||
-    !payload.nik ||
-    !payload.email ||
-    !payload.password ||
-    !payload.tanggal_lahir ||
-    !payload.jenis_kelamin
-  ) {
-    return { error: "Kolom yang ditandai bintang (*) wajib diisi!" };
-  }
-
-  if (!payload.password || payload.password.length < 6) {
-    return { error: "Kata sandi minimal 6 karakter!" };
-  }
-
-  const result = await createPasien(payload, session.user.id);
-
-  if (result.success) {
-    revalidatePath("/dashboard/pasien");
-  } else {
-    return { error: result.message };
-  }
-
-  return { success: true, message: result.message };
 }
 
 export async function updatePasienAction(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "nakes")
-    return { error: "Akses ditolak." };
+  try {
+    const nakesId = await requireNakesSession();
+    const rawData = Object.fromEntries(formData.entries());
 
-  const id_pasien = Number(formData.get("id_pasien"));
-  const id_user = formData.get("id_user") as string;
-  const passwordInput = formData.get("password") as string;
+    const validation = updatePasienSchema.safeParse(rawData);
 
-  const payload: UpdatePasienPayload = {
-    id_pasien,
-    id_user,
-    nama_lengkap: formData.get("nama_lengkap") as string,
-    nik: formData.get("nik") as string,
-    email: formData.get("email") as string,
-    password: passwordInput ? passwordInput : undefined, // Opsional
-    no_rm: (formData.get("no_rm") as string) || "",
-    tanggal_lahir: formData.get("tanggal_lahir") as string,
-    jenis_kelamin: formData.get("jenis_kelamin") as "L" | "P",
-    alamat: (formData.get("alamat") as string) || "",
-    no_telp: (formData.get("no_telp") as string) || "",
-    tinggi_badan_awal: formData.get("tinggi_badan_awal")
-      ? Number(formData.get("tinggi_badan_awal"))
-      : 0,
-    berat_badan_awal: formData.get("berat_badan_awal")
-      ? Number(formData.get("berat_badan_awal"))
-      : 0,
-  };
+    if (!validation.success) {
+      return { success: false, error: validation.error.issues[0].message };
+    }
 
-  // Validasi sandi JIKA DIISI
-  if (payload.password && payload.password.length < 6) {
-    return { error: "Jika ingin mengganti kata sandi, minimal 6 karakter!" };
+    const result = await updatePasien(validation.data, nakesId);
+
+    if (result.success) revalidatePath("/dashboard/pasien");
+
+    return result;
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Terjadi kesalahan server",
+    };
   }
-
-  const result = await updatePasien(payload, session.user.id);
-
-  if (result.success) revalidatePath("/dashboard/pasien");
-  else return { error: result.message };
-
-  return { success: true };
 }
 
-export async function deletePasienAction(id_pasien: number) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "nakes")
-    return { error: "Akses ditolak." };
+export async function deletePasienAction(
+  id_pasien: number,
+): Promise<ActionResponse> {
+  try {
+    const nakesId = await requireNakesSession();
 
-  const result = await deletePasien(id_pasien, session.user.id);
+    const result = await deletePasien(id_pasien, nakesId);
 
-  if (result.success) revalidatePath("/dashboard/pasien");
-  else return { error: result.message };
+    if (result.success) revalidatePath("/dashboard/pasien");
 
-  return { success: true };
+    return result;
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Terjadi kesalahan server",
+    };
+  }
 }
