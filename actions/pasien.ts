@@ -14,13 +14,17 @@ import {
   createPasienSchema,
   updatePasienSchema,
 } from "@/schemas/pasien.schema";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 
 export async function getDaftarPasienAction(): Promise<
   ActionResponse<PasienData[]>
 > {
   try {
     const nakesId = await requireNakesSession();
-    return await getPasienByNakesId(nakesId);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    return await getPasienByNakesId(supabase, nakesId);
   } catch (error) {
     return {
       success: false,
@@ -37,6 +41,8 @@ export async function createPasienAction(
 ): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
     const rawData = Object.fromEntries(formData.entries());
 
@@ -47,7 +53,7 @@ export async function createPasienAction(
       return { success: false, error: firstError };
     }
 
-    const result = await createPasien(validation.data, nakesId);
+    const result = await createPasien(supabase, validation.data, nakesId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -64,6 +70,9 @@ export async function createPasienAction(
 export async function updatePasienAction(formData: FormData) {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
     const rawData = Object.fromEntries(formData.entries());
 
     const validation = updatePasienSchema.safeParse(rawData);
@@ -72,7 +81,7 @@ export async function updatePasienAction(formData: FormData) {
       return { success: false, error: validation.error.issues[0].message };
     }
 
-    const result = await updatePasien(validation.data, nakesId);
+    const result = await updatePasien(supabase, validation.data, nakesId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -91,8 +100,10 @@ export async function deletePasienAction(
 ): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    const result = await deletePasien(id_pasien, nakesId);
+    const result = await deletePasien(supabase, id_pasien, nakesId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 

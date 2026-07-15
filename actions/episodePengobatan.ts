@@ -19,14 +19,19 @@ import {
   PasienEpisodeOverview,
 } from "@/types/episodePengobatan";
 import { requireNakesSession } from "@/utils/session";
+import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 export async function getDaftarEpisodeOverviewAction(): Promise<
   ActionResponse<PasienEpisodeOverview[]>
 > {
   try {
     const nakesId = await requireNakesSession();
-    return await getDaftarPasienDanEpisodeByNakes(nakesId);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    return await getDaftarPasienDanEpisodeByNakes(supabase, nakesId);
   } catch (error) {
     return {
       success: false,
@@ -43,7 +48,10 @@ export async function getEpisodeAktifAction(
 ): Promise<ActionResponse<EpisodePengobatanData>> {
   try {
     const nakesId = await requireNakesSession();
-    return await getEpisodeAktifByPasienId(id_pasien, nakesId);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    return await getEpisodeAktifByPasienId(supabase, id_pasien, nakesId);
   } catch (error) {
     return {
       success: false,
@@ -60,13 +68,16 @@ export async function bukaEpisodeAction(
 ): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
     const rawData = Object.fromEntries(formData.entries());
     const validation = bukaEpisodeSchema.safeParse(rawData);
 
     if (!validation.success)
       return { success: false, error: validation.error.issues[0].message };
 
-    const result = await bukaEpisode(validation.data, nakesId);
+    const result = await bukaEpisode(supabase, validation.data, nakesId);
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
@@ -80,13 +91,16 @@ export async function bukaEpisodeAction(
 export async function tutupEpisodeAction(formData: FormData) {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
     const rawData = Object.fromEntries(formData.entries());
     const validation = tutupEpisodeSchema.safeParse(rawData);
 
     if (!validation.success)
       return { success: false, error: validation.error.issues[0].message };
 
-    const result = await tutupEpisode(validation.data, nakesId);
+    const result = await tutupEpisode(supabase, validation.data, nakesId);
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
@@ -102,6 +116,9 @@ export async function editEpisodeAction(
 ): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
     const rawData = Object.fromEntries(formData.entries());
     const validation = editEpisodeSchema.safeParse(rawData);
 
@@ -109,7 +126,7 @@ export async function editEpisodeAction(
       return { success: false, error: validation.error.issues[0].message };
     }
 
-    const result = await editEpisode(validation.data, nakesId);
+    const result = await editEpisode(supabase, validation.data, nakesId);
 
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
@@ -126,7 +143,10 @@ export async function hapusEpisodeAction(
 ): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
-    const result = await hapusEpisode(id_episode, nakesId);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const result = await hapusEpisode(supabase, id_episode, nakesId);
 
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
 

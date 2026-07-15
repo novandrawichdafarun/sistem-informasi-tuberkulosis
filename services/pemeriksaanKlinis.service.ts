@@ -6,18 +6,14 @@ import {
   UpdatePemeriksaanPayload,
 } from "@/types/pemeriksaanKlinis";
 import { verifyNakesAccess } from "@/utils/access";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export const getDaftarPemeriksaanByNakes = async (
+  supabase: SupabaseClient,
   id_user_nakes: string,
 ): Promise<ActionResponse<PasienPemeriksaanOverview[]>> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -89,11 +85,12 @@ export const getDaftarPemeriksaanByNakes = async (
 };
 
 export const createPemeriksaanKlinis = async (
+  supabase: SupabaseClient,
   payload: CreatePemeriksaanPayload,
   id_user_nakes: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -145,11 +142,12 @@ export const createPemeriksaanKlinis = async (
 };
 
 export const updatePemeriksaanKlinis = async (
+  supabase: SupabaseClient,
   payload: UpdatePemeriksaanPayload,
   id_user_nakes: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -193,11 +191,12 @@ export const updatePemeriksaanKlinis = async (
 };
 
 export const deletePemeriksaanKlinis = async (
+  supabase: SupabaseClient,
   id_periksa: number,
   id_user_nakes: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 

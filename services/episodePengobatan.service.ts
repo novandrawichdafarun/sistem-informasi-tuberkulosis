@@ -7,18 +7,14 @@ import {
   TutupEpisodePayload,
 } from "@/types/episodePengobatan";
 import { verifyNakesAccess } from "@/utils/access";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export const getDaftarPasienDanEpisodeByNakes = async (
+  supabase: SupabaseClient,
   id_user_nakes: string,
 ): Promise<ActionResponse<PasienEpisodeOverview[]>> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -78,11 +74,12 @@ export const getDaftarPasienDanEpisodeByNakes = async (
 };
 
 export const getEpisodeAktifByPasienId = async (
+  supabase: SupabaseClient,
   id_pasien: number,
   id_user_nakes: string,
 ): Promise<ActionResponse<EpisodePengobatanData>> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -109,11 +106,12 @@ export const getEpisodeAktifByPasienId = async (
 };
 
 export const bukaEpisode = async (
+  supabase: SupabaseClient,
   payload: BukaEpisodePayload,
   id_user_nakes: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -147,11 +145,12 @@ export const bukaEpisode = async (
 };
 
 export const tutupEpisode = async (
+  supabase: SupabaseClient,
   payload: TutupEpisodePayload,
   id_user_nakes: string,
 ) => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -167,7 +166,7 @@ export const tutupEpisode = async (
       .from("pasien")
       .select("id_pasien")
       .eq("id_pasien", episode.id_pasien)
-      .eq("id_nakes", (await verifyNakesAccess(id_user_nakes)).nakes?.id_nakes)
+      .eq("id_nakes", nakes.id_nakes)
       .single();
 
     if (!pasien) return { success: false, error: "Akses ditolak." };
@@ -194,11 +193,12 @@ export const tutupEpisode = async (
 };
 
 export const editEpisode = async (
+  supabase: SupabaseClient,
   payload: EditEpisodePayload,
   id_user_nakes: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -215,7 +215,7 @@ export const editEpisode = async (
       .from("pasien")
       .select("id_pasien")
       .eq("id_pasien", episode.id_pasien)
-      .eq("id_nakes", nakes?.id_nakes)
+      .eq("id_nakes", nakes.id_nakes)
       .single();
 
     if (!pasien)
@@ -246,11 +246,12 @@ export const editEpisode = async (
 };
 
 export const hapusEpisode = async (
+  supabase: SupabaseClient,
   id_episode: number,
   id_user_nakes: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(id_user_nakes);
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
@@ -266,7 +267,7 @@ export const hapusEpisode = async (
       .from("pasien")
       .select("id_pasien")
       .eq("id_pasien", episode.id_pasien)
-      .eq("id_nakes", nakes?.id_nakes)
+      .eq("id_nakes", nakes.id_nakes)
       .single();
 
     if (!pasien) return { success: false, error: "Akses ditolak." };

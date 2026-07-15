@@ -11,18 +11,20 @@ import {
   updatePemeriksaanKlinis,
 } from "@/services/pemeriksaanKlinis.service";
 import { ActionResponse } from "@/types/action";
-import {
-  PasienPemeriksaanOverview,
-} from "@/types/pemeriksaanKlinis";
+import { PasienPemeriksaanOverview } from "@/types/pemeriksaanKlinis";
 import { requireNakesSession } from "@/utils/session";
+import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 export async function getDaftarPemeriksaanAction(): Promise<
   ActionResponse<PasienPemeriksaanOverview[]>
 > {
   try {
     const nakesId = await requireNakesSession();
-    return await getDaftarPemeriksaanByNakes(nakesId);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    return await getDaftarPemeriksaanByNakes(supabase, nakesId);
   } catch (error) {
     return {
       success: false,
@@ -37,6 +39,8 @@ export async function getDaftarPemeriksaanAction(): Promise<
 export async function createPemeriksaanAction(formData: FormData) {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
     const rawData = Object.fromEntries(formData.entries());
 
@@ -47,7 +51,11 @@ export async function createPemeriksaanAction(formData: FormData) {
       return { success: false, error: firstError };
     }
 
-    const result = await createPemeriksaanKlinis(validation.data, nakesId);
+    const result = await createPemeriksaanKlinis(
+      supabase,
+      validation.data,
+      nakesId,
+    );
 
     if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 
@@ -64,6 +72,8 @@ export async function createPemeriksaanAction(formData: FormData) {
 export async function updatePemeriksaanAction(formData: FormData) {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
     const rawData = Object.fromEntries(formData.entries());
 
@@ -74,7 +84,11 @@ export async function updatePemeriksaanAction(formData: FormData) {
       return { success: false, error: firstError };
     }
 
-    const result = await updatePemeriksaanKlinis(validation.data, nakesId);
+    const result = await updatePemeriksaanKlinis(
+      supabase,
+      validation.data,
+      nakesId,
+    );
 
     if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 
@@ -91,8 +105,10 @@ export async function updatePemeriksaanAction(formData: FormData) {
 export async function deletePemeriksaanAction(id_periksa: number) {
   try {
     const nakesId = await requireNakesSession();
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    const result = await deletePemeriksaanKlinis(id_periksa, nakesId);
+    const result = await deletePemeriksaanKlinis(supabase, id_periksa, nakesId);
 
     if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 
