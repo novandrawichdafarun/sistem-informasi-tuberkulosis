@@ -1,62 +1,113 @@
 "use server";
 
 import {
+  requestOtpSchema,
+  resetPasswordSchema,
+  verifyOtpSchema,
+} from "@/schemas/auth.schema";
+import {
+  clearDbSessionService,
   requestPasswordReset,
   ResetPassword,
   verifyOtp,
 } from "@/services/auth.service";
-import { createClient } from "@supabase/supabase-js";
+import { ActionResponse } from "@/types/action";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+export async function clearDbSessionAction(
+  sessionToken: string,
+): Promise<ActionResponse> {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-export async function clearDbSessionAction(sessionToken: string) {
-  await supabase
-    .from("user_sessions")
-    .delete()
-    .eq("session_token", sessionToken);
+    return await clearDbSessionService(supabase, sessionToken);
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Gagal menghapus sesi database.",
+    };
+  }
 }
 
-export async function requestOtpAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  if (!email) return { error: "Alamat email tidak boleh kosong!" };
+export async function requestOtpAction(
+  formData: FormData,
+): Promise<ActionResponse> {
+  try {
+    const rawData = Object.fromEntries(formData.entries());
+    const validation = requestOtpSchema.safeParse(rawData);
 
-  const result = await requestPasswordReset(email);
-  if (!result.success) return { error: result.message };
+    if (!validation.success) {
+      return { success: false, error: validation.error.issues[0].message };
+    }
 
-  return { success: true };
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    return await requestPasswordReset(supabase, validation.data.email);
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan pada server.",
+    };
+  }
 }
 
-export async function verifyOtpAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const token = formData.get("token") as string;
+export async function verifyOtpAction(
+  formData: FormData,
+): Promise<ActionResponse> {
+  try {
+    const rawData = Object.fromEntries(formData.entries());
+    const validation = verifyOtpSchema.safeParse(rawData);
 
-  if (!email || !token) return { error: "Data tidak lengkap!" };
+    if (!validation.success) {
+      return { success: false, error: validation.error.issues[0].message };
+    }
 
-  const result = await verifyOtp({ email, token });
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-  if (!result.success) return { error: result.message };
-
-  return { success: true };
+    return await verifyOtp(supabase, validation.data);
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan pada server.",
+    };
+  }
 }
 
-export async function resetPasswordAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const token = formData.get("token") as string;
-  const newPassword = formData.get("newPassword") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
+export async function resetPasswordAction(
+  formData: FormData,
+): Promise<ActionResponse> {
+  try {
+    const rawData = Object.fromEntries(formData.entries());
+    const validation = resetPasswordSchema.safeParse(rawData);
 
-  if (!email || !token || !newPassword)
-    return { error: "Semua kolom harus diisi!" };
-  if (newPassword.length < 6)
-    return { error: "Kata sandi minimal 6 karakter!" };
-  if (newPassword !== confirmPassword)
-    return { error: "Kata sandi dan konfirmasi kata sandi tidak cocok!" };
+    if (!validation.success) {
+      return { success: false, error: validation.error.issues[0].message };
+    }
 
-  const result = await ResetPassword({ email, token, newPassword });
-  if (!result.success) return { error: result.message };
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-  return { success: true };
+    return await ResetPassword(supabase, validation.data);
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan pada server.",
+    };
+  }
 }

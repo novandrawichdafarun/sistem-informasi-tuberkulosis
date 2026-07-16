@@ -4,18 +4,13 @@ export interface UserAuthData {
   id: string;
   email: string;
   role: UserRole;
+  sessionToken: string;
 }
 
 export interface LoginPayLoad {
   email: string;
   password: string;
   rememberMe: boolean;
-}
-
-export interface AuthResponse<T = UserAuthData> {
-  success: boolean;
-  message: string;
-  data?: T;
 }
 
 export interface ForgetPasswordPayload {

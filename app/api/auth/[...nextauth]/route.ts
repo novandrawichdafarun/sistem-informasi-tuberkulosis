@@ -4,13 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import { headers } from "next/headers";
 import { randomUUID } from "crypto";
-import { Session } from "next-auth";
-import { JWT } from "next-auth/jwt";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+import { loginUserService } from "@/services/auth.service";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -25,60 +19,32 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email dan Password harus diisi");
         }
 
-        const { data: user, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("email", credentials.email)
-          .single();
-
-        if (error || !user) {
-          throw new Error("Email tidak ditemukan");
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password_hash,
-        );
-
-        if (!isPasswordValid) {
-          throw new Error("Kata sandi salah");
-        }
-
         const headersList = await headers();
         const userAgent =
           headersList.get("user-agent") || "Perangkat Tidak Dikenal";
-        const newSessionToken = randomUUID();
 
-        const { data: activeSessions } = await supabase
-          .from("user_sessions")
-          .select("id, session_token")
-          .eq("id_user", user.id_user)
-          .order("last_active_at", { ascending: true });
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          { auth: { persistSession: false } },
+        );
 
-        if (activeSessions && activeSessions.length >= 3) {
-          const overLimitCount = activeSessions.length - 2;
-          const sessionsToKick = activeSessions
-            .slice(0, overLimitCount)
-            .map((s) => s.session_token);
+        const result = await loginUserService(
+          supabase,
+          credentials.email,
+          credentials.password,
+          userAgent,
+        );
 
-          await supabase
-            .from("user_sessions")
-            .delete()
-            .in("session_token", sessionsToKick);
+        if (!result.success) {
+          throw new Error(result.error);
         }
 
-        await supabase.from("user_sessions").insert({
-          id_user: user.id_user,
-          session_token: newSessionToken,
-          device_info: userAgent,
-        });
+        if (!result.data) {
+          throw new Error("Kredensial tidak valid");
+        }
 
-        return {
-          id: user.id_user,
-          email: user.email,
-          role: user.role,
-          sessionToken: newSessionToken,
-        };
+        return result.data;
       },
     }),
   ],
@@ -91,6 +57,12 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (token.sessionToken) {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          { auth: { persistSession: false } },
+        );
+
         const { data: sessionData } = await supabase
           .from("user_sessions")
           .select("session_token")
