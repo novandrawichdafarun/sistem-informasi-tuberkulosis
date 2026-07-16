@@ -31,7 +31,7 @@ export default function TutupEpisodeModal({
 
     startTransition(async () => {
       const res = await tutupEpisodeAction(formData);
-      if (res?.error) {
+      if (!res.success) {
         setError(res.error);
       } else {
         onClose();

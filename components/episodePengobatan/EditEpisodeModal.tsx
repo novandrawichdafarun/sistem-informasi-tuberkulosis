@@ -27,7 +27,7 @@ export default function EditEpisodeModal({
 
     startTransition(async () => {
       const res = await editEpisodeAction(formData);
-      if (res?.error) setError(res.error);
+      if (!res.success) setError(res.error);
       else onClose();
     });
   };

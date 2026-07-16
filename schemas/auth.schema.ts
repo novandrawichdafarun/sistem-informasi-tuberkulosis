@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 
 export const requestOtpSchema = z.object({
   email: z.email("Format email tidak valid").trim().toLowerCase(),

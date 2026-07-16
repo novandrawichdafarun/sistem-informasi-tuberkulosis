@@ -3,6 +3,7 @@ import { OtpPayload, ResetPasswordPayload, UserAuthData } from "@/types/auth";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ActionResponse } from "@/types/action";
 import { randomUUID } from "crypto";
+import { handleServiceError } from "@/utils/error";
 
 export const loginUserService = async (
   supabase: SupabaseClient,
@@ -72,8 +73,7 @@ export const loginUserService = async (
       },
     };
   } catch (error) {
-    console.error("[AUTH ERROR] loginUserService:", error);
-    return { success: false, error: "Terjadi kesalahan internal saat login" };
+    return handleServiceError(error);
   }
 };
 
@@ -88,8 +88,7 @@ export const clearDbSessionService = async (
       .eq("session_token", sessionToken);
     return { success: true };
   } catch (error) {
-    console.error("[AUTH ERROR] clearDbSessionService:", error);
-    return { success: false, error: "Gagal menghapus sesi database" };
+    return handleServiceError(error);
   }
 };
 
@@ -126,11 +125,7 @@ export const requestPasswordReset = async (
 
     return { success: true, message: "Kode OTP telah dikirim ke email." };
   } catch (error) {
-    console.error("[AUTH ERROR] requestPasswordReset:", error);
-    return {
-      success: false,
-      error: "Terjadi kesalahan saat memproses permintaan OTP.",
-    };
+    return handleServiceError(error);
   }
 };
 
@@ -156,8 +151,7 @@ export const verifyOtp = async (
 
     return { success: true, message: "Kode OTP valid." };
   } catch (error) {
-    console.error("[AUTH ERROR] verifyOtp:", error);
-    return { success: false, error: "Gagal memverifikasi OTP." };
+    return handleServiceError(error);
   }
 };
 
@@ -198,7 +192,6 @@ export const ResetPassword = async (
       message: "Kata sandi berhasil diubah. Silakan login kembali.",
     };
   } catch (error: unknown) {
-    console.error("[AUTH ERROR] ResetPassword:", error);
-    return { success: false, error: "Gagal memperbarui kata sandi di server." };
+    return handleServiceError(error);
   }
 };

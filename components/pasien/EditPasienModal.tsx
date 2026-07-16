@@ -21,7 +21,7 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
     const formData = new FormData(e.currentTarget);
     const result = await updatePasienAction(formData);
 
-    if (result?.error) {
+    if (!result.success) {
       setErrorMessage(result.error);
       setIsLoading(false);
     } else if (result?.success) {

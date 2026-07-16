@@ -29,7 +29,7 @@ export default function BukaEpisoodeModal({
 
     startTransition(async () => {
       const res = await bukaEpisodeAction(formData);
-      if (res?.error) {
+      if (!res.success) {
         setError(res.error);
       } else {
         onClose();

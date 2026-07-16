@@ -7,6 +7,7 @@ import {
 } from "@/types/pasien";
 import { ActionResponse } from "@/types/action";
 import { verifyNakesAccess } from "@/utils/access";
+import { handleServiceError } from "@/utils/error";
 
 export const getPasienByNakesId = async (
   supabase: SupabaseClient,
@@ -30,17 +31,15 @@ export const getPasienByNakesId = async (
       .order("created_at", { ascending: false });
 
     if (pasienError) {
-      console.error("[DB ERROR] getPasienByNakesId:", pasienError.message);
-      return {
-        success: false,
-        error: "Gagal mengambil data pasien dari sistem.",
-      };
+      return handleServiceError(
+        pasienError,
+        "Gagal mengambil data pasien dari sistem.",
+      );
     }
 
     return { success: true, data: pasien as unknown as PasienData[] };
   } catch (error) {
-    console.error("[SYSTEM ERROR] getPasienByNakesId:", error);
-    return { success: false, error: "Terjadi kesalahan pada server." };
+    return handleServiceError(error);
   }
 };
 
@@ -102,21 +101,16 @@ export const createPasien = async (
 
     // Rollback Manual jika insert pasien gagal
     if (pasienError) {
-      console.error("[DB ERROR] Insert Pasien:", pasienError.message);
       await supabase.from("users").delete().eq("id_user", newUser.id_user);
-      return {
-        success: false,
-        error: "Gagal menyimpan data medis pasien. Pendaftaran dibatalkan.",
-      };
+      return handleServiceError(
+        pasienError,
+        "Gagal menyimpan data medis pasien. Pendaftaran dibatalkan",
+      );
     }
 
     return { success: true, message: "Pasien berhasil didaftarkan!" };
   } catch (error) {
-    console.error("[SYSTEM ERROR] createPasien:", error);
-    return {
-      success: false,
-      error: "Terjadi kesalahan internal server saat pendaftaran.",
-    };
+    return handleServiceError(error);
   }
 };
 
@@ -171,20 +165,15 @@ export const updatePasien = async (
       .eq("id_nakes", nakes.id_nakes); // Proteksi memastikan nakes hanya update pasien miliknya
 
     if (pasienError) {
-      console.error("[DB ERROR] Update Pasien:", pasienError.message);
-      return {
-        success: false,
-        error: "Gagal memperbarui profil medis pasien.",
-      };
+      return handleServiceError(
+        pasienError,
+        "Gagal memperbarui profil medis pasien.",
+      );
     }
 
     return { success: true, message: "Data pasien berhasil diperbarui!" };
   } catch (error) {
-    console.error("[SYSTEM ERROR] updatePasien:", error);
-    return {
-      success: false,
-      error: "Terjadi kesalahan internal saat memperbarui data.",
-    };
+    return handleServiceError(error);
   }
 };
 
@@ -227,16 +216,11 @@ export const deletePasien = async (
       .delete()
       .eq("id_user", pasien.id_user);
 
-    // Jika gagal hapus user, kembalikan data pasien (Manual Rollback)
     if (deleteUserError) {
-      console.error(
-        "[DB CRITICAL] Gagal menghapus akun user (Orphan Data):",
-        deleteUserError.message,
+      return handleServiceError(
+        deletePasienError,
+        "Gagal menghapus akun pasien. Operasi dibatalkan otomatis.",
       );
-      return {
-        success: false,
-        error: "Gagal menghapus akun pasien. Operasi dibatalkan otomatis.",
-      };
     }
 
     return {
@@ -244,10 +228,6 @@ export const deletePasien = async (
       message: "Pasien dan akunnya berhasil dihapus permanen.",
     };
   } catch (error) {
-    console.error("[SYSTEM ERROR] deletePasien:", error);
-    return {
-      success: false,
-      error: "Terjadi kesalahan internal saat menghapus pasien.",
-    };
+    return handleServiceError(error);
   }
 };

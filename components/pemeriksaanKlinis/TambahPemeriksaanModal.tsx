@@ -28,7 +28,7 @@ export default function TambahPemeriksaanModal({
 
     startTransition(async () => {
       const res = await createPemeriksaanAction(formData);
-      if (res?.error) setError(res.error);
+      if (!res.success) setError(res.error);
       else onClose();
     });
   };

@@ -20,7 +20,7 @@ export default async function PemeriksaanKlinisPage() {
 
       {res.success === false && (
         <div className="rounded bg-red-50 p-4 text-sm text-red-600 border border-red-200">
-          {res.message || "Gagal memuat data."}
+          {res.error || "Gagal memuat data."}
         </div>
       )}
 

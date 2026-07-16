@@ -19,7 +19,7 @@ export default async function episodePengobatanPage() {
 
       {res.success === false && (
         <div className="rounded bg-red-50 p-4 text-sm text-red-600 border border-red-200">
-          {res.message || "Gagal memuat data episode pengobatan."}
+          {res.error || "Gagal memuat data episode pengobatan."}
         </div>
       )}
 

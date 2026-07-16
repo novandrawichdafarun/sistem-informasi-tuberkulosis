@@ -20,7 +20,7 @@ export default function TambahPasienModal() {
     const formData = new FormData(e.currentTarget);
     const result = await createPasienAction(formData);
 
-    if (result?.error) {
+    if (!result.success) {
       setErrorMessage(result.error);
       setIsLoading(false);
     } else if (result?.success) {

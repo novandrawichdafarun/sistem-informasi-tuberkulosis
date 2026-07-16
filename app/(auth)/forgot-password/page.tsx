@@ -94,7 +94,7 @@ export default function ForgotPasswordPage() {
     const inputEmail = formData.get("email") as string;
     const result = await requestOtpAction(formData);
 
-    if (result?.error) {
+    if (!result.success) {
       setErrorMessage(result.error);
     } else {
       setEmail(inputEmail);
@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
     const inputToken = FormData.get("token") as string;
     const result = await verifyOtpAction(FormData);
 
-    if (result?.error) {
+    if (!result.success) {
       setErrorMessage(result.error);
     } else {
       setToken(inputToken);
@@ -125,7 +125,7 @@ export default function ForgotPasswordPage() {
 
     const result = await resetPasswordAction(formData);
 
-    if (result?.error) {
+    if (!result.success) {
       setErrorMessage(result.error);
     } else {
       setStep(4);

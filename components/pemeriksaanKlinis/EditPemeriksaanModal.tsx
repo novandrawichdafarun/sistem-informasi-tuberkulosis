@@ -29,7 +29,7 @@ export default function EditPemeriksaanModal({
 
     startTransition(async () => {
       const res = await updatePemeriksaanAction(formData);
-      if (res?.error) setError(res.error);
+      if (!res.success) setError(res.error);
       else onClose();
     });
   };

@@ -1,18 +1,18 @@
 import { ActionResponse } from "@/types/action";
 import {
-  CreatePemeriksaanPayload,
-  PasienPemeriksaanOverview,
-  PemeriksaanKlinisData,
-  UpdatePemeriksaanPayload,
-} from "@/types/pemeriksaanKlinis";
+  CreatePemeriksaanLabPayload,
+  PasienPemeriksaanLabOverview,
+  PemeriksaanLabData,
+  UpdatePemeriksaanLabPayload,
+} from "@/types/pemeriksaanLab";
 import { verifyNakesAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export const getDaftarPemeriksaanByNakes = async (
+export const getDaftarPemeriksaanLabByNakes = async (
   supabase: SupabaseClient,
   id_user_nakes: string,
-): Promise<ActionResponse<PasienPemeriksaanOverview[]>> => {
+): Promise<ActionResponse<PasienPemeriksaanLabOverview[]>> => {
   try {
     const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
@@ -22,46 +22,49 @@ export const getDaftarPemeriksaanByNakes = async (
       .from("pasien")
       .select(
         `
-      id_pasien, no_rm, nama_lengkap, nik,
-      episode_pengobatan (
-        id_episode, status_episode,
-        pemeriksaan_klinis ( 
-          id_periksa, id_episode, id_nakes, 
-          tanggal_periksa, keluhan, tensi, suhu, 
-          pernapasan, nadi, saturasi_o2, 
-          tinggi_badan_saat_ini, berat_badan_saat_ini, 
-          created_at 
+        id_pasien, no_rm, nama_lengkap, nik,
+        episode_pengobatan (
+          id_episode, status_episode,
+          pemeriksaan_lab ( 
+            id_tes, id_episode, id_nakes, 
+            jenis_tes, tanggal_tes, hasil_tes, 
+            periode_bulanan, berkas_pendukung_url, 
+            created_at 
+          )
         )
-      )
-    `,
+      `,
       )
       .eq("id_nakes", nakes.id_nakes)
       .order("created_at", { ascending: false });
 
     if (pasienError) {
-      return handleServiceError(
-        pasienError?.message,
-        "Gagal mengambil data pasien dari sistem.",
+      console.error(
+        "[DB ERROR] getDaftarPemeriksaanLabByNakes:",
+        pasienError.message,
       );
+      return {
+        success: false,
+        error: "Gagal mengambil data pasien dari sistem.",
+      };
     }
 
-    const formattedData: PasienPemeriksaanOverview[] = pasienData.map(
+    const formattedData: PasienPemeriksaanLabOverview[] = pasienData.map(
       (pasien) => {
         const rawEpisodes = pasien.episode_pengobatan || [];
         const episodeAktif =
           rawEpisodes.find((ep) => ep.status_episode === "aktif") || null;
 
-        let riwayat: PemeriksaanKlinisData[] = [];
+        let riwayat: PemeriksaanLabData[] = [];
         rawEpisodes.forEach((ep) => {
-          if (ep.pemeriksaan_klinis) {
-            riwayat = [...riwayat, ...ep.pemeriksaan_klinis];
+          if (ep.pemeriksaan_lab) {
+            riwayat = [...riwayat, ...ep.pemeriksaan_lab];
           }
         });
 
         riwayat.sort(
           (a, b) =>
-            new Date(b.tanggal_periksa).getTime() -
-            new Date(a.tanggal_periksa).getTime(),
+            new Date(b.tanggal_tes).getTime() -
+            new Date(a.tanggal_tes).getTime(),
         );
 
         return {
@@ -75,20 +78,20 @@ export const getDaftarPemeriksaanByNakes = async (
                 status_episode: episodeAktif.status_episode,
               }
             : null,
-          riwayat_pemeriksaan: riwayat,
+          riwayat_pemeriksaan_lab: riwayat,
         };
       },
     );
 
     return { success: true, data: formattedData };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(error, "Gagal mengambil data pemeriksaan lab.");
   }
 };
 
-export const createPemeriksaanKlinis = async (
+export const createPemeriksaanLab = async (
   supabase: SupabaseClient,
-  payload: CreatePemeriksaanPayload,
+  payload: CreatePemeriksaanLabPayload,
   id_user_nakes: string,
 ): Promise<ActionResponse> => {
   try {
@@ -110,32 +113,83 @@ export const createPemeriksaanKlinis = async (
       };
     }
 
-    const { error: pemeriksaanError } = await supabase
-      .from("pemeriksaan_klinis")
+    const { error: insertError } = await supabase
+      .from("pemeriksaan_lab")
       .insert({
         ...payload,
         id_nakes: nakes.id_nakes,
       });
 
-    if (pemeriksaanError) {
-      return handleServiceError(
-        pemeriksaanError?.message,
-        "Gagal menyimpan pemeriksaan klinis.",
-      );
+    if (insertError) {
+      console.error("[DB ERROR] Insert Pemeriksaan Lab:", insertError.message);
+      return { success: false, error: "Gagal menyimpan pemeriksaan lab." };
     }
 
+    return { success: true, message: "Pemeriksaan lab berhasil ditambahkan!" };
+  } catch (error) {
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal server saat menambah data.",
+    );
+  }
+};
+
+export const updatePemeriksaanLab = async (
+  supabase: SupabaseClient,
+  payload: UpdatePemeriksaanLabPayload,
+  id_user_nakes: string,
+): Promise<ActionResponse> => {
+  try {
+    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
+    if (error || !nakes)
+      return { success: false, error: "Otoritas Nakes tidak valid." };
+
+    const { data: tesLab, error: checkError } = await supabase
+      .from("pemeriksaan_lab")
+      .select(
+        `
+        id_tes,
+        episode_pengobatan!inner (
+          pasien!inner (
+            id_nakes
+          )
+        )
+      `,
+      )
+      .eq("id_tes", payload.id_tes)
+      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes)
+      .single();
+
+    if (checkError || !tesLab) {
+      return {
+        success: false,
+        error: "Data tidak ditemukan atau akses ditolak.",
+      };
+    }
+
+    const { id_tes, ...updateData } = payload;
+    const { error: updateError } = await supabase
+      .from("pemeriksaan_lab")
+      .update(updateData)
+      .eq("id_tes", id_tes);
+
+    if (updateError)
+      return { success: false, error: "Gagal memperbarui data." };
     return {
       success: true,
-      message: "Pemeriksaan klinis berhasil ditambahkan!",
+      message: "Data pemeriksaan lab berhasil diperbarui!",
     };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat memperbarui data.",
+    );
   }
 };
 
-export const updatePemeriksaanKlinis = async (
+export const deletePemeriksaanLab = async (
   supabase: SupabaseClient,
-  payload: UpdatePemeriksaanPayload,
+  id_tes: number,
   id_user_nakes: string,
 ): Promise<ActionResponse> => {
   try {
@@ -143,11 +197,11 @@ export const updatePemeriksaanKlinis = async (
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
-    const { data: periksa, error: checkError } = await supabase
-      .from("pemeriksaan_klinis")
+    const { data: tesLab, error: checkError } = await supabase
+      .from("pemeriksaan_lab")
       .select(
         `
-        id_periksa,
+        id_tes,
         episode_pengobatan!inner (
           pasien!inner (
             id_nakes
@@ -155,73 +209,30 @@ export const updatePemeriksaanKlinis = async (
         )
       `,
       )
-      .eq("id_periksa", payload.id_periksa)
-      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes) // Pengecekan 2 level ke atas
+      .eq("id_tes", id_tes)
+      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes)
       .single();
 
-    if (checkError || !periksa) {
+    if (checkError || !tesLab) {
       return {
         success: false,
         error: "Data tidak ditemukan atau akses ditolak.",
       };
     }
 
-    const { id_periksa, ...updateData } = payload;
-    const { error: pemeriksaanError } = await supabase
-      .from("pemeriksaan_klinis")
-      .update(updateData)
-      .eq("id_periksa", id_periksa);
-
-    if (pemeriksaanError)
-      return { success: false, error: "Gagal memperbarui data." };
-    return { success: true, message: "Data pemeriksaan berhasil diperbarui!" };
-  } catch (error) {
-    return handleServiceError(error);
-  }
-};
-
-export const deletePemeriksaanKlinis = async (
-  supabase: SupabaseClient,
-  id_periksa: number,
-  id_user_nakes: string,
-): Promise<ActionResponse> => {
-  try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
-
-    const { data: periksa, error: checkError } = await supabase
-      .from("pemeriksaan_klinis")
-      .select(
-        `
-        id_periksa,
-        episode_pengobatan!inner (
-          pasien!inner (
-            id_nakes
-          )
-        )
-      `,
-      )
-      .eq("id_periksa", id_periksa)
-      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes) // Pengecekan 2 level ke atas
-      .single();
-
-    if (checkError || !periksa) {
-      return {
-        success: false,
-        error: "Data tidak ditemukan atau akses ditolak.",
-      };
-    }
-
-    const { error: pemeriksaanError } = await supabase
-      .from("pemeriksaan_klinis")
+    const { error: deleteError } = await supabase
+      .from("pemeriksaan_lab")
       .delete()
-      .eq("id_periksa", id_periksa);
-    if (pemeriksaanError)
-      return { success: false, error: "Gagal menghapus data pemeriksaan." };
+      .eq("id_tes", id_tes);
 
-    return { success: true, message: "Pemeriksaan berhasil dihapus." };
+    if (deleteError)
+      return { success: false, error: "Gagal menghapus data pemeriksaan lab." };
+
+    return { success: true, message: "Pemeriksaan lab berhasil dihapus." };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat menghapus data.",
+    );
   }
 };

@@ -69,7 +69,9 @@ export async function bukaEpisodeAction(
   }
 }
 
-export async function tutupEpisodeAction(formData: FormData) {
+export async function tutupEpisodeAction(
+  formData: FormData,
+): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
     const supabase = await getSupabaseServer();

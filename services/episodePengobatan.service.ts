@@ -7,6 +7,7 @@ import {
   TutupEpisodePayload,
 } from "@/types/episodePengobatan";
 import { verifyNakesAccess } from "@/utils/access";
+import { handleServiceError } from "@/utils/error";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const getDaftarPasienDanEpisodeByNakes = async (
@@ -33,11 +34,10 @@ export const getDaftarPasienDanEpisodeByNakes = async (
       .order("created_at", { ascending: false });
 
     if (pasienError) {
-      console.error("[DB ERROR] getPasienByNakesId:", pasienError.message);
-      return {
-        success: false,
-        error: "Gagal mengambil data pasien dari sistem.",
-      };
+      return handleServiceError(
+        pasienError?.message,
+        "Pasien tidak ditemukan.",
+      );
     }
 
     const formattedData: PasienEpisodeOverview[] = (pasienData || []).map(
@@ -68,8 +68,7 @@ export const getDaftarPasienDanEpisodeByNakes = async (
 
     return { success: true, data: formattedData };
   } catch (error) {
-    console.error("[SYSTEM ERROR] getDaftarPasienDanEpisode:", error);
-    return { success: false, error: "Gagal mengambil data episode." };
+    return handleServiceError(error);
   }
 };
 
@@ -91,17 +90,15 @@ export const getEpisodeAktifByPasienId = async (
       .single();
 
     if (episodeError) {
-      console.error(
-        "[DB ERROR] getEpisodeAktifByPasienId:",
-        episodeError.message,
+      return handleServiceError(
+        episodeError?.message,
+        "Episode aktif tidak ditemukan.",
       );
-      return { success: false, error: "Episode aktif tidak ditemukan." };
     }
 
     return { success: true, data: episode_pengobatan };
   } catch (error) {
-    console.error("[SYSTEM ERROR] getEpisodeAktifByPasienId:", error);
-    return { success: false, error: "Gagal mengambil data." };
+    return handleServiceError(error);
   }
 };
 
@@ -133,14 +130,12 @@ export const bukaEpisode = async (
       });
 
     if (episodeError) {
-      console.error("[DB ERROR] bukaEpisode:", episodeError.message);
-      return { success: false, error: "Episode gagal dibuka." };
+      return handleServiceError(episodeError?.message, "Episode gagal dibuka.");
     }
 
     return { success: true, message: "Episode berhasil dibuka." };
   } catch (error) {
-    console.error("[DB ERROR] bukaEpisode:", error);
-    return { success: false, error: "Gagal membuka episode." };
+    return handleServiceError(error);
   }
 };
 
@@ -148,7 +143,7 @@ export const tutupEpisode = async (
   supabase: SupabaseClient,
   payload: TutupEpisodePayload,
   id_user_nakes: string,
-) => {
+): Promise<ActionResponse> => {
   try {
     const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
     if (error || !nakes)
@@ -178,14 +173,15 @@ export const tutupEpisode = async (
       .eq("id_episode", payload.id_episode);
 
     if (episodeError) {
-      console.error("[DB ERROR] tutupEpisode:", episodeError.message);
-      return { success: false, error: "Episode aktif tidak ditemukan." };
+      return handleServiceError(
+        episodeError?.message,
+        "Episode gagal diselesiakan.",
+      );
     }
 
     return { success: true, message: "Episode berhasil diselesaikan." };
   } catch (error) {
-    console.error("[DB ERROR] tutupEpisode:", error);
-    return { success: false, error: "Gagal menyelesaikan episode." };
+    return handleServiceError(error);
   }
 };
 
@@ -224,13 +220,14 @@ export const editEpisode = async (
       .eq("id_episode", payload.id_episode);
 
     if (episodeError) {
-      console.error("[DB ERROR] editEpisode:", episodeError.message);
-      return { success: false, error: "Episode aktif tidak ditemukan." };
+      return handleServiceError(
+        episodeError?.message,
+        "Episode aktif tidak ditemukan.",
+      );
     }
     return { success: true, message: "Episode berhasil diperbarui." };
   } catch (error) {
-    console.error("[DB ERROR] editEpisode:", error);
-    return { success: false, error: "Gagal memperbarui episode." };
+    return handleServiceError(error);
   }
 };
 
@@ -270,13 +267,14 @@ export const hapusEpisode = async (
       .eq("id_episode", id_episode);
 
     if (episodeError) {
-      console.error("[DB ERROR] editEpisode:", episodeError.message);
-      return { success: false, error: "Episode aktif tidak ditemukan." };
+      return handleServiceError(
+        episodeError?.message,
+        "Episode aktif tidak ditemukan.",
+      );
     }
 
     return { success: true, message: "Episode berhasil dihapus." };
   } catch (error) {
-    console.error("[DB ERROR] hapusEpisode:", error);
-    return { success: false, error: "Gagal menghapus episode." };
+    return handleServiceError(error);
   }
 };
