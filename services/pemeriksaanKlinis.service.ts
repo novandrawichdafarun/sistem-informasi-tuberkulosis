@@ -24,7 +24,13 @@ export const getDaftarPemeriksaanByNakes = async (
       id_pasien, no_rm, nama_lengkap, nik,
       episode_pengobatan (
         id_episode, status_episode,
-        pemeriksaan_klinis ( * )
+        pemeriksaan_klinis ( 
+          id_periksa, id_episode, id_nakes, 
+          tanggal_periksa, keluhan, tensi, suhu, 
+          pernapasan, nadi, saturasi_o2, 
+          tinggi_badan_saat_ini, berat_badan_saat_ini, 
+          created_at 
+        )
       )
     `,
       )

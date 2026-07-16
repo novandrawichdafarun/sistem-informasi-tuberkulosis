@@ -13,7 +13,7 @@ export const loginUserService = async (
   try {
     const { data: user, error } = await supabase
       .from("users")
-      .select("*")
+      .select("id_user, email, password_hash, role")
       .eq("email", email)
       .single();
 
@@ -142,7 +142,7 @@ export const verifyOtp = async (
     const { email, token } = payload;
     const { data: resetRecord, error } = await supabase
       .from("password_resets")
-      .select("*")
+      .select("id")
       .eq("email", email)
       .eq("token", token)
       .gte("expires_at", new Date().toISOString())

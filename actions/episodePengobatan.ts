@@ -18,6 +18,7 @@ import {
   EpisodePengobatanData,
   PasienEpisodeOverview,
 } from "@/types/episodePengobatan";
+import { handleActionError } from "@/utils/error";
 import { requireNakesSession } from "@/utils/session";
 import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
@@ -32,13 +33,7 @@ export async function getDaftarEpisodeOverviewAction(): Promise<
 
     return await getDaftarPasienDanEpisodeByNakes(supabase, nakesId);
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan yang tidak diketahui",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -51,13 +46,7 @@ export async function getEpisodeAktifAction(
 
     return await getEpisodeAktifByPasienId(supabase, id_pasien, nakesId);
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan yang tidak diketahui",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -76,10 +65,7 @@ export async function bukaEpisodeAction(
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Terjadi kesalahan.",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -96,10 +82,7 @@ export async function tutupEpisodeAction(formData: FormData) {
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Terjadi kesalahan.",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -119,10 +102,7 @@ export async function editEpisodeAction(
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Terjadi kesalahan.",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -139,9 +119,6 @@ export async function hapusEpisodeAction(
 
     return result;
   } catch (error: unknown) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Terjadi kesalahan.",
-    };
+    return handleActionError(error);
   }
 }

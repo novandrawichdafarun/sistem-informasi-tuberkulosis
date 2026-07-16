@@ -8,7 +8,7 @@ function SessionGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (session?.error === "ForceLogout") {
-      signOut({ callbackUrl: "/login" });
+      signOut({ callbackUrl: "/login", redirect: true });
     }
   }, [session]);
 
@@ -21,7 +21,7 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={60} refetchOnWindowFocus={true}>
       <SessionGuard>{children}</SessionGuard>
     </SessionProvider>
   );

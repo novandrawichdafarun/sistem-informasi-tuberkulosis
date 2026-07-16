@@ -12,6 +12,7 @@ import {
 } from "@/services/pemeriksaanKlinis.service";
 import { ActionResponse } from "@/types/action";
 import { PasienPemeriksaanOverview } from "@/types/pemeriksaanKlinis";
+import { handleActionError } from "@/utils/error";
 import { requireNakesSession } from "@/utils/session";
 import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
@@ -26,13 +27,7 @@ export async function getDaftarPemeriksaanAction(): Promise<
 
     return await getDaftarPemeriksaanByNakes(supabase, nakesId);
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan yang tidak diketahui",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -53,11 +48,7 @@ export async function createPemeriksaanAction(
 
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Terjadi kesalahan server",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -78,11 +69,7 @@ export async function updatePemeriksaanAction(
 
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Terjadi kesalahan server",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -99,10 +86,6 @@ export async function deletePemeriksaanAction(
 
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Terjadi kesalahan server",
-    };
+    return handleActionError(error);
   }
 }

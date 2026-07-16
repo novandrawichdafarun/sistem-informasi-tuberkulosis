@@ -71,11 +71,6 @@ export const authOptions: NextAuthOptions = {
           token.error = "ForceLogout";
           return token;
         }
-
-        await supabase
-          .from("user_sessions")
-          .update({ last_active_at: new Date().toISOString() })
-          .eq("session_token", token.sessionToken);
       }
 
       return token;

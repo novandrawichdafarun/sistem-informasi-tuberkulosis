@@ -12,6 +12,7 @@ import {
   verifyOtp,
 } from "@/services/auth.service";
 import { ActionResponse } from "@/types/action";
+import { handleActionError } from "@/utils/error";
 import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
 
@@ -23,13 +24,7 @@ export async function clearDbSessionAction(
 
     return await clearDbSessionService(supabase, sessionToken);
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Gagal menghapus sesi database.",
-    };
+    return handleActionError(error, "Gagal menghapus sesi database.");
   }
 }
 
@@ -45,13 +40,7 @@ export async function requestOtpAction(
 
     return await requestPasswordReset(supabase, data.email);
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan pada server.",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -67,13 +56,7 @@ export async function verifyOtpAction(
 
     return await verifyOtp(supabase, data);
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan pada server.",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -89,12 +72,6 @@ export async function resetPasswordAction(
 
     return await ResetPassword(supabase, data);
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan pada server.",
-    };
+    return handleActionError(error);
   }
 }

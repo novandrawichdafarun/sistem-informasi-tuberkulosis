@@ -16,6 +16,7 @@ import {
 } from "@/schemas/pasien.schema";
 import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
+import { handleActionError } from "@/utils/error";
 
 export async function getDaftarPasienAction(): Promise<
   ActionResponse<PasienData[]>
@@ -25,13 +26,7 @@ export async function getDaftarPasienAction(): Promise<
     const supabase = await getSupabaseServer();
     return await getPasienByNakesId(supabase, nakesId);
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan yang tidak diketahui",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -52,11 +47,7 @@ export async function createPasienAction(
 
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Terjadi kesalahan server",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -77,11 +68,7 @@ export async function updatePasienAction(
 
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Terjadi kesalahan server",
-    };
+    return handleActionError(error);
   }
 }
 
@@ -98,10 +85,6 @@ export async function deletePasienAction(
 
     return result;
   } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Terjadi kesalahan server",
-    };
+    return handleActionError(error);
   }
 }

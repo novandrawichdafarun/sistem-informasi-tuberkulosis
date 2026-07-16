@@ -200,7 +200,7 @@ export const deletePasien = async (
 
     const { data: pasien } = await supabase
       .from("pasien")
-      .select("*")
+      .select("id_user")
       .eq("id_pasien", id_pasien)
       .eq("id_nakes", nakes.id_nakes) // Proteksi kepemilikan data
       .single();
@@ -229,8 +229,10 @@ export const deletePasien = async (
 
     // Jika gagal hapus user, kembalikan data pasien (Manual Rollback)
     if (deleteUserError) {
-      console.error("[DB ERROR] Delete User:", deleteUserError.message);
-      await supabase.from("pasien").insert(pasien);
+      console.error(
+        "[DB CRITICAL] Gagal menghapus akun user (Orphan Data):",
+        deleteUserError.message,
+      );
       return {
         success: false,
         error: "Gagal menghapus akun pasien. Operasi dibatalkan otomatis.",
