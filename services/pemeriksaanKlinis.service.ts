@@ -94,24 +94,19 @@ export const createPemeriksaanKlinis = async (
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
-    const { data: episode } = await supabase
+    const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
-      .select("id_pasien")
+      .select(`id_episode, pasien!inner (id_nakes)`)
       .eq("id_episode", payload.id_episode)
+      .eq("pasien.id_nakes", nakes.id_nakes)
       .single();
-    if (!episode) return { success: false, error: "Episode tidak ditemukan." };
 
-    const { data: pasien } = await supabase
-      .from("pasien")
-      .select("id_pasien")
-      .eq("id_pasien", episode.id_pasien)
-      .eq("id_nakes", nakes.id_nakes)
-      .single();
-    if (!pasien)
+    if (checkError || !episode) {
       return {
         success: false,
         error: "Akses ditolak: Pasien bukan milik Anda.",
       };
+    }
 
     const { error: pemeriksaanError } = await supabase
       .from("pemeriksaan_klinis")
@@ -151,26 +146,28 @@ export const updatePemeriksaanKlinis = async (
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
-    const { data: periksa } = await supabase
+    const { data: periksa, error: checkError } = await supabase
       .from("pemeriksaan_klinis")
-      .select("id_episode")
+      .select(
+        `
+        id_periksa,
+        episode_pengobatan!inner (
+          pasien!inner (
+            id_nakes
+          )
+        )
+      `,
+      )
       .eq("id_periksa", payload.id_periksa)
+      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes) // Pengecekan 2 level ke atas
       .single();
-    if (!periksa)
-      return { success: false, error: "Data periksa tidak ditemukan." };
 
-    const { data: episode } = await supabase
-      .from("episode_pengobatan")
-      .select("id_pasien")
-      .eq("id_episode", periksa.id_episode)
-      .single();
-    const { data: pasien } = await supabase
-      .from("pasien")
-      .select("id_pasien")
-      .eq("id_pasien", episode?.id_pasien)
-      .eq("id_nakes", nakes.id_nakes)
-      .single();
-    if (!pasien) return { success: false, error: "Akses ditolak." };
+    if (checkError || !periksa) {
+      return {
+        success: false,
+        error: "Data tidak ditemukan atau akses ditolak.",
+      };
+    }
 
     const { id_periksa, ...updateData } = payload;
     const { error: pemeriksaanError } = await supabase
@@ -200,25 +197,28 @@ export const deletePemeriksaanKlinis = async (
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
-    const { data: periksa } = await supabase
+    const { data: periksa, error: checkError } = await supabase
       .from("pemeriksaan_klinis")
-      .select("id_episode")
+      .select(
+        `
+        id_periksa,
+        episode_pengobatan!inner (
+          pasien!inner (
+            id_nakes
+          )
+        )
+      `,
+      )
       .eq("id_periksa", id_periksa)
+      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes) // Pengecekan 2 level ke atas
       .single();
-    if (!periksa) return { success: false, error: "Data tidak ditemukan." };
 
-    const { data: episode } = await supabase
-      .from("episode_pengobatan")
-      .select("id_pasien")
-      .eq("id_episode", periksa.id_episode)
-      .single();
-    const { data: pasien } = await supabase
-      .from("pasien")
-      .select("id_pasien")
-      .eq("id_pasien", episode?.id_pasien)
-      .eq("id_nakes", nakes.id_nakes)
-      .single();
-    if (!pasien) return { success: false, error: "Akses ditolak." };
+    if (checkError || !periksa) {
+      return {
+        success: false,
+        error: "Data tidak ditemukan atau akses ditolak.",
+      };
+    }
 
     const { error: pemeriksaanError } = await supabase
       .from("pemeriksaan_klinis")

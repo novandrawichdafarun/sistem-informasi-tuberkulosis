@@ -106,11 +106,11 @@ export const requestPasswordReset = async (
     if (!user)
       return { success: false, error: "Email tidak terdaftar di sistem." };
 
+    const now = new Date().toISOString();
     await supabase
       .from("password_resets")
       .delete()
-      .lt("expires_at", new Date().toISOString());
-    await supabase.from("password_resets").delete().eq("email", email);
+      .or(`email.eq.${email},expires_at.lt.${now}`);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 menit

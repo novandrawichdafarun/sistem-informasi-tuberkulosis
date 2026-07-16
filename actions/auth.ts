@@ -12,15 +12,14 @@ import {
   verifyOtp,
 } from "@/services/auth.service";
 import { ActionResponse } from "@/types/action";
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getSupabaseServer } from "@/utils/supabase/server";
+import { validateFormData } from "@/utils/validation";
 
 export async function clearDbSessionAction(
   sessionToken: string,
 ): Promise<ActionResponse> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
 
     return await clearDbSessionService(supabase, sessionToken);
   } catch (error) {
@@ -38,17 +37,13 @@ export async function requestOtpAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    const rawData = Object.fromEntries(formData.entries());
-    const validation = requestOtpSchema.safeParse(rawData);
+    const supabase = await getSupabaseServer();
+    const { data, error } = validateFormData(formData, requestOtpSchema);
 
-    if (!validation.success) {
-      return { success: false, error: validation.error.issues[0].message };
-    }
+    if (error || !data)
+      return { success: false, error: error || "Validasi gagal." };
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    return await requestPasswordReset(supabase, validation.data.email);
+    return await requestPasswordReset(supabase, data.email);
   } catch (error) {
     return {
       success: false,
@@ -64,17 +59,13 @@ export async function verifyOtpAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    const rawData = Object.fromEntries(formData.entries());
-    const validation = verifyOtpSchema.safeParse(rawData);
+    const supabase = await getSupabaseServer();
+    const { data, error } = validateFormData(formData, verifyOtpSchema);
 
-    if (!validation.success) {
-      return { success: false, error: validation.error.issues[0].message };
-    }
+    if (error || !data)
+      return { success: false, error: error || "Validasi gagal." };
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    return await verifyOtp(supabase, validation.data);
+    return await verifyOtp(supabase, data);
   } catch (error) {
     return {
       success: false,
@@ -90,17 +81,13 @@ export async function resetPasswordAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    const rawData = Object.fromEntries(formData.entries());
-    const validation = resetPasswordSchema.safeParse(rawData);
+    const supabase = await getSupabaseServer();
+    const { data, error } = validateFormData(formData, resetPasswordSchema);
 
-    if (!validation.success) {
-      return { success: false, error: validation.error.issues[0].message };
-    }
+    if (error || !data)
+      return { success: false, error: error || "Validasi gagal." };
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    return await ResetPassword(supabase, validation.data);
+    return await ResetPassword(supabase, data);
   } catch (error) {
     return {
       success: false,

@@ -13,17 +13,17 @@ import {
 import { ActionResponse } from "@/types/action";
 import { PasienPemeriksaanOverview } from "@/types/pemeriksaanKlinis";
 import { requireNakesSession } from "@/utils/session";
-import { createClient } from "@/utils/supabase/server";
+import { getSupabaseServer } from "@/utils/supabase/server";
+import { validateFormData } from "@/utils/validation";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 
 export async function getDaftarPemeriksaanAction(): Promise<
   ActionResponse<PasienPemeriksaanOverview[]>
 > {
   try {
     const nakesId = await requireNakesSession();
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
+
     return await getDaftarPemeriksaanByNakes(supabase, nakesId);
   } catch (error) {
     return {
@@ -36,26 +36,18 @@ export async function getDaftarPemeriksaanAction(): Promise<
   }
 }
 
-export async function createPemeriksaanAction(formData: FormData) {
+export async function createPemeriksaanAction(
+  formData: FormData,
+): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
 
-    const rawData = Object.fromEntries(formData.entries());
+    const { data, error } = validateFormData(formData, createPemeriksaanSchema);
+    if (error || !data)
+      return { success: false, error: error || "Validasi gagal." };
 
-    const validation = createPemeriksaanSchema.safeParse(rawData);
-
-    if (!validation.success) {
-      const firstError = validation.error.issues[0].message;
-      return { success: false, error: firstError };
-    }
-
-    const result = await createPemeriksaanKlinis(
-      supabase,
-      validation.data,
-      nakesId,
-    );
+    const result = await createPemeriksaanKlinis(supabase, data, nakesId);
 
     if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 
@@ -69,26 +61,18 @@ export async function createPemeriksaanAction(formData: FormData) {
   }
 }
 
-export async function updatePemeriksaanAction(formData: FormData) {
+export async function updatePemeriksaanAction(
+  formData: FormData,
+): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
 
-    const rawData = Object.fromEntries(formData.entries());
+    const { data, error } = validateFormData(formData, updatePemeriksaanSchema);
+    if (error || !data)
+      return { success: false, error: error || "Validasi gagal." };
 
-    const validation = updatePemeriksaanSchema.safeParse(rawData);
-
-    if (!validation.success) {
-      const firstError = validation.error.issues[0].message;
-      return { success: false, error: firstError };
-    }
-
-    const result = await updatePemeriksaanKlinis(
-      supabase,
-      validation.data,
-      nakesId,
-    );
+    const result = await updatePemeriksaanKlinis(supabase, data, nakesId);
 
     if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 
@@ -102,11 +86,12 @@ export async function updatePemeriksaanAction(formData: FormData) {
   }
 }
 
-export async function deletePemeriksaanAction(id_periksa: number) {
+export async function deletePemeriksaanAction(
+  id_periksa: number,
+): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
 
     const result = await deletePemeriksaanKlinis(supabase, id_periksa, nakesId);
 

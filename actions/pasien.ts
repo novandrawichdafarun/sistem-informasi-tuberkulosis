@@ -14,16 +14,15 @@ import {
   createPasienSchema,
   updatePasienSchema,
 } from "@/schemas/pasien.schema";
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { getSupabaseServer } from "@/utils/supabase/server";
+import { validateFormData } from "@/utils/validation";
 
 export async function getDaftarPasienAction(): Promise<
   ActionResponse<PasienData[]>
 > {
   try {
     const nakesId = await requireNakesSession();
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
     return await getPasienByNakesId(supabase, nakesId);
   } catch (error) {
     return {
@@ -41,19 +40,13 @@ export async function createPasienAction(
 ): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
 
-    const rawData = Object.fromEntries(formData.entries());
+    const { data, error } = validateFormData(formData, createPasienSchema);
+    if (error || !data)
+      return { success: false, error: error || "Validasi gagal." };
 
-    const validation = createPasienSchema.safeParse(rawData);
-
-    if (!validation.success) {
-      const firstError = validation.error.issues[0].message;
-      return { success: false, error: firstError };
-    }
-
-    const result = await createPasien(supabase, validation.data, nakesId);
+    const result = await createPasien(supabase, data, nakesId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -67,21 +60,18 @@ export async function createPasienAction(
   }
 }
 
-export async function updatePasienAction(formData: FormData) {
+export async function updatePasienAction(
+  formData: FormData,
+): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
 
-    const rawData = Object.fromEntries(formData.entries());
+    const { data, error } = validateFormData(formData, updatePasienSchema);
+    if (error || !data)
+      return { success: false, error: error || "Validasi gagal." };
 
-    const validation = updatePasienSchema.safeParse(rawData);
-
-    if (!validation.success) {
-      return { success: false, error: validation.error.issues[0].message };
-    }
-
-    const result = await updatePasien(supabase, validation.data, nakesId);
+    const result = await updatePasien(supabase, data, nakesId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -100,8 +90,7 @@ export async function deletePasienAction(
 ): Promise<ActionResponse> {
   try {
     const nakesId = await requireNakesSession();
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await getSupabaseServer();
 
     const result = await deletePasien(supabase, id_pasien, nakesId);
 

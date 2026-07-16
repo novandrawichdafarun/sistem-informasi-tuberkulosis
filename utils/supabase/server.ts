@@ -26,3 +26,8 @@ export const createClient = (
     },
   });
 };
+
+export const getSupabaseServer = async () => {
+  const cookieStore = await cookies();
+  return createClient(cookieStore);
+};

@@ -154,22 +154,19 @@ export const tutupEpisode = async (
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
-    const { data: episode } = await supabase
+    const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
-      .select("id_pasien")
+      .select(`id_episode, pasien!inner (id_nakes)`)
       .eq("id_episode", payload.id_episode)
+      .eq("pasien.id_nakes", nakes.id_nakes)
       .single();
 
-    if (!episode) return { success: false, error: "Episode tidak ditemukan." };
-
-    const { data: pasien } = await supabase
-      .from("pasien")
-      .select("id_pasien")
-      .eq("id_pasien", episode.id_pasien)
-      .eq("id_nakes", nakes.id_nakes)
-      .single();
-
-    if (!pasien) return { success: false, error: "Akses ditolak." };
+    if (checkError || !episode) {
+      return {
+        success: false,
+        error: "Episode tidak ditemukan atau akses ditolak.",
+      };
+    }
 
     const { error: episodeError } = await supabase
       .from("episode_pengobatan")
@@ -204,25 +201,17 @@ export const editEpisode = async (
 
     const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
-      .select("id_pasien")
+      .select(`id_episode, pasien!inner (id_nakes)`)
       .eq("id_episode", payload.id_episode)
+      .eq("pasien.id_nakes", nakes.id_nakes)
       .single();
 
-    if (checkError || !episode)
-      return { success: false, error: "Episode tidak ditemukan." };
-
-    const { data: pasien } = await supabase
-      .from("pasien")
-      .select("id_pasien")
-      .eq("id_pasien", episode.id_pasien)
-      .eq("id_nakes", nakes.id_nakes)
-      .single();
-
-    if (!pasien)
+    if (checkError || !episode) {
       return {
         success: false,
-        error: "Akses ditolak: Anda tidak memiliki akses ke pasien ini.",
+        error: "Episode tidak ditemukan atau akses ditolak.",
       };
+    }
 
     // Update
     const { error: episodeError } = await supabase
@@ -255,23 +244,26 @@ export const hapusEpisode = async (
     if (error || !nakes)
       return { success: false, error: "Otoritas Nakes tidak valid." };
 
-    const { data: episode } = await supabase
+    const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
-      .select("id_pasien")
+      .select(
+        `
+        id_episode,
+        pasien!inner (
+          id_nakes
+        )
+      `,
+      )
       .eq("id_episode", id_episode)
+      .eq("pasien.id_nakes", nakes.id_nakes) // Filter langsung dari tabel relasi
       .single();
 
-    if (!episode) return { success: false, error: "Episode tidak ditemukan." };
-
-    const { data: pasien } = await supabase
-      .from("pasien")
-      .select("id_pasien")
-      .eq("id_pasien", episode.id_pasien)
-      .eq("id_nakes", nakes.id_nakes)
-      .single();
-
-    if (!pasien) return { success: false, error: "Akses ditolak." };
-
+    if (checkError || !episode) {
+      return {
+        success: false,
+        error: "Episode tidak ditemukan atau akses ditolak.",
+      };
+    }
     const { error: episodeError } = await supabase
       .from("episode_pengobatan")
       .delete()
