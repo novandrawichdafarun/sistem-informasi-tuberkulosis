@@ -1,3 +1,5 @@
+import z from "zod";
+
 export function parseOptionalNumber(
   value: FormDataEntryValue | null,
 ): number | undefined {
@@ -32,3 +34,14 @@ export function hitungIMT(bb?: number | null, tb?: number | null) {
 
   return { nilai: imt.toFixed(1), kategori, colorClass };
 }
+
+export const optionalNumber = (min: number, max: number, name: string) =>
+  z.preprocess(
+    (val) =>
+      val === "" || val === undefined || val === null ? undefined : Number(val),
+    z
+      .number()
+      .min(min, `${name} terlalu rendah`)
+      .max(max, `${name} terlalu tinggi`)
+      .optional(),
+  );
