@@ -37,7 +37,16 @@ export const createPasienSchema = z.object({
   tanggal_lahir: z
     .string()
     .min(1, "Tanggal lahir wajib diisi")
-    .regex(dateRegex, "Format tanggal lahir harus YYYY-MM-DD"),
+    .regex(dateRegex, "Format tanggal lahir harus YYYY-MM-DD")
+    .refine(
+      (dateStr) => {
+        const inputDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(24, 0, 0, 0);
+        return inputDate <= today;
+      },
+      { message: "Tanggal tidak boleh melebihi hari ini" },
+    ),
   jenis_kelamin: z.enum(["L", "P"], {
     message: "Jenis kelamin wajib dipilih (L atau P)",
   }),

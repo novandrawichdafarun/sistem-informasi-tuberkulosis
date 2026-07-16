@@ -7,7 +7,16 @@ export const bukaEpisodeSchema = z.object({
   tanggal_mulai: z
     .string()
     .min(1, "Tanggal mulai wajib diisi")
-    .regex(dateRegex, "Format tanggal harus YYYY-MM-DD"),
+    .regex(dateRegex, "Format tanggal harus YYYY-MM-DD")
+    .refine(
+      (dateStr) => {
+        const inputDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(24, 0, 0, 0);
+        return inputDate <= today;
+      },
+      { message: "Tanggal tidak boleh melebihi hari ini" },
+    ),
   tipe_pasien: z
     .string()
     .trim()
@@ -20,7 +29,16 @@ export const tutupEpisodeSchema = z.object({
   tanggal_selesai: z
     .string()
     .min(1, "Tanggal selesai wajib diisi")
-    .regex(dateRegex, "Format tanggal harus YYYY-MM-DD"),
+    .regex(dateRegex, "Format tanggal harus YYYY-MM-DD")
+    .refine(
+      (dateStr) => {
+        const inputDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(24, 0, 0, 0);
+        return inputDate <= today;
+      },
+      { message: "Tanggal tidak boleh melebihi hari ini" },
+    ),
   tipe_pasien: z
     .string()
     .trim()
@@ -33,10 +51,28 @@ export const editEpisodeSchema = z.object({
   tanggal_mulai: z
     .string()
     .min(1, "Tanggal mulai wajib diisi")
-    .regex(dateRegex, "Format tanggal harus YYYY-MM-DD"),
+    .regex(dateRegex, "Format tanggal harus YYYY-MM-DD")
+    .refine(
+      (dateStr) => {
+        const inputDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(24, 0, 0, 0);
+        return inputDate <= today;
+      },
+      { message: "Tanggal tidak boleh melebihi hari ini" },
+    ),
   tanggal_selesai: z
     .string()
     .regex(dateRegex, "Format tanggal harus YYYY-MM-DD")
+    .refine(
+      (dateStr) => {
+        const inputDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(24, 0, 0, 0);
+        return inputDate <= today;
+      },
+      { message: "Tanggal tidak boleh melebihi hari ini" },
+    )
     .nullable()
     .optional()
     .or(z.literal("")),

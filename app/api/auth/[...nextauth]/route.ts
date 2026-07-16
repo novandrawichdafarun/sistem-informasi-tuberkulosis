@@ -1,9 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { createClient } from "@supabase/supabase-js";
-import bcrypt from "bcryptjs";
 import { headers } from "next/headers";
-import { randomUUID } from "crypto";
 import { loginUserService } from "@/services/auth.service";
 
 export const authOptions: NextAuthOptions = {

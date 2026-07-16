@@ -1,8 +1,8 @@
-import { ZodSchema } from "zod";
+import { ZodType } from "zod";
 
 export function validateFormData<T>(
   formData: FormData,
-  schema: ZodSchema<T>,
+  schema: ZodType<T>,
 ): { data?: T; error?: string } {
   const rawData = Object.fromEntries(formData.entries());
   const validation = schema.safeParse(rawData);

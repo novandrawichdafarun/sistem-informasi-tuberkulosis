@@ -9,7 +9,16 @@ const basePemeriksaanSchema = {
   tanggal_periksa: z
     .string()
     .min(1, "Tanggal periksa wajib diisi")
-    .regex(dateRegex, "Format tanggal harus YYYY-MM-DD"),
+    .regex(dateRegex, "Format tanggal harus YYYY-MM-DD")
+    .refine(
+      (dateStr) => {
+        const inputDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(24, 0, 0, 0);
+        return inputDate <= today;
+      },
+      { message: "Tanggal tidak boleh melebihi hari ini" },
+    ),
   keluhan: optionalString(1000),
 
   tensi: z.preprocess(
