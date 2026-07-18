@@ -58,7 +58,7 @@ export default function TambahPasienModal() {
           ></div>
 
           {/* Kotak Modal */}
-          <div className="relative text-left text-gray-600 bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all">
+          <div className="relative text-left bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all">
             <div className="px-6 py-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-lg font-bold text-gray-900">

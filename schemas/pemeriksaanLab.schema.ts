@@ -7,8 +7,8 @@ const basePemeriksaanLabSchema = {
   jenis_tes: z
     .string()
     .trim()
-    .min(1, "Jenis tes tidak boleh kosong")
-    .max(20, "Tipe pasien maksimal 50 karakter"),
+    .min(1, "Jenis Tes tidak boleh kosong")
+    .max(50, "Jenis Tes maksimal 50 karakter"),
 
   tanggal_tes: z
     .string()
@@ -24,9 +24,33 @@ const basePemeriksaanLabSchema = {
       { message: "Tanggal tes tidak boleh melebihi hari ini" },
     ),
 
-  hasil_tes: z.string().trim().min(1, "Hasil tes tidak boleh kosong"),
+  periode_pemeriksaan: z
+    .string()
+    .trim()
+    .min(1, "Periode Pemeriksaan tidak boleh kosong")
+    .max(50, "Periode Pemeriksaan maksimal 50 karakter"),
 
-  periode_bulanan: optionalString(50),
+  jenis_sample: optionalString(50),
+
+  dna_bakteri_tb: z
+    .string()
+    .trim()
+    .min(1, "DNA Bakteri tidak boleh kosong")
+    .max(50, "DNA Bakteri maksimal 50 karakter"),
+
+  status_resistensi: z
+    .string()
+    .trim()
+    .min(1, "Status Resistensi tidak boleh kosong")
+    .max(50, "Status Resistensi maksimal 50 karakter"),
+
+  hasil_tes: z
+    .string()
+    .trim()
+    .min(1, "Hasil Tes tidak boleh kosong")
+    .max(50, "Hasil Tes maksimal 50 karakter"),
+
+  hasil_bta: optionalString(50),
   berkas_pendukung_url: optionalString(255),
 };
 

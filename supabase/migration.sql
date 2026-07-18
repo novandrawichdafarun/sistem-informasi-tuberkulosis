@@ -132,10 +132,11 @@ CREATE TABLE pemeriksaan_lab (
   id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   jenis_tes VARCHAR(50) NOT NULL, -- TCM, IGRA, Mantoux, BTA, Rontgen
   tanggal_tes DATE NOT NULL,
-  periode_bulanan VARCHAR(50), -- Bulan ke-2, ke-5, akhir masa pengobatan
+  periode_pemeriksaan VARCHAR(50) NOT NULL, -- Bulan ke-2, ke-5, akhir masa pengobatan
 
   -- Data Sample
   jenis_sample VARCHAR(50), -- Sputum (dahak), Cairan Serebrospinal (LCS), Jaringan (Biopsi), Bilasan Lambung
+  kualitas_sample VARCHAR(50), -- Purulen / Mukoid / Saliva
 
   -- Hasil Tes Khusus Molekuler (TCM)
   dna_bakteri_tb VARCHAR(50) NOT NULL, -- Isi beban kuman khusus TCM: High, Medium, Low, Very Low, Trace

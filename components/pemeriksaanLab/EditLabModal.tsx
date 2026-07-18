@@ -51,7 +51,7 @@ export default function EditLabModal({
           <input type="hidden" name="id_tes" value={data.id_tes} />
           <input type="hidden" name="id_episode" value={data.id_episode} />
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Tanggal Tes *
@@ -64,6 +64,17 @@ export default function EditLabModal({
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Periode Pemeriksaan *
+              </label>
+              <input
+                type="text"
+                name="periode_pemeriksaan"
+                placeholder="Contoh: Bulan ke-2"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
@@ -73,41 +84,105 @@ export default function EditLabModal({
                 type="text"
                 name="jenis_tes"
                 required
-                list="opsi-jenis-tes-edit"
+                list="opsi-jenis-tes"
+                placeholder="TCM, IGRA, dll"
                 defaultValue={data.jenis_tes}
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
-              <datalist id="opsi-jenis-tes-edit">
+              <datalist id="opsi-jenis-tes">
                 <option value="TCM" />
                 <option value="IGRA" />
-                <option value="Mantoux" />
                 <option value="BTA" />
                 <option value="Rontgen" />
               </datalist>
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Hasil Tes *
+                Hasil Tes Umum *
               </label>
               <input
                 type="text"
                 name="hasil_tes"
                 required
+                placeholder="Positif / Negatif"
                 defaultValue={data.hasil_tes}
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
+              <h4 className="text-sm font-semibold text-gray-600">
+                Detail Sampel & TCM
+              </h4>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Jenis Sampel
+              </label>
+              <input
+                type="text"
+                name="jenis_sample"
+                placeholder="Sputum / LCS / Biopsi"
+                defaultValue={data.jenis_sample || ""}
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Kualitas Sampel
+              </label>
+              <input
+                type="text"
+                name="kualitas_sample"
+                placeholder="Purulen / Mukoid"
+                defaultValue={data.kualitas_sample || ""}
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Periode Bulanan{" "}
-                <span className="text-gray-400 font-normal">(Opsional)</span>
+                DNA Bakteri *
               </label>
               <input
                 type="text"
-                name="periode_bulanan"
-                defaultValue={data.periode_bulanan || ""}
+                name="dna_bakteri_tb"
+                required
+                placeholder="High, Medium, Trace"
+                defaultValue={data.dna_bakteri_tb}
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Status Resistensi *
+              </label>
+              <input
+                type="text"
+                name="status_resistensi"
+                required
+                list="opsi-status-resistensi"
+                placeholder="Sensitif / Resisten"
+                defaultValue={data.status_resistensi}
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+              <datalist id="opsi-status-resistensi">
+                <option value="Sensitif" />
+                <option value="Resisten" />
+                <option value="Indeterminate" />
+              </datalist>
+            </div>
+
+            <div className="col-span-1 md:col-span-2">
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Hasil BTA (Khusus tes BTA)
+              </label>
+              <input
+                type="text"
+                name="hasil_bta"
+                placeholder="Negatif / 1+ / 2+"
+                defaultValue={data.hasil_bta || ""}
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>

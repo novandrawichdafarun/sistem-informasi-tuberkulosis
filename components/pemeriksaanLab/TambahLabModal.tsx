@@ -49,7 +49,7 @@ export default function TambahLabModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <input type="hidden" name="id_episode" value={id_episode} />
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Tanggal Tes *
@@ -59,7 +59,18 @@ export default function TambahLabModal({
                 name="tanggal_tes"
                 required
                 defaultValue={new Date().toLocaleDateString("en-CA")}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Periode Pemeriksaan *
+              </label>
+              <input
+                type="text"
+                name="periode_pemeriksaan"
+                placeholder="Contoh: Bulan ke-2"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
 
@@ -67,52 +78,103 @@ export default function TambahLabModal({
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Jenis Tes *
               </label>
-              {/* Menggunakan Datalist agar bisa memilih atau mengetik manual */}
               <input
                 type="text"
                 name="jenis_tes"
                 required
                 list="opsi-jenis-tes"
-                placeholder="Contoh: TCM, IGRA, Mantoux, BTA, Rontgen"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="TCM, IGRA, dll"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
               <datalist id="opsi-jenis-tes">
                 <option value="TCM" />
                 <option value="IGRA" />
-                <option value="Mantoux" />
                 <option value="BTA" />
                 <option value="Rontgen" />
               </datalist>
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Hasil Tes *
+                Hasil Tes Umum *
               </label>
               <input
                 type="text"
                 name="hasil_tes"
                 required
-                placeholder="Contoh: Positif, Negatif, Rifampisin Resisten"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Positif / Negatif"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
+              <h4 className="text-sm font-semibold text-gray-600">
+                Detail Sampel & TCM
+              </h4>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Jenis Sampel
+              </label>
+              <input
+                type="text"
+                name="jenis_sample"
+                placeholder="Sputum / LCS / Biopsi"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Kualitas Sampel
+              </label>
+              <input
+                type="text"
+                name="kualitas_sample"
+                placeholder="Purulen / Mukoid"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Periode Bulanan{" "}
-                <span className="text-gray-400 font-normal">(Opsional)</span>
+                DNA Bakteri *
               </label>
               <input
                 type="text"
-                name="periode_bulanan"
-                placeholder="Contoh: Bulan ke-2, Akhir Pengobatan"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                name="dna_bakteri_tb"
+                required
+                placeholder="High, Medium, Trace"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Status Resistensi *
+              </label>
+              <input
+                type="text"
+                name="status_resistensi"
+                required
+                placeholder="Sensitif / Resisten"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="col-span-1 md:col-span-2">
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Hasil BTA (Khusus tes BTA)
+              </label>
+              <input
+                type="text"
+                name="hasil_bta"
+                placeholder="Negatif / 1+ / 2+"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-5 mt-2 border-t border-gray-100">
+            {/* Tombol Batal & Simpan seperti sebelumnya */}
             <button
               type="button"
               onClick={onClose}

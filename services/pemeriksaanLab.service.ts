@@ -27,9 +27,10 @@ export const getDaftarPemeriksaanLabByNakes = async (
           id_episode, status_episode,
           pemeriksaan_lab ( 
             id_tes, id_episode, id_nakes, 
-            jenis_tes, tanggal_tes, hasil_tes, 
-            periode_bulanan, berkas_pendukung_url, 
-            created_at 
+            jenis_tes, tanggal_tes, periode_pemeriksaan, 
+            jenis_sample, kualitas_sample, dna_bakteri_tb, 
+            status_resistensi, hasil_tes, hasil_bta,
+            berkas_pendukung_url, created_at
           )
         )
       `,

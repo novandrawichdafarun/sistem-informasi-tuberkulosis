@@ -4,8 +4,16 @@ export interface PemeriksaanLabData {
   id_nakes: number;
   jenis_tes: string;
   tanggal_tes: string;
+  periode_pemeriksaan: string;
+
+  jenis_sample?: string | null;
+  kualitas_sample?: string | null;
+
+  dna_bakteri_tb: string;
+  status_resistensi: string;
+
   hasil_tes: string;
-  periode_bulanan?: string | null;
+  hasil_bta?: string | null;
   berkas_pendukung_url?: string | null;
   created_at: string;
 }
@@ -14,8 +22,16 @@ export interface CreatePemeriksaanLabPayload {
   id_episode: number;
   jenis_tes: string;
   tanggal_tes: string;
+  periode_pemeriksaan: string;
+
+  jenis_sample?: string | null;
+  kualitas_sampl?: string | null;
+
+  dna_bakteri_tb: string;
+  status_resistensi: string;
+
   hasil_tes: string;
-  periode_bulanan?: string;
+  hasil_bta?: string | null;
   berkas_pendukung_url?: string; //! Nanti bisa digunakan jika fitur upload file ditambahkan
 }
 
