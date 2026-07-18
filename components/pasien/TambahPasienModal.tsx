@@ -205,38 +205,6 @@ export default function TambahPasienModal() {
                   </div>
                 </div>
 
-                {/* --- DATA KLINIS AWAL --- */}
-                <div className="border-t border-gray-100 pt-6">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Klinis Fisik Awal
-                  </h4>
-                  <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Tinggi Badan (cm)
-                      </label>
-                      <input
-                        type="number"
-                        name="tinggi_badan_awal"
-                        min="0"
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Berat Badan (kg)
-                      </label>
-                      <input
-                        type="number"
-                        name="berat_badan_awal"
-                        min="0"
-                        step="0.1"
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 {/* Bagian Tombol */}
                 <div className="bg-gray-50 -mx-6 -mb-6 px-6 py-4 flex items-center justify-end gap-x-3 rounded-b-xl border-t border-gray-200 mt-6">
                   <button

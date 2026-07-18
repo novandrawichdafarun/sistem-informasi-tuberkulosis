@@ -9,8 +9,8 @@ export interface PemeriksaanKlinisData {
   pernapasan?: number | null;
   nadi?: number | null;
   saturasi_o2?: number | null;
-  tinggi_badan_saat_ini?: number | null;
-  berat_badan_saat_ini?: number | null;
+  tinggi_badan?: number | null;
+  berat_badan?: number | null;
   created_at: string;
 }
 
@@ -23,8 +23,8 @@ export interface CreatePemeriksaanPayload {
   pernapasan?: number;
   nadi?: number;
   saturasi_o2?: number;
-  tinggi_badan_saat_ini?: number;
-  berat_badan_saat_ini?: number;
+  tinggi_badan?: number;
+  berat_badan?: number;
 }
 
 export interface UpdatePemeriksaanPayload extends CreatePemeriksaanPayload {

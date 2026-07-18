@@ -68,12 +68,6 @@ export default async function ManajemenPasienPage() {
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Fisik Awal
-                  </th>
-                  <th
-                    scope="col"
                     className="relative py-3.5 pl-3 pr-4 sm:pr-6 text-gray-900"
                   >
                     Aksi
@@ -118,17 +112,6 @@ export default async function ManajemenPasienPage() {
                         <span className="text-xs text-gray-400">
                           {pasien.users?.email}
                         </span>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        TB:{" "}
-                        {pasien.tinggi_badan_awal
-                          ? `${pasien.tinggi_badan_awal} cm`
-                          : "-"}{" "}
-                        <br />
-                        BB:{" "}
-                        {pasien.berat_badan_awal
-                          ? `${pasien.berat_badan_awal} kg`
-                          : "-"}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-6">
                         <Link

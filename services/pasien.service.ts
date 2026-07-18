@@ -23,7 +23,7 @@ export const getPasienByNakesId = async (
       .select(
         `
         id_pasien, id_user, no_rm, nik, nama_lengkap, jenis_kelamin, tanggal_lahir,
-        alamat, no_telp, tinggi_badan_awal, berat_badan_awal, created_at,
+        alamat, no_telp, created_at,
         users ( email )
       `,
       )
@@ -95,8 +95,6 @@ export const createPasien = async (
       jenis_kelamin: payload.jenis_kelamin,
       alamat: payload.alamat,
       no_telp: payload.no_telp,
-      tinggi_badan_awal: payload.tinggi_badan_awal,
-      berat_badan_awal: payload.berat_badan_awal,
     });
 
     // Rollback Manual jika insert pasien gagal
@@ -158,8 +156,6 @@ export const updatePasien = async (
         jenis_kelamin: payload.jenis_kelamin,
         alamat: payload.alamat,
         no_telp: payload.no_telp,
-        tinggi_badan_awal: payload.tinggi_badan_awal,
-        berat_badan_awal: payload.berat_badan_awal,
       })
       .eq("id_pasien", payload.id_pasien)
       .eq("id_nakes", nakes.id_nakes); // Proteksi memastikan nakes hanya update pasien miliknya

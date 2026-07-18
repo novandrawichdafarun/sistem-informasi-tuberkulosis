@@ -8,9 +8,6 @@ export interface CreatePasienPayload {
   jenis_kelamin: "L" | "P";
   alamat: string;
   no_telp: string;
-
-  tinggi_badan_awal?: number;
-  berat_badan_awal?: number;
 }
 
 export interface UpdatePasienPayload {
@@ -25,9 +22,6 @@ export interface UpdatePasienPayload {
   jenis_kelamin: "L" | "P";
   alamat: string;
   no_telp: string;
-
-  tinggi_badan_awal?: number;
-  berat_badan_awal?: number;
 }
 
 export interface PasienData {
@@ -40,8 +34,6 @@ export interface PasienData {
   jenis_kelamin: "L" | "P";
   alamat: string;
   no_telp: string;
-  tinggi_badan_awal: number | null;
-  berat_badan_awal: number | null;
   created_at: string;
 
   users?: {

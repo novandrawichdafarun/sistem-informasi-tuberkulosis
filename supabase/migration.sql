@@ -80,8 +80,6 @@ CREATE TABLE pasien (
   jenis_kelamin CHAR(1) CHECK (jenis_kelamin IN ('L', 'P')) NOT NULL,
   alamat TEXT,
   no_telp VARCHAR(20),
-  tinggi_badan_awal INTEGER, -- dalam cm
-  berat_badan_awal DECIMAL(5,2), -- dalam kg
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
@@ -120,8 +118,8 @@ CREATE TABLE pemeriksaan_klinis (
   pernapasan INTEGER,
   nadi INTEGER,
   saturasi_o2 INTEGER,
-  tinggi_badan_saat_ini INTEGER,
-  berat_badan_saat_ini DECIMAL(5,2),
+  tinggi_badan INTEGER,
+  berat_badan DECIMAL(5,2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
@@ -134,8 +132,18 @@ CREATE TABLE pemeriksaan_lab (
   id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   jenis_tes VARCHAR(50) NOT NULL, -- TCM, IGRA, Mantoux, BTA, Rontgen
   tanggal_tes DATE NOT NULL,
-  hasil_tes VARCHAR(100) NOT NULL, -- Positif, Negatif, dll
-  periode_bulanan VARCHAR(50), -- Bulan ke-2, ke-5, ke-6
+  periode_bulanan VARCHAR(50), -- Bulan ke-2, ke-5, akhir masa pengobatan
+
+  -- Data Sample
+  jenis_sample VARCHAR(50), -- Sputum (dahak), Cairan Serebrospinal (LCS), Jaringan (Biopsi), Bilasan Lambung
+
+  -- Hasil Tes Khusus Molekuler (TCM)
+  dna_bakteri_tb VARCHAR(50) NOT NULL, -- Isi beban kuman khusus TCM: High, Medium, Low, Very Low, Trace
+  status_resistensi VARCHAR(50) NOT NULL, -- Resisten / Sensitif / Indeterminate (Terutama untuk Rifampisin pada TCM atau obat lain)
+
+  hasil_tes VARCHAR(100) NOT NULL, -- Hasil umum: Positif / Negatif / Normal / Kesan TB Paru Aktif
+
+  hasil_bta VARCHAR(100), -- Khusus tes BTA: Negatif / Scanty (tulis jumlahnya) / 1+ / 2+ / 3+
   berkas_pendukung_url VARCHAR(255), -- Link berkas di Supabase Storage
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );

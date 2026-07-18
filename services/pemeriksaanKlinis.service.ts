@@ -29,7 +29,7 @@ export const getDaftarPemeriksaanByNakes = async (
           id_periksa, id_episode, id_nakes, 
           tanggal_periksa, keluhan, tensi, suhu, 
           pernapasan, nadi, saturasi_o2, 
-          tinggi_badan_saat_ini, berat_badan_saat_ini, 
+          tinggi_badan, berat_badan, 
           created_at 
         )
       )

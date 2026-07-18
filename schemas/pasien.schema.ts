@@ -64,10 +64,6 @@ export const createPasienSchema = z.object({
     .or(z.literal("")) // Mengizinkan string kosong jika user tidak mengisi
     .optional()
     .default(""),
-
-  tinggi_badan_awal: optionalNumber(30, 300, "Tinggi badan"),
-
-  berat_badan_awal: optionalNumber(1, 300, "Berat badan"),
 });
 
 export const updatePasienSchema = createPasienSchema.extend({

@@ -82,7 +82,7 @@ export default function TambahPemeriksaanModal({
               <input
                 type="number"
                 step="0.01"
-                name="berat_badan_saat_ini"
+                name="berat_badan"
                 className="w-full rounded border p-2 text-sm"
               />
             </div>
@@ -92,7 +92,7 @@ export default function TambahPemeriksaanModal({
               </label>
               <input
                 type="number"
-                name="tinggi_badan_saat_ini"
+                name="tinggi_badan"
                 className="w-full rounded border p-2 text-sm"
               />
             </div>

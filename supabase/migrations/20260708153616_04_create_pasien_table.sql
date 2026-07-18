@@ -10,8 +10,6 @@ CREATE TABLE pasien (
   jenis_kelamin CHAR(1) CHECK (jenis_kelamin IN ('L', 'P')) NOT NULL,
   alamat TEXT,
   no_telp VARCHAR(20),
-  tinggi_badan_awal INTEGER, -- dalam cm
-  berat_badan_awal DECIMAL(5,2), -- dalam kg
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 

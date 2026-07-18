@@ -9,8 +9,8 @@ CREATE TABLE pemeriksaan_klinis (
   pernapasan INTEGER,
   nadi INTEGER,
   saturasi_o2 INTEGER,
-  tinggi_badan_saat_ini INTEGER,
-  berat_badan_saat_ini DECIMAL(5,2),
+  tinggi_badan INTEGER,
+  berat_badan DECIMAL(5,2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 

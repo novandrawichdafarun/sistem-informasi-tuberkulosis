@@ -21,12 +21,15 @@ export default function MedicationBanner({
   const [takenAt, setTakenAt] = useState<string | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-    try {
-      setTakenAt(localStorage.getItem(todayKey()));
-    } catch {
-      /* ignore */
-    }
+    const timer = setTimeout(() => {
+      setMounted(true);
+      try {
+        setTakenAt(localStorage.getItem(todayKey()));
+      } catch (error) {
+        console.error("Gagal mengambil data dari localStorage:", error);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const confirm = () => {

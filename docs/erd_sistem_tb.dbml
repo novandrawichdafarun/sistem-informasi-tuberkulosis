@@ -9,6 +9,14 @@ Table users {
   role varchar(20) [note: 'pasien / nakes / super_admin']
 }
 
+Table user_session {
+  id integer [pk, increment]
+  id_user integer [ref: - users.id_user, unique]
+  session_token text [not null]
+  device_info text
+  last_active_at timestamp [default: 'now()', not null]
+}
+
 Table faskes {
   id_faskes integer [pk, increment]
   nama_faskes varchar(100) [not null]
@@ -43,8 +51,6 @@ Table pasien {
   jenis_kelamin varchar(1) [note: 'L / P']
   alamat text
   no_telp varchar(20)
-  tinggi_badan_awal integer [note: 'Dalam satuan cm, angka bulat']
-  berat_badan_awal decimal(5,2) [note: 'Menggunakan desimal presisi, contoh 45.50 kg']
 }
 
 Table episode_pengobatan {
@@ -71,18 +77,33 @@ Table pemeriksaan_klinis {
   pernapasan integer [note: 'Angka bulat per menit']
   nadi integer [note: 'Angka bulat bpm']
   saturasi_o2 integer [note: 'Persentase 0-100']
-  tinggi_badan_saat_ini integer
-  berat_badan_saat_ini decimal(5,2)
+  tinggi_badan integer
+  berat_badan decimal(5,2)
 }
 
 Table pemeriksaan_lab {
   id_tes integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode]
   id_nakes integer [ref: > nakes.id_nakes]
-  jenis_tes varchar(50) [note: 'TCM / IGRA / Mantoux / BTA / Rontgen']
   tanggal_tes date
-  hasil_tes varchar(100) [note: 'positif / negatif']
-  pemeriksaan_ke varchar(50) [note: 'diagnostik awal / follow-up bulan ke-2 / ke-5']
+  jenis_tes varchar(50) [note: 'TCM / IGRA / Mantoux / BTA / Rontgen']
+  periode_pemeriksaan varchar(50) [note: 'Bulan ke-2 / bulan ke-5 / akhir masa pengobatan']
+  
+  // Data Sample
+  jenis_sample varchar(50) [note: 'Sputum (Dahak) / Cairan Serebrospinal (LCS) / Jaringan (Biopsi) / Bilasan Lambung']
+  kualitas_sample varchar(50) [note: 'Purulen / Mukoid / Saliva']
+  
+  // Hasil Tes Khusus Molekuler (TCM) & Kepekaan Obat
+  dna_bakteri_tb varchar(50) [note: 'Isi beban kuman khusus TCM: High / Medium / Low / Very Low / Trace']
+  status_resistensi_obat varchar(50) [note: 'Resisten / Sensitif / Indeterminate (Terutama untuk Rifampisin pada TCM atau obat lain)']
+  
+  // Hasil Tes Umum (Untuk Rontgen, Mantoux, IGRA)
+  hasil_tes varchar(100) [note: 'Hasil umum: Positif / Negatif / Normal / Kesan TB Paru Aktif']
+  
+  // Hasil Tes Mikroskopis (BTA)
+  hasil_bta varchar(100) [note: 'Khusus tes BTA: Negatif / Scanty (tulis jumlahnya) / 1+ / 2+ / 3+']
+
+  catatan_lab text
   berkas_pendukung_url varchar(255)
 }
 
@@ -117,14 +138,14 @@ Table jadwal_minum_obat {
   id_jadwal integer [pk, increment]
   id_resep integer [ref: > resep_pengobatan.id_resep]
   tanggal_jadwal date
-  jam_jadwal time
+  jam_jadwal timestamp
 }
 
 Table medication_log {
   id_log integer [pk, increment]
   id_jadwal integer [ref: - jadwal_minum_obat.id_jadwal, unique, note: 'Cukup lewat jadwal untuk tahu relasi pasien']
   status varchar(20) [note: 'diminum / terlewat']
-  reported_by varchar(20) [note: 'pasien / pendamping']
+  reported_by varchar(20) [note: 'pendamping / PMO']
 }
 
 Table hasil_akhir {
