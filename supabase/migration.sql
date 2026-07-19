@@ -142,9 +142,13 @@ CREATE TABLE pemeriksaan_lab (
   dna_bakteri_tb VARCHAR(50) NOT NULL, -- Isi beban kuman khusus TCM: High, Medium, Low, Very Low, Trace
   status_resistensi VARCHAR(50) NOT NULL, -- Resisten / Sensitif / Indeterminate (Terutama untuk Rifampisin pada TCM atau obat lain)
 
+  -- Hasil Tes Umum (Untuk Rontgen, Mantoux, IGRA)
   hasil_tes VARCHAR(100) NOT NULL, -- Hasil umum: Positif / Negatif / Normal / Kesan TB Paru Aktif
 
+  -- Hasil Tes Mikroskopis (BTA)
   hasil_bta VARCHAR(100), -- Khusus tes BTA: Negatif / Scanty (tulis jumlahnya) / 1+ / 2+ / 3+
+  
+  catatan_lab text,
   berkas_pendukung_url VARCHAR(255), -- Link berkas di Supabase Storage
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
@@ -155,25 +159,39 @@ ALTER TABLE pemeriksaan_lab ENABLE ROW LEVEL SECURITY;
 CREATE TABLE diagnosis (
   id_diagnosis SERIAL PRIMARY KEY,
   id_episode INTEGER UNIQUE REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_tes INTEGER REFERENCES pemeriksaan_lab(id_tes) ON DELETE SET NULL,
   id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   tanggal_diagnosis DATE NOT NULL,
-  kode_icd10 VARCHAR(10) DEFAULT 'A15', -- Kode standar TB Paru
-  jenis_tb VARCHAR(50), -- TB Paru, TB Ekstra Paru
-  status_resistensi VARCHAR(50) CHECK (status_resistensi IN ('Sensitif Obat', 'Resisten Obat')) NOT NULL,
+  
+  -- standarisasi Medis
+  kode_icd10 VARCHAR(10) DEFAULT 'A15' NOT NULL, -- Kode standar TB: A15.0 (TB Paru), A18.2 (TB Kelenjar)
+  klasifikasi_anatomi VARCHAR(50), -- TB Paru, TB Ekstra Paru
+  lokasi_anatomi_detail VARCHAR(100), -- Jika Ekstraparu, sebutkan: Kelenjar getah bening / Pleura / Meninges / Tulang
+  
+  -- Kesimpulan Resistensi (Pondasi penentu jenis regimen obat)
+  klasifikasi_resistensi VARCHAR(50) NOT NULL, -- TB-SO (Sensitif Obat) / TB-RO (Resisten Obat) / Terduga TB-RO
+  tipe_resistensi_detail VARCHAR(50), -- Monoresisten Rifampisin (TB-RR) / MDR-TB / XDR-TB / Null jika SO
+
+  dasar_diagnosis VARCHAR(50), -- Terkonfirmasi Bakteriologis (TCM/BTA+) / Terdiagnosis Klinis (Gejala + Rontgen) 
+  catatan_klinis text, -- Catatan tambahan dokter terkait kondisi komorbid seperti TB-HIV atau TB-DM
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
-CREATE INDEX idx_diagnosis_id_tes ON diagnosis(id_tes);
+CREATE INDEX idx_diagnosis_episode ON diagnosis(id_episode);
 ALTER TABLE diagnosis ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE resep_pengobatan (
   id_resep SERIAL PRIMARY KEY,
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
   id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
-  tanggal_mulai_obat DATE NOT NULL,
+  tanggal_resep DATE NOT NULL,
+  
+  -- Klasifikasi Regimen
   kategori_regimen VARCHAR(50) NOT NULL, -- Kategori 1 (HRZE), Kategori 2, Anak
-  durasi_hari INTEGER NOT NULL,
+  fase_pengobatan VARCHAR(20), -- Intensif / Lanjutan
+
+  -- Manajemen Waktu
+  tanggal_mulai_obat DATE NOT NULL,
+  durasi_hari INTEGER NOT NULL, -- Durasi resep berlaku, misal: 28 hari atau 56 hari
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
@@ -181,10 +199,16 @@ CREATE INDEX idx_resep_pengobatan_episode ON resep_pengobatan(id_episode);
 ALTER TABLE resep_pengobatan ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE detail_obat (
-  id_detail SERIAL PRIMARY KEY,
+  id_detail_obat SERIAL PRIMARY KEY,
   id_resep INTEGER REFERENCES resep_pengobatan(id_resep) ON DELETE CASCADE NOT NULL,
   nama_obat VARCHAR(100) NOT NULL, -- Rifampisin, Isoniazid, Pirazinamid, Etambutol
-  dosis VARCHAR(50) NOT NULL,
+  jenis_obat VARCHAR(50) NOT NULL, -- KDT (Kombinasi Dosis Tetap) / Tunggal / Injeksi
+
+  jumlah_obat_per_minum DECIMAL(4,2) NOT NULL, -- Contoh: 3.00 (artinya 3 tablet sekali minum), atau 1.50 (1 setengah tablet)
+  frekuensi_minum VARCHAR(50) NOT NULL, -- 1x sehari / 3x seminggu / 1x seminggu
+
+  aturan_pakai VARCHAR(100) NOT NULL, -- Sebelum makan / sesudah makan / saat perut kosong pagi hari
+  jumlah_total_diberikan INTEGER NOT NULL, -- Total fisik obat yang dibawa pulang pasien, misal: 84 tablet
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
@@ -194,25 +218,28 @@ ALTER TABLE detail_obat ENABLE ROW LEVEL SECURITY;
 CREATE TABLE jadwal_minum_obat (
   id_jadwal SERIAL PRIMARY KEY,
   id_resep INTEGER REFERENCES resep_pengobatan(id_resep) ON DELETE CASCADE NOT NULL,
+  id_detail_obat INTEGER REFERENCES detail_obat(id_detail_obat) ON DELETE CASCADE NOT NULL,
   tanggal_jadwal DATE NOT NULL,
   jam_jadwal TIME DEFAULT '07:00:00' NOT NULL,
+  status_pengingat VARCHAR(20) DEFAULT 'Pending' NOT NULL, -- pending / terkirim / gagal_kirim
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
 CREATE INDEX idx_jadwal_minum_obat_resep ON jadwal_minum_obat(id_resep);
+CREATE INDEX idx_jadwal_minum_obat_detail_obat ON jadwal_minum_obat(id_detail_obat);
 CREATE INDEX idx_jadwal_minum_obat_tanggal ON jadwal_minum_obat(tanggal_jadwal);
 ALTER TABLE jadwal_minum_obat ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE medication_log (
   id_log SERIAL PRIMARY KEY,
   id_jadwal INTEGER UNIQUE REFERENCES jadwal_minum_obat(id_jadwal) ON DELETE CASCADE NOT NULL,
-  status VARCHAR(20) CHECK (status IN ('diminum', 'terlewat')) NOT NULL,
-  catatan_efek_samping TEXT,
-  bukti_foto_url VARCHAR(255),
+  status VARCHAR(20) CHECK (status IN ('diminum', 'terlewat', 'ditunda')) NOT NULL,
+  catatan_kepatuhan TEXT,
   reported_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-  reported_by VARCHAR(20) CHECK (reported_by IN ('pasien', 'pendamping')) NOT NULL
+  reported_by VARCHAR(20) CHECK (reported_by IN ('pasien', 'pendamping', 'nakes')) NOT NULL
 );
 
+CREATE INDEX idx_medication_log_jadwal ON medication_log(id_jadwal);
 ALTER TABLE medication_log ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Pasien kelola log sendiri" ON medication_log
@@ -248,3 +275,17 @@ CREATE TABLE pesan_chat (
 
 CREATE INDEX idx_pesan_chat_pasien_waktu ON pesan_chat(id_pasien, waktu_kirim DESC);
 ALTER TABLE pesan_chat ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE notifikasi (
+  id_notifikasi SERIAL PRIMARY KEY,
+  id_user UUID REFERENCES users(id_user) ON DELETE CASCADE NOT NULL, -- Penerima notifikasi
+  judul VARCHAR(100) NOT NULL,
+  pesan TEXT NOT NULL,
+  waktu_kirim TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+CREATE INDEX idx_notifikasi_id_user ON notifikasi(id_user);
+CREATE INDEX idx_notifikasi_waktu_kirim ON notifikasi(waktu_kirim);
+CREATE INDEX idx_notifikasi_created_at ON notifikasi(created_at);
+ALTER TABLE notifikasi ENABLE ROW LEVEL SECURITY;

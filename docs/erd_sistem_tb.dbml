@@ -9,14 +9,6 @@ Table users {
   role varchar(20) [note: 'pasien / nakes / super_admin']
 }
 
-Table user_session {
-  id integer [pk, increment]
-  id_user integer [ref: - users.id_user, unique]
-  session_token text [not null]
-  device_info text
-  last_active_at timestamp [default: 'now()', not null]
-}
-
 Table faskes {
   id_faskes integer [pk, increment]
   nama_faskes varchar(100) [not null]
@@ -109,43 +101,71 @@ Table pemeriksaan_lab {
 
 Table diagnosis {
   id_diagnosis integer [pk, increment]
-  id_episode integer [ref: - episode_pengobatan.id_episode, unique]
-  id_tes integer [ref: > pemeriksaan_lab.id_tes]
-  id_nakes integer [ref: > nakes.id_nakes]
-  tanggal_diagnosis date
-  kode_icd10 varchar(10) [note: 'Contoh: A15']
-  jenis_tb varchar(50) [note: 'TB paru / TB ekstraparu']
-  status_resistensi varchar(50) [note: 'sensitif obat / resisten obat']
+  id_episode integer [ref: - episode_pengobatan.id_episode, unique, note: 'Satu diagnosis final per satu episode pengobatan']
+  id_nakes integer [ref: > nakes.id_nakes, note: 'Dokter yang menegakkan diagnosis']
+  tanggal_diagnosis date [not null]
+
+  // Standarisasi Medis
+  kode_icd10 varchar(10) [note: 'Contoh: A15.0 (TB Paru), A18.2 (TB Kelenjar)']
+  klasifikasi_anatomi varchar(50) [note: 'TB Paru / TB Ekstraparu']
+  lokasi_anatomi_detail varchar(100) [note: 'Jika Ekstraparu, sebutkan: Kelenjar getah bening / Pleura / Meninges / Tulang']
+
+  // Kesimpulan Resistensi (Pondasi penentu jenis regimen obat)
+  klasifikasi_resistensi varchar(50) [note: 'TB-SO (Sensitif Obat) / TB-RO (Resisten Obat) / Terduga TB-RO']
+  tipe_resistensi_detail varchar(50) [note: 'Monoresisten Rifampisin (TB-RR) / MDR-TB / XDR-TB / Null jika SO']
+
+  // Dasar Penegakan Diagnosis
+  dasar_diagnosis varchar(50) [note: 'Terkonfirmasi Bakteriologis (TCM/BTA+) / Terdiagnosis Klinis (Gejala + Rontgen)']
+  catatan_klinis text [note: 'Catatan tambahan dokter terkait kondisi komorbid seperti TB-HIV atau TB-DM']
 }
 
 Table resep_pengobatan {
   id_resep integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode]
-  id_nakes integer [ref: > nakes.id_nakes]
-  tanggal_mulai_obat date
-  kategori_regimen varchar(50) [note: 'kategori 1 / kategori 2 / Kategori 3 / OAT Sisipan / OAT Anak']
-  durasi_hari integer
+  id_nakes integer [ref: > nakes.id_nakes, note: 'Dokter yang meresepkan']
+  tanggal_resep date [not null]
+
+  // Klasifikasi Rejimen
+  kategori_regimen varchar(50) [note: 'Kategori 1 (2RHZE/4RH) / Kategori 2 / OAT Anak / Rejimen TB-RO Jangka Pendek / Rejimen TB-RO Jangka Panjang']
+  fase_pengobatan varchar(20) [note: 'Intensif / Lanjutan']
+
+  // Manajemen Waktu
+  tanggal_mulai_obat date [not null]
+  durasi_hari integer [note: 'Durasi resep berlaku, misal: 28 hari atau 56 hari']
+  status_resep varchar(20) [note: 'aktif / selesai / diganti']
 }
 
 Table detail_obat {
   id_detail integer [pk, increment]
   id_resep integer [ref: > resep_pengobatan.id_resep]
-  nama_obat varchar(100)
-  dosis varchar(50)
+
+  // Detail Fisik Obat
+  nama_obat varchar(100) [note: 'Contoh: KDT Lini 1 (4FDC), Streptomisin vial, Levofloxacin 250mg, Rifampisin 450mg']
+  jenis_obat varchar(50) [note: 'KDT (Kombinasi Dosis Tetap) / Tunggal / Injeksi']
+
+  // Aturan Pakai & Dosis (Sangat krusial berdasarkan berat badan pasien)
+  jumlah_obat_per_minum decimal(4,2) [note: 'Contoh: 3.00 (artinya 3 tablet sekali minum), atau 1.50 (1 setengah tablet)']
+  frekuensi_minum varchar(50) [note: '1x sehari / 3x seminggu / 1x seminggu']
+  aturan_pakai varchar(100) [note: 'Sebelum makan / sesudah makan / saat perut kosong pagi hari']
+  jumlah_total_diberikan integer [note: 'Total fisik obat yang dibawa pulang pasien, misal: 84 tablet']
 }
 
 Table jadwal_minum_obat {
   id_jadwal integer [pk, increment]
   id_resep integer [ref: > resep_pengobatan.id_resep]
-  tanggal_jadwal date
-  jam_jadwal timestamp
+  id_detail_obat integer [ref: > detail_obat.id_detail, note: 'Spesifik ke obatnya']
+  tanggal_jadwal date [not null]
+  jam_jadwal time [not null]
+  status_pengingat varchar(20) [default: 'pending', note: 'pending / terkirim / gagal_kirim']
 }
 
 Table medication_log {
   id_log integer [pk, increment]
-  id_jadwal integer [ref: - jadwal_minum_obat.id_jadwal, unique, note: 'Cukup lewat jadwal untuk tahu relasi pasien']
-  status varchar(20) [note: 'diminum / terlewat']
-  reported_by varchar(20) [note: 'pendamping / PMO']
+  id_jadwal integer [ref: - jadwal_minum_obat.id_jadwal, note: 'Cukup lewat jadwal untuk tahu relasi pasien']
+  status varchar(20) [note: 'diminum / terlewat / ditunda']
+  waktu_aktual_diminum timestamp [note: 'Mencatat waktu asli saat tombol "Sudah Minum" diklik di aplikasi']
+  reported_by varchar(20) [note: 'pasien_mandiri / pmo_keluarga / pmo_nakes']
+  catatan_kepatuhan text [note: 'Alasan jika obat terlewat/ditunda, misal: muntah, pusing berat, atau lupa bawa obat']
 }
 
 Table hasil_akhir {
@@ -159,10 +179,11 @@ Table hasil_akhir {
 // 4. ENTITAS PENDUKUNG (NOTIFIKASI & CHAT)
 // ==========================================
 
-Table notifikasi_wa {
-  id_notifikasi_wa integer [pk, increment]
+Table notifikasi {
+  id_notifikasi integer [pk, increment]
   id_user integer [ref: > users.id_user, note: 'Mengarah ke id_user penerima email/notif']
-  jenis varchar(50) [note: 'pengingat obat / edukasi']
+  judul varchar(50) [note: 'pengingat obat', not null]
+  pesan text [not null]
   waktu_kirim timestamp
   status_terkirim varchar(20)
 }
@@ -173,6 +194,14 @@ Table pesan_chat {
   id_pengirim integer [ref: > users.id_user, note: 'ID akun yang mengetik pesan']
   isi_pesan text
   lampiran_file_url varchar(255)
-  waktu_kirim timestamp [default: `now()` ]
+  waktu_kirim timestamp [default:  `now()` ]
   status_baca varchar(20) [note: 'dibaca / belum dibaca']
+}
+
+Table user_session {
+  id integer [pk, increment]
+  id_user integer [ref: - users.id_user, unique]
+  session_token text [not null]
+  device_info text
+  last_active_at timestamp [default: 'now()', not null]
 }
