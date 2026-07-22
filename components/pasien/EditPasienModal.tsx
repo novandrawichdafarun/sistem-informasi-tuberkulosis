@@ -61,7 +61,7 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                   Edit Pasien: {pasien.nama_lengkap}
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Perbarui data pasien dan akun login terkait.
+                  Perbarui data demografi pasien dan akun login terkait.
                 </p>
               </div>
               <button
@@ -87,9 +87,10 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                 />
                 <input type="hidden" name="id_user" value={pasien.id_user} />
 
+                {/* --- INFO AKUN & IDENTITAS --- */}
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Info Akun & Identitas
+                    Info Akun & Identitas Dasar
                   </h4>
                   <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
@@ -101,32 +102,6 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                         name="nama_lengkap"
                         defaultValue={pasien.nama_lengkap}
                         required
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        NIK *
-                      </label>
-                      <input
-                        type="text"
-                        name="nik"
-                        defaultValue={pasien.nik}
-                        required
-                        maxLength={16}
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Nomor RM (Opsional)
-                      </label>
-                      <input
-                        type="text"
-                        name="no_rm"
-                        defaultValue={pasien.no_rm}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
@@ -158,24 +133,37 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                   </div>
                 </div>
 
+                {/* --- DATA DEMOGRAFI (FLEKSIBEL: PILIH ATAU KETIK) --- */}
                 <div className="border-t border-gray-100 pt-6">
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Demografi
+                    Data Demografi
                   </h4>
                   <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
+                    {/* USIA */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        Tanggal Lahir *
+                        Usia / Kategori Usia *
                       </label>
                       <input
-                        type="date"
-                        name="tanggal_lahir"
-                        defaultValue={pasien.tanggal_lahir}
+                        type="text"
+                        name="usia"
+                        list="edit-list-usia"
+                        defaultValue={pasien.usia}
                         required
+                        placeholder="Pilih atau ketik usia..."
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       />
+                      <datalist id="edit-list-usia">
+                        <option value="Balita (< 5 tahun)" />
+                        <option value="Anak-anak (5-11 tahun)" />
+                        <option value="Remaja (12-25 tahun)" />
+                        <option value="Dewasa (26-45 tahun)" />
+                        <option value="Lansia (56-65 tahun)" />
+                        <option value="Manula (> 65 tahun)" />
+                      </datalist>
                     </div>
 
+                    {/* JENIS KELAMIN */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
                         Jenis Kelamin *
@@ -192,28 +180,108 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                       </select>
                     </div>
 
-                    <div className="sm:col-span-2">
+                    {/* DOMISILI */}
+                    <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        Alamat Lengkap
+                        Domisili *
                       </label>
-                      <textarea
-                        name="alamat"
-                        rows={2}
-                        defaultValue={pasien.alamat}
+                      <input
+                        type="text"
+                        name="domisili"
+                        defaultValue={pasien.domisili}
+                        required
+                        placeholder="Contoh: Surabaya"
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      ></textarea>
+                      />
                     </div>
 
-                    <div className="sm:col-span-2">
+                    {/* NOMOR TELEPON */}
+                    <div>
                       <label className="block text-sm font-medium text-gray-700">
                         Nomor Telepon
                       </label>
                       <input
                         type="tel"
                         name="no_telp"
-                        defaultValue={pasien.no_telp}
+                        defaultValue={pasien.no_telp || ""}
+                        placeholder="Contoh: 081234567890"
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       />
+                    </div>
+
+                    {/* PENDIDIKAN */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Pendidikan Terakhir *
+                      </label>
+                      <input
+                        type="text"
+                        name="pendidikan"
+                        list="edit-list-pendidikan"
+                        defaultValue={pasien.pendidikan}
+                        required
+                        placeholder="Pilih atau ketik pendidikan..."
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                      <datalist id="edit-list-pendidikan">
+                        <option value="SD" />
+                        <option value="SMP" />
+                        <option value="SMA" />
+                        <option value="Diploma (D1/D2/D3/D4)" />
+                        <option value="Sarjana (S1)" />
+                        <option value="Magister (S2)" />
+                        <option value="Doktor (S3)" />
+                      </datalist>
+                    </div>
+
+                    {/* PEKERJAAN */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Pekerjaan *
+                      </label>
+                      <input
+                        type="text"
+                        name="pekerjaan"
+                        list="edit-list-pekerjaan"
+                        defaultValue={pasien.pekerjaan}
+                        required
+                        placeholder="Pilih atau ketik pekerjaan..."
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                      <datalist id="edit-list-pekerjaan">
+                        <option value="Ibu Rumah Tangga" />
+                        <option value="Wirausaha" />
+                        <option value="PNS/ASN" />
+                        <option value="TNI/Polri" />
+                        <option value="Pegawai BUMN/BUMD" />
+                        <option value="Karyawan Swasta" />
+                        <option value="Buruh" />
+                        <option value="Pensiunan" />
+                      </datalist>
+                    </div>
+
+                    {/* PENDAPATAN */}
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Pendapatan / Penghasilan *
+                      </label>
+                      <input
+                        type="text"
+                        name="pendapatan"
+                        list="edit-list-pendapatan"
+                        defaultValue={pasien.pendapatan}
+                        required
+                        placeholder="Pilih atau ketik kisaran pendapatan..."
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                      <datalist id="edit-list-pendapatan">
+                        <option value="Dibawah rata-rata (< 1.5jt)" />
+                        <option value="Kelas Bawah (1.5jt - 3jt)" />
+                        <option value="Kelas Menengah-Bawah (3jt - 5jt)" />
+                        <option value="Kelas Menengah (5jt - 10jt)" />
+                        <option value="Kelas Menengah Atas (10jt - 20jt)" />
+                        <option value="Kelas Atas (> 20jt)" />
+                      </datalist>
                     </div>
                   </div>
                 </div>

@@ -2,7 +2,7 @@ CREATE TABLE users (
   id_user UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(100) NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
-  role VARCHAR(20) CHECK (role IN ('pasien', 'nakes', 'super_admin')) NOT NULL,
+  role VARCHAR(20) CHECK (role IN ('pasien', 'super_admin')) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 

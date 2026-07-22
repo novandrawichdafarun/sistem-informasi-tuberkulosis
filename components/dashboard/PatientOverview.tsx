@@ -6,7 +6,7 @@ import {
   ChatIcon,
   CheckIcon,
   CloseIcon,
-} from "./icons";
+} from "../asset/icons";
 
 // NOTE: sample data for the UI. Replace with real adherence data from Supabase.
 const ADHERENCE_PERCENT = 87;

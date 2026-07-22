@@ -2,7 +2,7 @@ CREATE TABLE users (
   id_user UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(100) NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
-  role VARCHAR(20) CHECK (role IN ('pasien', 'nakes', 'super_admin')) NOT NULL,
+  role VARCHAR(20) CHECK (role IN ('pasien', 'super_admin')) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
@@ -37,62 +37,22 @@ CREATE TABLE user_sessions (
 CREATE INDEX idx_user_sessions_user ON user_sessions(id_user);
 ALTER TABLE user_sessions ENABLE ROW LEVEL SECURITY;
 
-CREATE TABLE faskes (
-  id_faskes SERIAL PRIMARY KEY,
-  nama_faskes VARCHAR(100) NOT NULL,
-  jenis VARCHAR(50) NOT NULL, -- Puskesmas, Rumah Sakit, Klinik
-  alamat TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-);
-
-ALTER TABLE faskes ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Pengguna terautentikasi dapat melihat faskes" ON faskes
-  FOR SELECT TO authenticated USING (true);
-
-CREATE TABLE nakes (
-  id_nakes SERIAL PRIMARY KEY,
-  id_user UUID REFERENCES users(id_user) ON DELETE CASCADE NOT NULL,
-  id_faskes INTEGER REFERENCES faskes(id_faskes) ON DELETE SET NULL,
-  nama VARCHAR(100) NOT NULL,
-  no_str_sip VARCHAR(50) UNIQUE,
-  jabatan VARCHAR(50),
-  no_hp VARCHAR(20),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-);
-
-CREATE INDEX idx_nakes_id_user ON nakes(id_user);
-create INDEX idx_nakes_id_faskes ON nakes(id_faskes);
-ALTER TABLE nakes ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Nakes bisa melihat profil nakes lain se-faskes" ON nakes
-  FOR SELECT TO authenticated USING (true);
-
 CREATE TABLE pasien (
   id_pasien SERIAL PRIMARY KEY,
   id_user UUID REFERENCES users(id_user) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
-  id_faskes INTEGER REFERENCES faskes(id_faskes) ON DELETE SET NULL,
-  no_rm VARCHAR(50) UNIQUE, -- Nomor Rekam Medis
-  nik CHAR(16) UNIQUE NOT NULL,
   nama_lengkap VARCHAR(100) NOT NULL,
-  tanggal_lahir DATE NOT NULL,
+  usia VARCHAR(20) NOT NULL, -- Balita (< 5 tahun), Anak-anak (5-11 tahun), Remaja (12-25 tahun), Dewasa (26-45 tahun), Lansia (56-65 tahun), Manula (> 65 tahun), dkk
   jenis_kelamin CHAR(1) CHECK (jenis_kelamin IN ('L', 'P')) NOT NULL,
-  alamat TEXT,
+  domisili TEXT,
   no_telp VARCHAR(20),
+  pendidikan VARCHAR(20) NOT NULL, -- SD, SMP, SMA, Diploma (D1/D2/D3/D4), Sarjana (S1), Magister (S2), Doktor (S3) dkk
+  pekerjaan VARCHAR(50) NOT NULL, -- Ibu Rumah Tangga, Wirausaha, PNS/ASN, TNI/Polri, Pegawai BUMN/BUMD, Karyawan Swasta, Buruh, Pensiun, dkk
+  pendapatan VARCHAR(50) NOT NULL, -- Dibawa rata-rata (< 1.5jt), Kelas Bawah (1.5jt - 3jt), Kelas Menengah-Bawah (3jt - 5jt), Kelas Menengah (5jt - 10jt), Kelas Menegah Atas (10jt - 20jt), Kelas Atas (> 20jt)
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
 CREATE INDEX idx_pasien_id_user ON pasien(id_user);
-CREATE INDEX idx_pasien_id_nakes ON pasien(id_nakes);
-CREATE INDEX idx_pasien_id_faskes ON pasien(id_faskes);
 ALTER TABLE pasien ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Pasien melihat data sendiri atau Nakes melihat data pasien binaannya" ON pasien
-  FOR SELECT TO authenticated USING (
-    auth.uid() = id_user OR 
-    id_nakes IN (SELECT id_nakes FROM nakes WHERE id_user = auth.uid())
-  );
 
 CREATE TABLE episode_pengobatan (
   id_episode SERIAL PRIMARY KEY,
@@ -110,7 +70,6 @@ ALTER TABLE episode_pengobatan ENABLE ROW LEVEL SECURITY;
 CREATE TABLE pemeriksaan_klinis (
   id_periksa SERIAL PRIMARY KEY,
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL NOT NULL,
   tanggal_periksa DATE DEFAULT CURRENT_DATE NOT NULL,
   keluhan TEXT,
   tensi VARCHAR(20),
@@ -129,7 +88,6 @@ ALTER TABLE pemeriksaan_klinis ENABLE ROW LEVEL SECURITY;
 CREATE TABLE pemeriksaan_lab (
   id_tes SERIAL PRIMARY KEY,
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   jenis_tes VARCHAR(50) NOT NULL, -- TCM, IGRA, Mantoux, BTA, Rontgen
   tanggal_tes DATE NOT NULL,
   periode_pemeriksaan VARCHAR(50) NOT NULL, -- Bulan ke-2, ke-5, akhir masa pengobatan
@@ -159,7 +117,6 @@ ALTER TABLE pemeriksaan_lab ENABLE ROW LEVEL SECURITY;
 CREATE TABLE diagnosis (
   id_diagnosis SERIAL PRIMARY KEY,
   id_episode INTEGER UNIQUE REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   tanggal_diagnosis DATE NOT NULL,
   
   -- standarisasi Medis
@@ -182,7 +139,6 @@ ALTER TABLE diagnosis ENABLE ROW LEVEL SECURITY;
 CREATE TABLE resep_pengobatan (
   id_resep SERIAL PRIMARY KEY,
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   tanggal_resep DATE NOT NULL,
   
   -- Klasifikasi Regimen
@@ -262,19 +218,6 @@ CREATE TABLE hasil_akhir (
 );
 
 ALTER TABLE hasil_akhir ENABLE ROW LEVEL SECURITY;
-
-CREATE TABLE pesan_chat (
-  id_pesan SERIAL PRIMARY KEY,
-  id_pasien INTEGER REFERENCES pasien(id_pasien) ON DELETE CASCADE NOT NULL,
-  id_pengirim UUID REFERENCES auth.users(id) ON DELETE SET NULL NOT NULL,
-  isi_pesan TEXT NOT NULL,
-  lampiran_file_url VARCHAR(255),
-  waktu_kirim TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-  status_baca VARCHAR(20) DEFAULT 'belum dibaca' CHECK (status_baca IN ('dibaca', 'belum dibaca')) NOT NULL
-);
-
-CREATE INDEX idx_pesan_chat_pasien_waktu ON pesan_chat(id_pasien, waktu_kirim DESC);
-ALTER TABLE pesan_chat ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE notifikasi (
   id_notifikasi SERIAL PRIMARY KEY,

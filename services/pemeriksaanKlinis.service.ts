@@ -5,28 +5,31 @@ import {
   PemeriksaanKlinisData,
   UpdatePemeriksaanPayload,
 } from "@/types/pemeriksaanKlinis";
-import { verifyNakesAccess } from "@/utils/access";
+import { verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export const getDaftarPemeriksaanByNakes = async (
+export const getDaftarPemeriksaan = async (
   supabase: SupabaseClient,
-  id_user_nakes: string,
+  id_super_admin: string,
 ): Promise<ActionResponse<PasienPemeriksaanOverview[]>> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
     const { data: pasienData, error: pasienError } = await supabase
       .from("pasien")
       .select(
         `
-      id_pasien, no_rm, nama_lengkap, nik,
+      id_pasien, nama_lengkap, usia, domisili,
       episode_pengobatan (
         id_episode, status_episode,
         pemeriksaan_klinis ( 
-          id_periksa, id_episode, id_nakes, 
+          id_periksa, id_episode, 
           tanggal_periksa, keluhan, tensi, suhu, 
           pernapasan, nadi, saturasi_o2, 
           tinggi_badan, berat_badan, 
@@ -35,7 +38,6 @@ export const getDaftarPemeriksaanByNakes = async (
       )
     `,
       )
-      .eq("id_nakes", nakes.id_nakes)
       .order("created_at", { ascending: false });
 
     if (pasienError) {
@@ -66,9 +68,9 @@ export const getDaftarPemeriksaanByNakes = async (
 
         return {
           id_pasien: pasien.id_pasien,
-          no_rm: pasien.no_rm,
           nama_lengkap: pasien.nama_lengkap,
-          nik: pasien.nik,
+          usia: pasien.usia,
+          domisili: pasien.domisili,
           episodeAktif: episodeAktif
             ? {
                 id_episode: episodeAktif.id_episode,
@@ -89,18 +91,20 @@ export const getDaftarPemeriksaanByNakes = async (
 export const createPemeriksaanKlinis = async (
   supabase: SupabaseClient,
   payload: CreatePemeriksaanPayload,
-  id_user_nakes: string,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
     const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
-      .select(`id_episode, pasien!inner (id_nakes)`)
+      .select("id_episode")
       .eq("id_episode", payload.id_episode)
-      .eq("pasien.id_nakes", nakes.id_nakes)
       .single();
 
     if (checkError || !episode) {
@@ -112,10 +116,7 @@ export const createPemeriksaanKlinis = async (
 
     const { error: pemeriksaanError } = await supabase
       .from("pemeriksaan_klinis")
-      .insert({
-        ...payload,
-        id_nakes: nakes.id_nakes,
-      });
+      .insert(payload);
 
     if (pemeriksaanError) {
       return handleServiceError(
@@ -136,27 +137,20 @@ export const createPemeriksaanKlinis = async (
 export const updatePemeriksaanKlinis = async (
   supabase: SupabaseClient,
   payload: UpdatePemeriksaanPayload,
-  id_user_nakes: string,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
     const { data: periksa, error: checkError } = await supabase
       .from("pemeriksaan_klinis")
-      .select(
-        `
-        id_periksa,
-        episode_pengobatan!inner (
-          pasien!inner (
-            id_nakes
-          )
-        )
-      `,
-      )
+      .select("id_periksa")
       .eq("id_periksa", payload.id_periksa)
-      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes) // Pengecekan 2 level ke atas
       .single();
 
     if (checkError || !periksa) {
@@ -183,27 +177,20 @@ export const updatePemeriksaanKlinis = async (
 export const deletePemeriksaanKlinis = async (
   supabase: SupabaseClient,
   id_periksa: number,
-  id_user_nakes: string,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
     const { data: periksa, error: checkError } = await supabase
       .from("pemeriksaan_klinis")
-      .select(
-        `
-        id_periksa,
-        episode_pengobatan!inner (
-          pasien!inner (
-            id_nakes
-          )
-        )
-      `,
-      )
+      .select("id_periksa")
       .eq("id_periksa", id_periksa)
-      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes) // Pengecekan 2 level ke atas
       .single();
 
     if (checkError || !periksa) {

@@ -16,12 +16,9 @@ export default function RiwayatSubRow({
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPending] = useTransition();
 
-  // Nakes hanya bisa mengedit/menghapus data jika data tersebut milik episode yang sedang aktif
+  // Super admin hanya bisa mengedit/menghapus data jika data tersebut milik episode yang sedang aktif
   const isEditable = periksa.id_episode === id_episode_aktif;
-  const imtData = hitungIMT(
-    periksa.berat_badan,
-    periksa.tinggi_badan,
-  );
+  const imtData = hitungIMT(periksa.berat_badan, periksa.tinggi_badan);
 
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition">
@@ -31,16 +28,11 @@ export default function RiwayatSubRow({
       <td className="px-4 py-3">
         <div>
           BB:{" "}
-          <span className="font-semibold">
-            {periksa.berat_badan || "-"}
-          </span>{" "}
-          kg
+          <span className="font-semibold">{periksa.berat_badan || "-"}</span> kg
         </div>
         <div>
           TB:{" "}
-          <span className="font-semibold">
-            {periksa.tinggi_badan || "-"}
-          </span>{" "}
+          <span className="font-semibold">{periksa.tinggi_badan || "-"}</span>{" "}
           cm
         </div>
 

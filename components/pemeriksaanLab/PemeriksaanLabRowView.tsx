@@ -1,4 +1,3 @@
-// components/pemeriksaanLab/PemeriksaanLabRowView.tsx
 "use client";
 
 import { PasienPemeriksaanLabOverview } from "@/types/pemeriksaanLab";
@@ -15,14 +14,29 @@ export default function PemeriksaanLabRowView({ data }: Props) {
   const isEpisodeAktif = data.episodeAktif?.status_episode === "aktif";
   const [isModalTambahOpen, setIsModalTambahOpen] = useState(false);
 
+  const {
+    nama_lengkap,
+    usia,
+    domisili,
+    episodeAktif,
+    riwayat_pemeriksaan_lab,
+  } = data;
+  const hasRiwayat =
+    riwayat_pemeriksaan_lab && riwayat_pemeriksaan_lab.length > 0;
+
   return (
     <>
       <tr className="hover:bg-gray-50 transition-colors group">
-        <td className="px-6 py-4 font-medium text-gray-900">{data.no_rm}</td>
-        <td className="px-6 py-4">
-          <div className="font-medium text-gray-800">{data.nama_lengkap}</div>
-          <div className="text-xs text-gray-500">NIK: {data.nik}</div>
+        {/* Kolom 1: Nama Pasien */}
+        <td className="px-6 py-4 font-medium text-gray-900">{nama_lengkap}</td>
+
+        {/* Kolom 2: Usia & Domisili*/}
+        <td className="px-6 py-4 text-sm text-gray-600">
+          <div className="font-medium text-gray-800">{usia || "-"}</div>
+          <div className="text-xs text-gray-400">{domisili || "-"}</div>
         </td>
+
+        {/* Kolom 3: Status Episode */}
         <td className="px-6 py-4">
           {isEpisodeAktif ? (
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -34,19 +48,26 @@ export default function PemeriksaanLabRowView({ data }: Props) {
             </span>
           )}
         </td>
+
+        {/* Kolom 4: Aksi */}
         <td className="px-6 py-4 text-right space-x-2">
           {/* Tombol Buka Riwayat */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-sm px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+            disabled={!hasRiwayat}
+            className={`text-sm px-3 py-1.5 border rounded-md transition-colors ${
+              hasRiwayat
+                ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                : "border-transparent bg-gray-50 text-gray-300 cursor-not-allowed"
+            }`}
           >
             {isExpanded
               ? "Tutup Riwayat"
-              : `Lihat Riwayat (${data.riwayat_pemeriksaan_lab.length})`}
+              : `Lihat Riwayat (${riwayat_pemeriksaan_lab.length})`}
           </button>
 
           {/* Tombol Tambah Lab (Hanya muncul jika episode aktif) */}
-          {isEpisodeAktif && data.episodeAktif && (
+          {isEpisodeAktif && episodeAktif && (
             <>
               <button
                 className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -55,7 +76,7 @@ export default function PemeriksaanLabRowView({ data }: Props) {
                 + Tambah Lab
               </button>
               <TambahLabModal
-                id_episode={data.episodeAktif.id_episode}
+                id_episode={episodeAktif.id_episode}
                 isOpen={isModalTambahOpen}
                 onClose={() => setIsModalTambahOpen(false)}
               />
@@ -73,8 +94,8 @@ export default function PemeriksaanLabRowView({ data }: Props) {
           >
             <div className="px-6 py-4">
               <RiwayatLabSubRow
-                riwayat={data.riwayat_pemeriksaan_lab}
-                id_episode={data.episodeAktif?.id_episode}
+                riwayat={riwayat_pemeriksaan_lab}
+                id_episode={episodeAktif?.id_episode}
               />
             </div>
           </td>

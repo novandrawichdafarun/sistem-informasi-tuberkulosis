@@ -1,7 +1,6 @@
 CREATE TABLE diagnosis (
   id_diagnosis SERIAL PRIMARY KEY,
   id_episode INTEGER UNIQUE REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   tanggal_diagnosis DATE NOT NULL,
   
   -- standarisasi Medis

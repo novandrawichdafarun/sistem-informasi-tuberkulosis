@@ -1,6 +1,10 @@
 import { getDaftarPemeriksaanLabAction } from "@/actions/pemeriksaanLab";
 import PemeriksaanLabRowView from "@/components/pemeriksaanLab/PemeriksaanLabRowView";
 
+export const metadata = {
+  title: "Manajemen Pemeriksaan Lab | PantauTB",
+};
+
 export default async function PemeriksaanLabPage() {
   const result = await getDaftarPemeriksaanLabAction();
 
@@ -23,7 +27,8 @@ export default async function PemeriksaanLabPage() {
           Manajemen Pemeriksaan Lab
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Kelola data pemeriksaan laboratorium pasien yang Anda tangani.
+          Kelola data pemeriksaan laboratorium pasien secara terpusat di dalam
+          sistem.
         </p>
       </div>
 
@@ -32,8 +37,8 @@ export default async function PemeriksaanLabPage() {
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-gray-50 border-b border-gray-200 text-gray-600">
               <tr>
-                <th className="px-6 py-4 font-semibold">No. RM</th>
                 <th className="px-6 py-4 font-semibold">Nama Pasien</th>
+                <th className="px-6 py-4 font-semibold">Usia & Domisili</th>
                 <th className="px-6 py-4 font-semibold">Status Episode</th>
                 <th className="px-6 py-4 font-semibold text-right">Aksi</th>
               </tr>

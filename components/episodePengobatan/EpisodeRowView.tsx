@@ -15,20 +15,31 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
   const [isModalTutupOpen, setIsModalTutupOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { id_pasien, no_rm, nama_lengkap, nik, episodeAktif, riwayat_episode } =
-    item;
+  const {
+    id_pasien,
+    nama_lengkap,
+    usia,
+    domisili,
+    episodeAktif,
+    riwayat_episode,
+  } = item;
   const hasRiwayat = riwayat_episode && riwayat_episode.length > 0;
 
   return (
     <>
       <tr className="hover:bg-gray-50 transition-colors">
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="font-medium text-gray-900">{no_rm || "-"}</div>
-          <div className="text-xs text-gray-400">NIK {nik}</div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
+        {/* Kolom 1: Nama Pasien */}
+        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
           {nama_lengkap}
         </td>
+
+        {/* Kolom 2: Usia & Domisili */}
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+          <div className="font-medium text-gray-800">{usia || "-"}</div>
+          <div className="text-xs text-gray-400">{domisili || "-"}</div>
+        </td>
+
+        {/* Kolom 3: Status Pengobatan */}
         <td className="px-6 py-4 whitespace-nowrap">
           {episodeAktif ? (
             <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 border border-blue-100">
@@ -40,6 +51,8 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
             </span>
           )}
         </td>
+
+        {/* Kolom 4: Tipe Kasus / Tgl Mulai */}
         <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
           {episodeAktif ? (
             <div className="flex flex-col">
@@ -54,11 +67,17 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
             <span className="text-gray-400">-</span>
           )}
         </td>
+
+        {/* Kolom 5: Aksi */}
         <td className="px-6 py-4 whitespace-nowrap text-right text-xs space-x-2">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             disabled={!hasRiwayat}
-            className={`rounded px-3 py-1.5 font-semibold transition border ${hasRiwayat ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200" : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"}`}
+            className={`rounded px-3 py-1.5 font-semibold transition border ${
+              hasRiwayat
+                ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
+                : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"
+            }`}
           >
             {isExpanded ? "Tutup Log ▴" : "Lihat Log ▾"}
           </button>

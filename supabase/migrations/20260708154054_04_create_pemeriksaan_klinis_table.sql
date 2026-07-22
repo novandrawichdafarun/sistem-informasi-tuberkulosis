@@ -1,7 +1,6 @@
 CREATE TABLE pemeriksaan_klinis (
   id_periksa SERIAL PRIMARY KEY,
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL NOT NULL,
   tanggal_periksa DATE DEFAULT CURRENT_DATE NOT NULL,
   keluhan TEXT,
   tensi VARCHAR(20),

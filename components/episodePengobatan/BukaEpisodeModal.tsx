@@ -68,20 +68,23 @@ export default function BukaEpisoodeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700">
               Tipe Pasien *
             </label>
-            <select
+            <input
+              type="text"
               name="tipe_pasien"
+              list="list-tipe-pasien"
               required
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none bg-white"
-            >
-              <option value="">-- Pilih Tipe Pasien --</option>
-              <option value="Kasus Baru">Kasus Baru</option>
-              <option value="Kambuh">Kambuh</option>
-              <option value="Default">Default</option>
-              <option value="Gagal">Gagal</option>
-            </select>
+              placeholder="Pilih atau ketik tipe pasien..."
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <datalist id="list-tipe-pasien">
+              <option value="Kasus Baru" />
+              <option value="Kambuh" />
+              <option value="Pengobatan Ulang" />
+              <option value="Pindahan" />
+            </datalist>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

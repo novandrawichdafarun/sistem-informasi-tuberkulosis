@@ -1,13 +1,13 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export async function verifyNakesAccess(
+export async function verifySuperAdminAccess(
   supabase: SupabaseClient,
-  id_user_nakes: string,
+  id_super_admin: string,
 ) {
   const { data, error } = await supabase
-    .from("nakes")
-    .select("id_nakes, id_faskes")
-    .eq("id_user", id_user_nakes)
+    .from("users")
+    .select("id_user, role")
+    .eq("id_user", id_super_admin)
     .single();
-  return { nakes: data, error };
+  return { superAdmin: data, error };
 }

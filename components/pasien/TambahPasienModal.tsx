@@ -54,7 +54,7 @@ export default function TambahPasienModal() {
           {/* Latar Belakang Gelap (Backdrop) */}
           <div
             className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
-            onClick={closeModal} // Tutup jika area luar diklik
+            onClick={closeModal}
           ></div>
 
           {/* Kotak Modal */}
@@ -65,7 +65,7 @@ export default function TambahPasienModal() {
                   Daftarkan Pasien Baru
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Pasien otomatis akan dibuatkan akun login.
+                  Pasien otomatis akan dibuatkan akun login sistem.
                 </p>
               </div>
               <button
@@ -84,10 +84,10 @@ export default function TambahPasienModal() {
               )}
 
               <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-                {/* --- INFORMASI DASAR --- */}
+                {/* --- INFORMASI AKUN & IDENTITAS --- */}
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Info Akun & Identitas
+                    Info Akun & Identitas Dasar
                   </h4>
                   <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
@@ -101,30 +101,6 @@ export default function TambahPasienModal() {
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        NIK *
-                      </label>
-                      <input
-                        type="text"
-                        name="nik"
-                        required
-                        maxLength={16}
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Nomor RM (Opsional)
-                      </label>
-                      <input
-                        type="text"
-                        name="no_rm"
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    {/* Input Email & Password untuk Akun */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
                         Alamat Email Login *
@@ -151,23 +127,36 @@ export default function TambahPasienModal() {
                   </div>
                 </div>
 
-                {/* --- DATA DEMOGRAFI --- */}
+                {/* --- DATA DEMOGRAFI (BISA KETIK MANUAL ATAU PILIH OPSI) --- */}
                 <div className="border-t border-gray-100 pt-6">
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Demografi
+                    Data Demografi (Bisa Pilih atau Ketik Manual)
                   </h4>
                   <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
+                    {/* USIA */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        Tanggal Lahir *
+                        Usia / Kategori Usia *
                       </label>
                       <input
-                        type="date"
-                        name="tanggal_lahir"
+                        type="text"
+                        name="usia"
+                        list="list-usia"
                         required
+                        placeholder="Pilih atau ketik usia..."
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       />
+                      <datalist id="list-usia">
+                        <option value="Balita (< 5 tahun)" />
+                        <option value="Anak-anak (5-11 tahun)" />
+                        <option value="Remaja (12-25 tahun)" />
+                        <option value="Dewasa (26-45 tahun)" />
+                        <option value="Lansia (56-65 tahun)" />
+                        <option value="Manula (> 65 tahun)" />
+                      </datalist>
                     </div>
+
+                    {/* JENIS KELAMIN (Tetap Select karena hanya ada 2 pilihan pasti) */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
                         Jenis Kelamin *
@@ -177,30 +166,109 @@ export default function TambahPasienModal() {
                         required
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
                       >
-                        <option value="">-- Pilih --</option>
+                        <option value="">-- Pilih Jenis Kelamin --</option>
                         <option value="L">Laki-laki</option>
                         <option value="P">Perempuan</option>
                       </select>
                     </div>
-                    <div className="sm:col-span-2">
+
+                    {/* DOMISILI */}
+                    <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        Alamat Lengkap
+                        Domisili *
                       </label>
-                      <textarea
-                        name="alamat"
-                        rows={2}
+                      <input
+                        type="text"
+                        name="domisili"
+                        required
+                        placeholder="Contoh: Surabaya"
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      ></textarea>
+                      />
                     </div>
-                    <div className="sm:col-span-2">
+
+                    {/* NOMOR TELEPON */}
+                    <div>
                       <label className="block text-sm font-medium text-gray-700">
                         Nomor Telepon
                       </label>
                       <input
                         type="tel"
                         name="no_telp"
+                        placeholder="Contoh: 081234567890"
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       />
+                    </div>
+
+                    {/* PENDIDIKAN */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Pendidikan Terakhir *
+                      </label>
+                      <input
+                        type="text"
+                        name="pendidikan"
+                        list="list-pendidikan"
+                        required
+                        placeholder="Pilih atau ketik pendidikan..."
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                      <datalist id="list-pendidikan">
+                        <option value="SD" />
+                        <option value="SMP" />
+                        <option value="SMA" />
+                        <option value="Diploma (D1/D2/D3/D4)" />
+                        <option value="Sarjana (S1)" />
+                        <option value="Magister (S2)" />
+                        <option value="Doktor (S3)" />
+                      </datalist>
+                    </div>
+
+                    {/* PEKERJAAN */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Pekerjaan *
+                      </label>
+                      <input
+                        type="text"
+                        name="pekerjaan"
+                        list="list-pekerjaan"
+                        required
+                        placeholder="Pilih atau ketik pekerjaan..."
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                      <datalist id="list-pekerjaan">
+                        <option value="Ibu Rumah Tangga" />
+                        <option value="Wirausaha" />
+                        <option value="PNS/ASN" />
+                        <option value="TNI/Polri" />
+                        <option value="Pegawai BUMN/BUMD" />
+                        <option value="Karyawan Swasta" />
+                        <option value="Buruh" />
+                        <option value="Pensiunan" />
+                      </datalist>
+                    </div>
+
+                    {/* PENDAPATAN */}
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Pendapatan / Penghasilan *
+                      </label>
+                      <input
+                        type="text"
+                        name="pendapatan"
+                        list="list-pendapatan"
+                        required
+                        placeholder="Pilih atau ketik kisaran pendapatan..."
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                      <datalist id="list-pendapatan">
+                        <option value="Dibawah rata-rata (< 1.5jt)" />
+                        <option value="Kelas Bawah (1.5jt - 3jt)" />
+                        <option value="Kelas Menengah-Bawah (3jt - 5jt)" />
+                        <option value="Kelas Menengah (5jt - 10jt)" />
+                        <option value="Kelas Menengah Atas (10jt - 20jt)" />
+                        <option value="Kelas Atas (> 20jt)" />
+                      </datalist>
                     </div>
                   </div>
                 </div>

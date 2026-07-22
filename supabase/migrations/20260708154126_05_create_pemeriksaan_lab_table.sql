@@ -1,7 +1,6 @@
 CREATE TABLE pemeriksaan_lab (
   id_tes SERIAL PRIMARY KEY,
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   jenis_tes VARCHAR(50) NOT NULL, -- TCM, IGRA, Mantoux, BTA, Rontgen
   tanggal_tes DATE NOT NULL,
   periode_pemeriksaan VARCHAR(50) NOT NULL, -- Bulan ke-2, ke-5, akhir masa pengobatan

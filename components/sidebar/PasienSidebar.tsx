@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
@@ -16,7 +16,7 @@ import {
   LogoutIcon,
   MenuIcon,
   CloseIcon,
-} from "./icons";
+} from "../asset/icons";
 
 type NavItem = {
   label: string;
@@ -37,7 +37,7 @@ const NAV: NavItem[] = [
 
 const STORAGE_KEY = "pantautb:pasien-sidebar-open";
 
-export default function PatientShell({
+export default function PasienSidebar({
   user,
   children,
 }: {
@@ -45,16 +45,18 @@ export default function PatientShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
 
   // Restore persisted state after mount (avoids SSR/CSR hydration mismatch).
-  useEffect(() => {
+  const [open, setOpen] = useState(() => {
     try {
-      if (localStorage.getItem(STORAGE_KEY) === "1") setOpen(true);
+      return (
+        typeof window !== "undefined" &&
+        localStorage.getItem(STORAGE_KEY) === "1"
+      );
     } catch {
       /* ignore */
     }
-  }, []);
+  });
 
   const toggle = (next: boolean) => {
     setOpen(next);

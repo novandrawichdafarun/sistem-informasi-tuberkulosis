@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-import Logo from "@/components/Logo";
 import LogoutButton from "@/components/buttons/LogoutButton";
-import PatientShell from "@/components/dashboard/PatientShell";
+import PasienSidebar from "@/components/sidebar/PasienSidebar";
+import SuperAdminSidebar from "@/components/sidebar/SuperAdminSidebar";
 
 export default async function DashboardLayout({
   children,
@@ -11,10 +11,10 @@ export default async function DashboardLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  // Patients get the app-shell with a collapsible sidebar.
+  //? Pasien
   if (session?.user?.role === "pasien") {
     return (
-      <PatientShell
+      <PasienSidebar
         user={{
           name: session.user.name ?? session.user.email ?? "Pasien",
           roleLabel: "Pasien",
@@ -22,27 +22,30 @@ export default async function DashboardLayout({
         }}
       >
         {children}
-      </PatientShell>
+      </PasienSidebar>
     );
   }
 
-  // Everyone else (nakes, etc.) keeps the simple top navbar.
+  //? Super Admin.
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="sticky top-0 z-20 border-b border-brand-100 bg-white/90 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Logo size="sm" withWordmark />
-
-          <div className="flex items-center space-x-4">
-            <span className="hidden text-sm text-brand-900/60 sm:block">
-              {session?.user?.email}
+    <div className="flex min-h-screen bg-gray-50">
+      <SuperAdminSidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="sticky top-0 z-20 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur-sm">
+          <div className="flex h-16 items-center justify-between px-6">
+            <span className="text-sm font-semibold text-gray-800">
+              Panel Super Admin
             </span>
-            <LogoutButton />
+            <div className="flex items-center space-x-4">
+              <span className="hidden text-sm text-gray-600 sm:block">
+                {session?.user?.email}
+              </span>
+              <LogoutButton />
+            </div>
           </div>
-        </div>
-      </nav>
-
-      <main>{children}</main>
+        </header>
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 }

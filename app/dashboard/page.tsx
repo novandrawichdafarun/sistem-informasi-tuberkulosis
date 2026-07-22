@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-import Link from "next/link";
-import MedicationBanner from "@/components/dashboard/MedicationBanner";
+import MedicationBanner from "@/components/banner/MedicationBanner";
 import PatientOverview from "@/components/dashboard/PatientOverview";
+import SuperAdminDashboard from "@/components/dashboard/SuperAdmin";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -18,7 +18,11 @@ export default async function DashboardPage() {
     );
   }
 
-  // --- TAMPILAN LAINNYA (NAKES, dll.) ---
+  if (role === "super_admin") {
+    return <SuperAdminDashboard />;
+  }
+
+  // --- TAMPILAN LAINNYA ---
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -30,25 +34,6 @@ export default async function DashboardPage() {
           </span>
         </p>
       </div>
-
-      {role === "nakes" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Daftar Pasien
-            </h3>
-            <p className="text-sm text-gray-500 mt-2">
-              Kelola data registrasi pasien dan rujukan.
-            </p>
-            <Link
-              href="/dashboard/pasien"
-              className="mt-4 block text-center w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors"
-            >
-              Kelola Pasien
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

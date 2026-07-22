@@ -5,28 +5,31 @@ import {
   PemeriksaanLabData,
   UpdatePemeriksaanLabPayload,
 } from "@/types/pemeriksaanLab";
-import { verifyNakesAccess } from "@/utils/access";
+import { verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export const getDaftarPemeriksaanLabByNakes = async (
+export const getDaftarPemeriksaanLab = async (
   supabase: SupabaseClient,
-  id_user_nakes: string,
+  id_super_admin: string,
 ): Promise<ActionResponse<PasienPemeriksaanLabOverview[]>> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
     const { data: pasienData, error: pasienError } = await supabase
       .from("pasien")
       .select(
         `
-        id_pasien, no_rm, nama_lengkap, nik,
+        id_pasien, nama_lengkap, usia, domisili,
         episode_pengobatan (
           id_episode, status_episode,
           pemeriksaan_lab ( 
-            id_tes, id_episode, id_nakes, 
+            id_tes, id_episode,
             jenis_tes, tanggal_tes, periode_pemeriksaan, 
             jenis_sample, kualitas_sample, dna_bakteri_tb, 
             status_resistensi, hasil_tes, hasil_bta,
@@ -35,14 +38,10 @@ export const getDaftarPemeriksaanLabByNakes = async (
         )
       `,
       )
-      .eq("id_nakes", nakes.id_nakes)
       .order("created_at", { ascending: false });
 
     if (pasienError) {
-      console.error(
-        "[DB ERROR] getDaftarPemeriksaanLabByNakes:",
-        pasienError.message,
-      );
+      console.error("[DB ERROR] getDaftarPemeriksaanLab:", pasienError.message);
       return {
         success: false,
         error: "Gagal mengambil data pasien dari sistem.",
@@ -70,9 +69,9 @@ export const getDaftarPemeriksaanLabByNakes = async (
 
         return {
           id_pasien: pasien.id_pasien,
-          no_rm: pasien.no_rm,
           nama_lengkap: pasien.nama_lengkap,
-          nik: pasien.nik,
+          usia: pasien.usia,
+          domisili: pasien.domisili,
           episodeAktif: episodeAktif
             ? {
                 id_episode: episodeAktif.id_episode,
@@ -93,18 +92,20 @@ export const getDaftarPemeriksaanLabByNakes = async (
 export const createPemeriksaanLab = async (
   supabase: SupabaseClient,
   payload: CreatePemeriksaanLabPayload,
-  id_user_nakes: string,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
     const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
-      .select(`id_episode, pasien!inner (id_nakes)`)
+      .select("id_episode")
       .eq("id_episode", payload.id_episode)
-      .eq("pasien.id_nakes", nakes.id_nakes)
       .single();
 
     if (checkError || !episode) {
@@ -116,10 +117,7 @@ export const createPemeriksaanLab = async (
 
     const { error: insertError } = await supabase
       .from("pemeriksaan_lab")
-      .insert({
-        ...payload,
-        id_nakes: nakes.id_nakes,
-      });
+      .insert(payload);
 
     if (insertError) {
       console.error("[DB ERROR] Insert Pemeriksaan Lab:", insertError.message);
@@ -138,27 +136,20 @@ export const createPemeriksaanLab = async (
 export const updatePemeriksaanLab = async (
   supabase: SupabaseClient,
   payload: UpdatePemeriksaanLabPayload,
-  id_user_nakes: string,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
     const { data: tesLab, error: checkError } = await supabase
       .from("pemeriksaan_lab")
-      .select(
-        `
-        id_tes,
-        episode_pengobatan!inner (
-          pasien!inner (
-            id_nakes
-          )
-        )
-      `,
-      )
+      .select("id_tes")
       .eq("id_tes", payload.id_tes)
-      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes)
       .single();
 
     if (checkError || !tesLab) {
@@ -191,27 +182,20 @@ export const updatePemeriksaanLab = async (
 export const deletePemeriksaanLab = async (
   supabase: SupabaseClient,
   id_tes: number,
-  id_user_nakes: string,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { nakes, error } = await verifyNakesAccess(supabase, id_user_nakes);
-    if (error || !nakes)
-      return { success: false, error: "Otoritas Nakes tidak valid." };
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
     const { data: tesLab, error: checkError } = await supabase
       .from("pemeriksaan_lab")
-      .select(
-        `
-        id_tes,
-        episode_pengobatan!inner (
-          pasien!inner (
-            id_nakes
-          )
-        )
-      `,
-      )
+      .select("id_tes")
       .eq("id_tes", id_tes)
-      .eq("episode_pengobatan.pasien.id_nakes", nakes.id_nakes)
       .single();
 
     if (checkError || !tesLab) {

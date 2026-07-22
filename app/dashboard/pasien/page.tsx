@@ -2,7 +2,6 @@ import { getDaftarPasienAction } from "@/actions/pasien";
 import Link from "next/link";
 import { PasienData } from "@/types/pasien";
 import TambahPasienModal from "@/components/pasien/TambahPasienModal";
-import { hitungUmur } from "@/utils/date";
 import EditPasienModal from "@/components/pasien/EditPasienModal";
 import DeletePasienButton from "@/components/pasien/DeletePasienButton";
 
@@ -22,7 +21,8 @@ export default async function ManajemenPasienPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Manajemen Pasien</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Daftar seluruh pasien TB yang berada di bawah pantauan Anda.
+            Daftar seluruh profil demografi pasien yang berada di bawah pantauan
+            Anda.
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
@@ -46,29 +46,29 @@ export default async function ManajemenPasienPage() {
                     scope="col"
                     className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                   >
-                    No. RM
+                    Nama Pasien & Usia
                   </th>
                   <th
                     scope="col"
                     className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Nama Pasien & Umur
+                    Domisili / L/P
                   </th>
                   <th
                     scope="col"
                     className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    NIK / L/P
+                    Pendidikan & Pekerjaan
                   </th>
                   <th
                     scope="col"
                     className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Kontak
+                    Pendapatan & Kontak
                   </th>
                   <th
                     scope="col"
-                    className="relative py-3.5 pl-3 pr-4 sm:pr-6 text-gray-900"
+                    className="relative py-3.5 pl-3 pr-4 sm:pr-6 text-gray-900 text-center"
                   >
                     Aksi
                   </th>
@@ -78,7 +78,7 @@ export default async function ManajemenPasienPage() {
                 {pasienList.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={5}
                       className="py-8 text-center text-sm text-gray-500"
                     >
                       Belum ada pasien yang didaftarkan.
@@ -90,17 +90,14 @@ export default async function ManajemenPasienPage() {
                       key={pasien.id_pasien}
                       className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 sm:pl-6">
-                        {pasien.no_rm || "-"}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium">
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                         {pasien.nama_lengkap} <br />
-                        <span className="text-xs font-normal text-gray-500">
-                          {hitungUmur(pasien.tanggal_lahir)} Tahun
+                        <span className="text-xs font-normal text-gray-400">
+                          {pasien.usia || "-"}
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {pasien.nik} <br />
+                        {pasien.domisili || "-"} <br />
                         <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 mt-1 inline-block">
                           {pasien.jenis_kelamin === "L"
                             ? "Laki-laki"
@@ -108,15 +105,24 @@ export default async function ManajemenPasienPage() {
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {pasien.no_telp || "-"} <br />
+                        {pasien.pendidikan || "-"} <br />
                         <span className="text-xs text-gray-400">
-                          {pasien.users?.email}
+                          {pasien.pekerjaan || "-"}
                         </span>
                       </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-6">
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <span className="font-medium text-gray-700">
+                          {pasien.pendapatan || "-"}
+                        </span>{" "}
+                        <br />
+                        <span className="text-xs text-gray-400">
+                          {pasien.no_telp || "-"} ({pasien.users?.email})
+                        </span>
+                      </td>
+                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-6 space-x-2">
                         <Link
                           href={`/dashboard/pasien/${pasien.id_pasien}`}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-600 hover:text-blue-900 inline-block"
                         >
                           Detail
                           <span className="sr-only">

@@ -14,7 +14,8 @@ export default function PemeriksaanRowView({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalTambahOpen, setIsModalTambahOpen] = useState(false);
 
-  const { no_rm, nama_lengkap, nik, episodeAktif, riwayat_pemeriksaan } = item;
+  const { nama_lengkap, usia, domisili, episodeAktif, riwayat_pemeriksaan } =
+    item;
   const hasRiwayat = riwayat_pemeriksaan && riwayat_pemeriksaan.length > 0;
 
   return (
@@ -22,13 +23,18 @@ export default function PemeriksaanRowView({
       <tr
         className={`transition-colors ${isExpanded ? "bg-emerald-50/30" : "hover:bg-gray-50"}`}
       >
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="font-medium text-gray-900">{no_rm || "-"}</div>
-          <div className="text-xs text-gray-400">NIK {nik}</div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
+        {/* Kolom 1: Nama Pasien */}
+        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
           {nama_lengkap}
         </td>
+
+        {/* Kolom 2: Usia & Domisili */}
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+          <div className="font-medium text-gray-800">{usia || "-"}</div>
+          <div className="text-xs text-gray-400">{domisili || "-"}</div>
+        </td>
+
+        {/* Kolom 3: Status Episode */}
         <td className="px-6 py-4 whitespace-nowrap">
           {episodeAktif ? (
             <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 border border-blue-100">
@@ -40,12 +46,18 @@ export default function PemeriksaanRowView({
             </span>
           )}
         </td>
+
+        {/* Kolom 4: Aksi */}
         <td className="px-6 py-4 whitespace-nowrap text-right text-xs space-x-2">
           {/* Tombol Lihat Log */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             disabled={!hasRiwayat}
-            className={`rounded px-3 py-1.5 font-semibold transition border ${hasRiwayat ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200" : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"}`}
+            className={`rounded px-3 py-1.5 font-semibold transition border ${
+              hasRiwayat
+                ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
+                : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"
+            }`}
           >
             {isExpanded ? "Tutup Data ▴" : "Lihat Data ▾"}
           </button>

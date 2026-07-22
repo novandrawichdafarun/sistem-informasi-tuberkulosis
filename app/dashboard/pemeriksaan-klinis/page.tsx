@@ -1,6 +1,9 @@
-import React from "react";
 import { getDaftarPemeriksaanAction } from "@/actions/pemeriksaanKlinis";
 import PemeriksaanRowView from "@/components/pemeriksaanKlinis/PemeriksaanRowView";
+
+export const metadata = {
+  title: "Manajemen Pemeriksaan Klinis | PantauTB",
+};
 
 export default async function PemeriksaanKlinisPage() {
   const res = await getDaftarPemeriksaanAction();
@@ -13,8 +16,8 @@ export default async function PemeriksaanKlinisPage() {
           Manajemen Pemeriksaan Klinis
         </h1>
         <p className="text-sm text-gray-500">
-          Kelola riwayat pemeriksaan fisik dan klinis pasien Tuberkulosis di
-          bawah penanganan Anda.
+          Kelola riwayat pemeriksaan fisik dan klinis pasien Tuberkulosis dalam
+          sistem.
         </p>
       </div>
 
@@ -29,8 +32,8 @@ export default async function PemeriksaanKlinisPage() {
           <table className="w-full border-collapse text-left text-sm text-gray-500">
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3">No. RM / NIK</th>
                 <th className="px-6 py-3">Nama Pasien</th>
+                <th className="px-6 py-3">Usia & Domisili</th>
                 <th className="px-6 py-3">Status Episode</th>
                 <th className="px-6 py-3 text-right">Aksi</th>
               </tr>
@@ -42,7 +45,7 @@ export default async function PemeriksaanKlinisPage() {
                     colSpan={4}
                     className="px-6 py-10 text-center text-gray-400"
                   >
-                    Belum ada data pasien terdaftar di bawah penanganan Anda.
+                    Belum ada data pasien terdaftar di dalam sistem.
                   </td>
                 </tr>
               ) : (

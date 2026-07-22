@@ -1,7 +1,6 @@
 CREATE TABLE resep_pengobatan (
   id_resep SERIAL PRIMARY KEY,
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL,
   tanggal_resep DATE NOT NULL,
   
   -- Klasifikasi Regimen

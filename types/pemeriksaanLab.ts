@@ -1,7 +1,6 @@
 export interface PemeriksaanLabData {
   id_tes: number;
   id_episode: number;
-  id_nakes: number;
   jenis_tes: string;
   tanggal_tes: string;
   periode_pemeriksaan: string;
@@ -41,9 +40,9 @@ export interface UpdatePemeriksaanLabPayload extends CreatePemeriksaanLabPayload
 
 export interface PasienPemeriksaanLabOverview {
   id_pasien: number;
-  no_rm: string;
   nama_lengkap: string;
-  nik: string;
+  usia: string;
+  domisili: string;
   episodeAktif: { id_episode: number; status_episode: string } | null;
   riwayat_pemeriksaan_lab: PemeriksaanLabData[];
 }

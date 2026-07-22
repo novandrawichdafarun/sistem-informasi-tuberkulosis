@@ -1,4 +1,4 @@
-import Logo from "@/components/Logo";
+import Logo from "@/components/asset/Logo";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
@@ -14,7 +14,7 @@ export default async function AuthLayout({
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-brand-50 via-white to-mint-300/20 px-4 py-12">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-brand-50 via-white to-mint-300/20 px-4 py-12">
       {/* Decorative background */}
       <div
         aria-hidden

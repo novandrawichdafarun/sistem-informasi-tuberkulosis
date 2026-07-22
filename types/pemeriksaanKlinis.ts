@@ -1,7 +1,6 @@
 export interface PemeriksaanKlinisData {
   id_periksa: number;
   id_episode: number;
-  id_nakes: number;
   tanggal_periksa: string;
   keluhan?: string | null;
   tensi?: string | null;
@@ -33,9 +32,9 @@ export interface UpdatePemeriksaanPayload extends CreatePemeriksaanPayload {
 
 export interface PasienPemeriksaanOverview {
   id_pasien: number;
-  no_rm: string;
   nama_lengkap: string;
-  nik: string;
+  usia: string;
+  domisili: string;
   episodeAktif: { id_episode: number; status_episode: string } | null;
   riwayat_pemeriksaan: PemeriksaanKlinisData[];
 }

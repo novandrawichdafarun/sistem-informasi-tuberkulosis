@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckIcon, PillIcon } from "./icons";
+import { CheckIcon, PillIcon } from "../asset/icons";
 
 // Reports are tracked per calendar day. Wire this to a server action / Supabase
 // later; for now the confirmation is persisted locally so "today" survives reloads.
@@ -57,7 +57,7 @@ export default function MedicationBanner({
   // Neutral placeholder on first paint to avoid a hydration mismatch.
   if (!mounted) {
     return (
-      <div className="mb-6 h-[104px] animate-pulse rounded-2xl border border-slate-200 bg-white" />
+      <div className="mb-6 h-26 animate-pulse rounded-2xl border border-slate-200 bg-white" />
     );
   }
 

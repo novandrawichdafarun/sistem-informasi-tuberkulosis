@@ -1,7 +1,11 @@
 import { getDaftarEpisodeOverviewAction } from "@/actions/episodePengobatan";
 import EpisodeRowView from "@/components/episodePengobatan/EpisodeRowView";
 
-export default async function episodePengobatanPage() {
+export const metadata = {
+  title: "Manajemen Episode Pengobatan | PantauTB",
+};
+
+export default async function EpisodePengobatanPage() {
   const res = await getDaftarEpisodeOverviewAction();
   const daftarPasienEpisode = res.success && res.data ? res.data : [];
 
@@ -13,7 +17,7 @@ export default async function episodePengobatanPage() {
         </h1>
         <p className="text-sm text-gray-500">
           Pantau dan kelola periode aktif pengobatan tuberkulosis untuk seluruh
-          pasien Anda secara terpusat.
+          pasien secara terpusat di dalam sistem.
         </p>
       </div>
 
@@ -28,8 +32,8 @@ export default async function episodePengobatanPage() {
           <table className="w-full border-collapse text-left text-sm text-gray-500">
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3">No. RM / NIK</th>
                 <th className="px-6 py-3">Nama Pasien</th>
+                <th className="px-6 py-3">Usia & Domisili</th>
                 <th className="px-6 py-3">Status Pengobatan</th>
                 <th className="px-6 py-3">Tipe Kasus / Tgl Mulai</th>
                 <th className="px-6 py-3 text-right">Aksi</th>
@@ -42,7 +46,7 @@ export default async function episodePengobatanPage() {
                     colSpan={5}
                     className="px-6 py-10 text-center text-gray-400"
                   >
-                    Belum ada data pasien terdaftar di bawah penanganan Anda.
+                    Belum ada data pasien terdaftar di dalam sistem.
                   </td>
                 </tr>
               ) : (
