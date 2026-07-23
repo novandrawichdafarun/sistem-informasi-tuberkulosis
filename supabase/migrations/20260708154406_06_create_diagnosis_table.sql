@@ -4,7 +4,7 @@ CREATE TABLE diagnosis (
   tanggal_diagnosis DATE NOT NULL,
   
   -- standarisasi Medis
-  kode_icd10 VARCHAR(10) DEFAULT 'A15' NOT NULL, -- Kode standar TB: A15.0 (TB Paru), A18.2 (TB Kelenjar)
+  kode_icd10 VARCHAR(30) DEFAULT 'A15' NOT NULL, -- Kode standar TB: A15.0 (TB Paru), A18.2 (TB Kelenjar)
   klasifikasi_anatomi VARCHAR(50), -- TB Paru, TB Ekstra Paru
   lokasi_anatomi VARCHAR(100), -- Jika Ekstraparu, sebutkan: Kelenjar getah bening / Pleura / Meninges / Tulang
   

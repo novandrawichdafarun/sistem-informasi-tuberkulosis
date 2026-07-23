@@ -22,7 +22,7 @@ const baseDiagnosisSchema = {
     .string()
     .trim()
     .min(1, "Kode icd10 tidak boleh kosong")
-    .max(10, "Kode icd10 maksimal 10 karakter"),
+    .max(30, "Kode icd10 maksimal 30 karakter"),
 
   klasifikasi_anatomi: optionalString(50),
   lokasi_anatomi: optionalString(100),
@@ -43,7 +43,7 @@ export const createDiagnosisSchema = z.object({
   id_episode: z.coerce.number().positive("ID Episode tidak valid"),
 });
 
-export const UpdateDaiganosisSchema = z.object({
+export const updateDaiganosisSchema = z.object({
   ...baseDiagnosisSchema,
   id_diagnosis: z.coerce.number().positive("ID Diagnosis tidak valid"),
   id_episode: z.coerce.number().positive("ID Episode tidak valid"),

@@ -1,22 +1,20 @@
-// components/pemeriksaanLab/EditLabModal.tsx
 "use client";
 
-import React, { useState, useTransition } from "react";
+import { createDiagnosisAction } from "@/actions/diagnosis";
+import { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
-import { updatePemeriksaanLabAction } from "@/actions/pemeriksaanLab";
-import { PemeriksaanLabData } from "@/types/pemeriksaanLab";
 
-interface EditLabModalProps {
-  data: PemeriksaanLabData;
+interface TambahDiagnosisModalProps {
+  id_episode: number;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function EditLabModal({
-  data,
+export default function TambahDiagnosisModal({
+  id_episode,
   isOpen,
   onClose,
-}: EditLabModalProps) {
+}: TambahDiagnosisModalProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +26,7 @@ export default function EditLabModal({
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const res = await updatePemeriksaanLabAction(formData);
+      const res = await createDiagnosisAction(formData);
       if (!res.success) setError(res.error);
       else onClose();
     });
@@ -38,7 +36,7 @@ export default function EditLabModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
-          Edit Pemeriksaan Laboratorium
+          Tambah Diagnosa Pasien
         </h3>
 
         {error && (
@@ -48,148 +46,140 @@ export default function EditLabModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="hidden" name="id_tes" value={data.id_tes} />
-          <input type="hidden" name="id_episode" value={data.id_episode} />
+          <input type="hidden" name="id_episode" value={id_episode} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Tanggal Tes *
+                Tanggal Diagnosa *
               </label>
               <input
                 type="date"
-                name="tanggal_tes"
+                name="tanggal_diagnosis"
                 required
-                defaultValue={data.tanggal_tes}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Periode Pemeriksaan *
-              </label>
-              <input
-                type="text"
-                name="periode_pemeriksaan"
-                defaultValue={data.periode_pemeriksaan}
-                placeholder="Contoh: Bulan ke-2"
+                defaultValue={new Date().toLocaleDateString("en-CA")}
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Jenis Tes *
+                Kode ICD-10 *
               </label>
               <input
                 type="text"
-                name="jenis_tes"
+                name="kode_icd10"
                 required
-                list="opsi-jenis-tes"
-                placeholder="TCM, IGRA, dll"
-                defaultValue={data.jenis_tes}
+                list="opsi-kode-icd10"
+                placeholder="A15.0 (TB Paru), A18.2 (TB Kelenjar), dll"
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
-              <datalist id="opsi-jenis-tes">
-                <option value="TCM" />
-                <option value="IGRA" />
-                <option value="BTA" />
-                <option value="Rontgen" />
+              <datalist id="opsi-kode-icd10">
+                <option value="A15.0 (TB Paru)" />
+                <option value="A18.2 (TB Kelenjar)" />
               </datalist>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Hasil Tes Umum *
-              </label>
-              <input
-                type="text"
-                name="hasil_tes"
-                required
-                placeholder="Positif / Negatif"
-                defaultValue={data.hasil_tes}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
             </div>
 
             <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
               <h4 className="text-sm font-semibold text-gray-600">
-                Detail Sampel & TCM
+                Detail Diagnosa
               </h4>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Jenis Sampel
+                Klasifikasi Anatomi
               </label>
-              <input
-                type="text"
-                name="jenis_sample"
-                placeholder="Sputum / LCS / Biopsi"
-                defaultValue={data.jenis_sample || ""}
+              <select
+                name="klasifikasi_anatomi"
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
+              >
+                <option value="">-- Klasifikasikan TB --</option>
+                <option value="TB Paru">TB Paru</option>
+                <option value="TB Ekstra Paru">TB Ekstra Paru</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Kualitas Sampel
+                Lokasi Anatomi
               </label>
               <input
                 type="text"
-                name="kualitas_sample"
-                placeholder="Purulen / Mukoid"
-                defaultValue={data.kualitas_sample || ""}
+                name="lokasi_anatomi"
+                placeholder="Jika Ekstraparu, sebutkan: Kelenjar getah bening, Pleura, ..."
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                DNA Bakteri *
+                Klasifikasi Resistensi *
               </label>
-              <input
-                type="text"
-                name="dna_bakteri_tb"
+              <select
+                name="klasifikasi_resistensi"
                 required
-                placeholder="High, Medium, Trace"
-                defaultValue={data.dna_bakteri_tb}
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
+              >
+                <option value="">-- Klaifikasikan Resistensi --</option>
+                <option value="TB-SO (Sensitif Obat)">
+                  TB-SO (Sensitif Obat)
+                </option>
+                <option value="TB-RO (Resisten Obat)">
+                  TB-RO (Resisten Obat)
+                </option>
+                <option value="Terduga TB-RO">Terduga TB-RO</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Status Resistensi *
+                Tipe Resistensi
               </label>
               <input
                 type="text"
-                name="status_resistensi"
-                required
-                list="opsi-status-resistensi"
-                placeholder="Sensitif / Resisten"
-                defaultValue={data.status_resistensi}
+                name="tipe_resistensi"
+                list="opsi-tipe-resistensi"
+                placeholder="Kosong jika SO"
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
-              <datalist id="opsi-status-resistensi">
-                <option value="Sensitif" />
-                <option value="Resisten" />
-                <option value="Indeterminate" />
+              <datalist id="opsi-tipe-resistensi">
+                <option value="Monoresisten Rifampisin (TB-RR)" />
+                <option value="MDR-TB" />
+                <option value="XDR-TB" />
               </datalist>
+            </div>
+
+            <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
+              <h4 className="text-sm font-semibold text-gray-600">
+                Dasar & Catatan Diagnosa
+              </h4>
             </div>
 
             <div className="col-span-1 md:col-span-2">
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Hasil BTA (Khusus tes BTA)
+                Dasar Diagnosa
               </label>
               <input
                 type="text"
-                name="hasil_bta"
-                placeholder="Negatif / 1+ / 2+"
-                defaultValue={data.hasil_bta || ""}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                name="dasar_diagnosis"
+                placeholder="contoh: Terkonfirmasi Bakteriologis (TCM/BTA+)"
+                className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div className="col-span-1 md:col-span-2">
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Catatan Klinis
+              </label>
+              <input
+                type="text"
+                name="catatan_klinis"
+                placeholder="Catatan tambahan dokter"
+                className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-5 mt-2 border-t border-gray-100">
+            {/* Tombol Batal & Simpan seperti sebelumnya */}
             <button
               type="button"
               onClick={onClose}
@@ -203,7 +193,7 @@ export default function EditLabModal({
               disabled={isPending}
               className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-blue-700 disabled:bg-blue-400"
             >
-              {isPending ? "Menyimpan..." : "Simpan Perubahan"}
+              {isPending ? "Menyimpan..." : "Simpan Data"}
             </button>
           </div>
         </form>

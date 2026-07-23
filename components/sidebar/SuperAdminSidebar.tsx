@@ -12,6 +12,7 @@ export default function SuperAdminSidebar() {
     { name: "Episode Pengobatan", href: "/dashboard/episode-pengobatan" },
     { name: "Pemeriksaan Klinis", href: "/dashboard/pemeriksaan-klinis" },
     { name: "Pemeriksaan Lab", href: "/dashboard/pemeriksaan-lab" },
+    { name: "Diagnosa pasien", href: "/dashboard/diagnosis" },
   ];
 
   return (

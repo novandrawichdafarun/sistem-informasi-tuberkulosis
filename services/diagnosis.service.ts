@@ -32,7 +32,7 @@ export const getDaftarDiagnosis = async (
             id_diagnosis, id_episode, tanggal_diagnosis,
             kode_icd10, klasifikasi_anatomi, lokasi_anatomi,
             klasifikasi_resistensi, tipe_resistensi, 
-            dasar_diagnosis, catata_klinis, created_at
+            dasar_diagnosis, catatan_klinis, created_at
           )
         )
         `,
@@ -102,7 +102,7 @@ export const createDiagnosis = async (
     const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
       .select("id_episode")
-      .eq("id_episoode", payload.id_episode)
+      .eq("id_episode", payload.id_episode)
       .single();
 
     if (checkError || !episode)

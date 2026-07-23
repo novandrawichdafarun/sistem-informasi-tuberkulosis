@@ -1,12 +1,12 @@
-import { getDaftarPemeriksaanLabAction } from "@/actions/pemeriksaanLab";
-import PemeriksaanLabRowView from "@/components/pemeriksaanLab/PemeriksaanLabRowView";
+import { getDaftarDiagnosisAction } from "@/actions/diagnosis";
+import DiagnosisRowView from "@/components/diagnosis/DiagnosisRowVIew";
 
 export const metadata = {
-  title: "Manajemen Pemeriksaan Lab | NU-TBCARE",
+  title: "Manajemen Diagnosis Pasien | NU-TBCARE",
 };
 
-export default async function PemeriksaanLabPage() {
-  const result = await getDaftarPemeriksaanLabAction();
+export default async function DiagnosisPage() {
+  const result = await getDaftarDiagnosisAction();
 
   if (result.success === false) {
     return (
@@ -55,7 +55,7 @@ export default async function PemeriksaanLabPage() {
                 </tr>
               ) : (
                 daftarPasien.map((pasien) => (
-                  <PemeriksaanLabRowView key={pasien.id_pasien} data={pasien} />
+                  <DiagnosisRowView key={pasien.id_pasien} data={pasien} />
                 ))
               )}
             </tbody>
