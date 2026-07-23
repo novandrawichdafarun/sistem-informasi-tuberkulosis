@@ -1,18 +1,18 @@
 import { ActionResponse } from "@/types/action";
 import {
-  CreatePemeriksaanPayload,
-  PasienPemeriksaanOverview,
-  PemeriksaanKlinisData,
-  UpdatePemeriksaanPayload,
-} from "@/types/pemeriksaanKlinis";
+  CreateDiagnosisPayload,
+  DiagnosisData,
+  PasienDiagnosisOverview,
+  UpdateDaignosisPayload,
+} from "@/types/diagnosis";
 import { verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export const getDaftarPemeriksaan = async (
+export const getDaftarDiagnosis = async (
   supabase: SupabaseClient,
   id_super_admin: string,
-): Promise<ActionResponse<PasienPemeriksaanOverview[]>> => {
+): Promise<ActionResponse<PasienDiagnosisOverview[]>> => {
   try {
     const { superAdmin, error } = await verifySuperAdminAccess(
       supabase,
@@ -25,41 +25,40 @@ export const getDaftarPemeriksaan = async (
       .from("pasien")
       .select(
         `
-      id_pasien, nama_lengkap, usia, domisili,
-      episode_pengobatan (
-        id_episode, status_episode,
-        pemeriksaan_klinis ( 
-          id_periksa, id_episode, 
-          tanggal_periksa, keluhan, tensi, suhu, 
-          pernapasan, nadi, saturasi_o2, 
-          tinggi_badan, berat_badan, 
-          created_at 
+        id_pasien, nama_lengkap, usia, domisili,
+        episode_pengobatan (
+          id_episode, status_episode,
+          diagnosis (
+            id_diagnosis, id_episode, tanggal_diagnosis,
+            kode_icd10, klasifikasi_anatomi, lokasi_anatomi,
+            klasifikasi_resistensi, tipe_resistensi, 
+            dasar_diagnosis, catata_klinis, created_at
+          )
         )
-      )
-    `,
+        `,
       )
       .order("created_at", { ascending: false });
 
     if (pasienError)
       return handleServiceError(pasienError?.message, "Pasien tidak ditemukan");
 
-    const formattedData: PasienPemeriksaanOverview[] = pasienData.map(
+    const formattedData: PasienDiagnosisOverview[] = pasienData.map(
       (pasien) => {
         const rawEpisodes = pasien.episode_pengobatan || [];
         const episodeAktif =
           rawEpisodes.find((ep) => ep.status_episode === "aktif") || null;
 
-        let riwayat: PemeriksaanKlinisData[] = [];
+        let riwayat: DiagnosisData[] = [];
         rawEpisodes.forEach((ep) => {
-          if (ep.pemeriksaan_klinis) {
-            riwayat = [...riwayat, ...ep.pemeriksaan_klinis];
+          if (ep.diagnosis) {
+            riwayat = [...riwayat, ...ep.diagnosis];
           }
         });
 
         riwayat.sort(
           (a, b) =>
-            new Date(b.tanggal_periksa).getTime() -
-            new Date(a.tanggal_periksa).getTime(),
+            new Date(b.tanggal_diagnosis).getTime() -
+            new Date(a.tanggal_diagnosis).getTime(),
         );
 
         return {
@@ -73,7 +72,7 @@ export const getDaftarPemeriksaan = async (
                 status_episode: episodeAktif.status_episode,
               }
             : null,
-          riwayat_pemeriksaan: riwayat,
+          riwayat_diagnosis: riwayat,
         };
       },
     );
@@ -87,9 +86,9 @@ export const getDaftarPemeriksaan = async (
   }
 };
 
-export const createPemeriksaanKlinis = async (
+export const createDiagnosis = async (
   supabase: SupabaseClient,
-  payload: CreatePemeriksaanPayload,
+  payload: CreateDiagnosisPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
@@ -103,7 +102,7 @@ export const createPemeriksaanKlinis = async (
     const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
       .select("id_episode")
-      .eq("id_episode", payload.id_episode)
+      .eq("id_episoode", payload.id_episode)
       .single();
 
     if (checkError || !episode)
@@ -113,27 +112,27 @@ export const createPemeriksaanKlinis = async (
       );
 
     const { error: insertError } = await supabase
-      .from("pemeriksaan_klinis")
+      .from("diagnosis")
       .insert(payload);
 
     if (insertError)
       return handleServiceError(
         insertError?.message,
-        "Gagal menyimpan pemeriksaan klinis.",
+        "Gagal menyimpan diagnosis",
       );
 
-    return {
-      success: true,
-      message: "Pemeriksaan klinis berhasil ditambahkan!",
-    };
+    return { success: true, message: "Diagnosis pasien berhasil ditambahkan!" };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal server saat menambah data.",
+    );
   }
 };
 
-export const updatePemeriksaanKlinis = async (
+export const updateDiagnosis = async (
   supabase: SupabaseClient,
-  payload: UpdatePemeriksaanPayload,
+  payload: UpdateDaignosisPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
@@ -144,20 +143,20 @@ export const updatePemeriksaanKlinis = async (
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: periksa, error: checkError } = await supabase
-      .from("pemeriksaan_klinis")
-      .select("id_periksa")
-      .eq("id_periksa", payload.id_periksa)
+    const { data: diagnosis, error: checkError } = await supabase
+      .from("diagnosis")
+      .select("id_diagnosis")
+      .eq("id_tes", payload.id_diagnosis)
       .single();
 
-    if (checkError || !periksa)
+    if (checkError || !diagnosis)
       return handleServiceError(checkError?.message, "Data tidak ditemukan");
 
-    const { id_periksa, ...updateData } = payload;
+    const { id_diagnosis, ...updateData } = payload;
     const { error: updateError } = await supabase
-      .from("pemeriksaan_klinis")
+      .from("diagnosis")
       .update(updateData)
-      .eq("id_periksa", id_periksa);
+      .eq("id_diagnosis", id_diagnosis);
 
     if (updateError)
       return handleServiceError(
@@ -165,7 +164,10 @@ export const updatePemeriksaanKlinis = async (
         "Gagal memeperbarui data.",
       );
 
-    return { success: true, message: "Data pemeriksaan berhasil diperbarui!" };
+    return {
+      success: true,
+      message: "Data Diagnosis Pasien berhasil diperbarui!",
+    };
   } catch (error) {
     return handleServiceError(
       error,
@@ -174,9 +176,9 @@ export const updatePemeriksaanKlinis = async (
   }
 };
 
-export const deletePemeriksaanKlinis = async (
+export const deleteDiagnosis = async (
   supabase: SupabaseClient,
-  id_periksa: number,
+  id_diagnosis: number,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
@@ -187,24 +189,24 @@ export const deletePemeriksaanKlinis = async (
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: periksa, error: checkError } = await supabase
-      .from("pemeriksaan_klinis")
-      .select("id_periksa")
-      .eq("id_periksa", id_periksa)
+    const { data: diagnosis, error: checkError } = await supabase
+      .from("diagnosis")
+      .select("id_diagnosis")
+      .eq("id_diagnosis", id_diagnosis)
       .single();
 
-    if (checkError || !periksa)
+    if (checkError || !diagnosis)
       return handleServiceError(checkError?.message, "Data tidak ditemukan");
 
     const { error: deleteError } = await supabase
-      .from("pemeriksaan_klinis")
+      .from("diagnosis")
       .delete()
-      .eq("id_periksa", id_periksa);
+      .eq("id_diagnosis", id_diagnosis);
 
     if (deleteError)
       return handleServiceError(deleteError?.message, "Gagal menghapus data");
 
-    return { success: true, message: "Pemeriksaan berhasil dihapus." };
+    return { success: true, message: "Diagnosis Pasien berhasil dihapus." };
   } catch (error) {
     return handleServiceError(
       error,

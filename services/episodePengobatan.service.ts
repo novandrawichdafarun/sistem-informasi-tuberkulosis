@@ -70,7 +70,10 @@ export const getDaftarPasienDanEpisode = async (
 
     return { success: true, data: formattedData };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
   }
 };
 
@@ -103,7 +106,10 @@ export const getEpisodeAktifByPasienId = async (
 
     return { success: true, data: episode_pengobatan };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
   }
 };
 
@@ -143,7 +149,10 @@ export const bukaEpisode = async (
 
     return { success: true, message: "Episode berhasil dibuka." };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat membuka data.",
+    );
   }
 };
 
@@ -166,12 +175,11 @@ export const tutupEpisode = async (
       .eq("id_episode", payload.id_episode)
       .single();
 
-    if (checkError || !episode) {
-      return {
-        success: false,
-        error: "Episode tidak ditemukan atau akses ditolak.",
-      };
-    }
+    if (checkError || !episode)
+      return handleServiceError(
+        checkError?.message,
+        "Episode pengobatan pasien tidak ada.",
+      );
 
     const { error: episodeError } = await supabase
       .from("episode_pengobatan")
@@ -191,7 +199,10 @@ export const tutupEpisode = async (
 
     return { success: true, message: "Episode berhasil diselesaikan." };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal server saat menutup data.",
+    );
   }
 };
 
@@ -214,15 +225,14 @@ export const editEpisode = async (
       .eq("id_episode", payload.id_episode)
       .single();
 
-    if (checkError || !episode) {
-      return {
-        success: false,
-        error: "Episode tidak ditemukan atau akses ditolak.",
-      };
-    }
+    if (checkError || !episode)
+      return handleServiceError(
+        checkError?.message,
+        "Episode pengobatan pasien tidak ada.",
+      );
 
     // Update
-    const { error: episodeError } = await supabase
+    const { error: updateError } = await supabase
       .from("episode_pengobatan")
       .update({
         tanggal_mulai: payload.tanggal_mulai,
@@ -231,15 +241,18 @@ export const editEpisode = async (
       })
       .eq("id_episode", payload.id_episode);
 
-    if (episodeError) {
+    if (updateError) {
       return handleServiceError(
-        episodeError?.message,
-        "Episode aktif tidak ditemukan.",
+        updateError?.message,
+        "Gagal memperbarui data.",
       );
     }
     return { success: true, message: "Episode berhasil diperbarui." };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat memperbarui data.",
+    );
   }
 };
 
@@ -262,26 +275,26 @@ export const hapusEpisode = async (
       .eq("id_episode", id_episode)
       .single();
 
-    if (checkError || !episode) {
-      return {
-        success: false,
-        error: "Episode tidak ditemukan atau akses ditolak.",
-      };
-    }
-    const { error: episodeError } = await supabase
+    if (checkError || !episode)
+      return handleServiceError(
+        checkError?.message,
+        "Episode pengobatan pasien tidak ada.",
+      );
+
+    const { error: deleteError } = await supabase
       .from("episode_pengobatan")
       .delete()
       .eq("id_episode", id_episode);
 
-    if (episodeError) {
-      return handleServiceError(
-        episodeError?.message,
-        "Episode aktif tidak ditemukan.",
-      );
+    if (deleteError) {
+      return handleServiceError(deleteError?.message, "Gagal menghapus data");
     }
 
     return { success: true, message: "Episode berhasil dihapus." };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat menghapus data.",
+    );
   }
 };

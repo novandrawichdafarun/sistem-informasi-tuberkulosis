@@ -40,13 +40,8 @@ export const getDaftarPemeriksaanLab = async (
       )
       .order("created_at", { ascending: false });
 
-    if (pasienError) {
-      console.error("[DB ERROR] getDaftarPemeriksaanLab:", pasienError.message);
-      return {
-        success: false,
-        error: "Gagal mengambil data pasien dari sistem.",
-      };
-    }
+    if (pasienError)
+      return handleServiceError(pasienError?.message, "Pasien tidak ditemukan");
 
     const formattedData: PasienPemeriksaanLabOverview[] = pasienData.map(
       (pasien) => {
@@ -85,7 +80,10 @@ export const getDaftarPemeriksaanLab = async (
 
     return { success: true, data: formattedData };
   } catch (error) {
-    return handleServiceError(error, "Gagal mengambil data pemeriksaan lab.");
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
   }
 };
 
@@ -108,21 +106,21 @@ export const createPemeriksaanLab = async (
       .eq("id_episode", payload.id_episode)
       .single();
 
-    if (checkError || !episode) {
-      return {
-        success: false,
-        error: "Akses ditolak: Pasien bukan milik Anda.",
-      };
-    }
+    if (checkError || !episode)
+      return handleServiceError(
+        checkError?.message,
+        "Episode pengobatan pasien tidak ada.",
+      );
 
     const { error: insertError } = await supabase
       .from("pemeriksaan_lab")
       .insert(payload);
 
-    if (insertError) {
-      console.error("[DB ERROR] Insert Pemeriksaan Lab:", insertError.message);
-      return { success: false, error: "Gagal menyimpan pemeriksaan lab." };
-    }
+    if (insertError)
+      return handleServiceError(
+        insertError?.message,
+        "Gagal menyimpan pemeriksaan lab",
+      );
 
     return { success: true, message: "Pemeriksaan lab berhasil ditambahkan!" };
   } catch (error) {
@@ -152,12 +150,8 @@ export const updatePemeriksaanLab = async (
       .eq("id_tes", payload.id_tes)
       .single();
 
-    if (checkError || !tesLab) {
-      return {
-        success: false,
-        error: "Data tidak ditemukan atau akses ditolak.",
-      };
-    }
+    if (checkError || !tesLab)
+      return handleServiceError(checkError, "Data tidak ditemukan");
 
     const { id_tes, ...updateData } = payload;
     const { error: updateError } = await supabase
@@ -166,7 +160,11 @@ export const updatePemeriksaanLab = async (
       .eq("id_tes", id_tes);
 
     if (updateError)
-      return { success: false, error: "Gagal memperbarui data." };
+      return handleServiceError(
+        updateError?.message,
+        "Gagal memeperbarui data.",
+      );
+
     return {
       success: true,
       message: "Data pemeriksaan lab berhasil diperbarui!",
@@ -198,12 +196,8 @@ export const deletePemeriksaanLab = async (
       .eq("id_tes", id_tes)
       .single();
 
-    if (checkError || !tesLab) {
-      return {
-        success: false,
-        error: "Data tidak ditemukan atau akses ditolak.",
-      };
-    }
+    if (checkError || !tesLab)
+      return handleServiceError(checkError, "Data tidak ditemukan");
 
     const { error: deleteError } = await supabase
       .from("pemeriksaan_lab")
@@ -211,7 +205,7 @@ export const deletePemeriksaanLab = async (
       .eq("id_tes", id_tes);
 
     if (deleteError)
-      return { success: false, error: "Gagal menghapus data pemeriksaan lab." };
+      return handleServiceError(deleteError?.message, "Gagal menghapus data");
 
     return { success: true, message: "Pemeriksaan lab berhasil dihapus." };
   } catch (error) {

@@ -32,16 +32,18 @@ export const getDaftarPasien = async (
       )
       .order("created_at", { ascending: false });
 
-    if (pasienError) {
+    if (pasienError)
       return handleServiceError(
-        pasienError,
+        pasienError?.message,
         "Gagal mengambil data pasien dari sistem.",
       );
-    }
 
     return { success: true, data: pasien as unknown as PasienData[] };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
   }
 };
 
@@ -65,9 +67,11 @@ export const createPasien = async (
       .eq("email", payload.email)
       .single();
 
-    if (existingUser) {
-      return { success: false, error: "Email sudah terdaftar di sistem!" };
-    }
+    if (existingUser)
+      return handleServiceError(
+        existingUser,
+        "Email sudah terdaftar di sistem!",
+      );
 
     // Hash Password & Insert User
     const salt = await bcrypt.genSalt(10);
@@ -83,10 +87,11 @@ export const createPasien = async (
       .select("id_user")
       .single();
 
-    if (userError || !newUser) {
-      console.error("[DB ERROR] Insert User:", userError?.message);
-      return { success: false, error: "Gagal membuat kredensial akun pasien." };
-    }
+    if (userError || !newUser)
+      return handleServiceError(
+        userError?.message,
+        "Gagal membuat kredensial akun pasien.",
+      );
 
     // Insert Data Medis Pasien
     const { error: pasienError } = await supabase.from("pasien").insert({
@@ -105,14 +110,17 @@ export const createPasien = async (
     if (pasienError) {
       await supabase.from("users").delete().eq("id_user", newUser.id_user);
       return handleServiceError(
-        pasienError,
+        pasienError?.message,
         "Gagal menyimpan data medis pasien. Pendaftaran dibatalkan",
       );
     }
 
     return { success: true, message: "Pasien berhasil didaftarkan!" };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat menambah data.",
+    );
   }
 };
 
@@ -144,13 +152,11 @@ export const updatePasien = async (
       .update(updateUserData)
       .eq("id_user", payload.id_user);
 
-    if (userError) {
-      console.error("[DB ERROR] Update User:", userError.message);
-      return {
-        success: false,
-        error: "Gagal memperbarui kredensial (Email mungkin sudah dipakai).",
-      };
-    }
+    if (userError)
+      return handleServiceError(
+        userError?.message,
+        "Gagal memperbarui kredensial (Email mungkin sudah dipakai).",
+      );
 
     // Update Data Medis Pasien
     const { error: pasienError } = await supabase
@@ -167,16 +173,18 @@ export const updatePasien = async (
       })
       .eq("id_pasien", payload.id_pasien);
 
-    if (pasienError) {
+    if (pasienError)
       return handleServiceError(
-        pasienError,
+        pasienError?.message,
         "Gagal memperbarui profil medis pasien.",
       );
-    }
 
     return { success: true, message: "Data pasien berhasil diperbarui!" };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat memperbarui data.",
+    );
   }
 };
 
@@ -199,40 +207,38 @@ export const deletePasien = async (
       .eq("id_pasien", id_pasien)
       .single();
 
-    if (!pasien) {
-      return {
-        success: false,
-        error: "Pasien tidak ditemukan atau bukan milik Anda.",
-      };
-    }
+    if (!pasien) return handleServiceError(pasien, "Pasien tidak ditmeukan");
 
     const { error: deletePasienError } = await supabase
       .from("pasien")
       .delete()
       .eq("id_pasien", id_pasien);
 
-    if (deletePasienError) {
-      console.error("[DB ERROR] Delete Pasien:", deletePasienError.message);
-      return { success: false, error: "Gagal menghapus data medis pasien." };
-    }
+    if (deletePasienError)
+      return handleServiceError(
+        deletePasienError?.message,
+        "Gagal menghapus data medis pasien.",
+      );
 
     const { error: deleteUserError } = await supabase
       .from("users")
       .delete()
       .eq("id_user", pasien.id_user);
 
-    if (deleteUserError) {
+    if (deleteUserError)
       return handleServiceError(
         deletePasienError,
         "Gagal menghapus akun pasien. Operasi dibatalkan otomatis.",
       );
-    }
 
     return {
       success: true,
       message: "Pasien dan akunnya berhasil dihapus permanen.",
     };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat menghapus data.",
+    );
   }
 };
