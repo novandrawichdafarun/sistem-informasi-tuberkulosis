@@ -1,5 +1,5 @@
 // ==========================================
-// 1. ENTITAS PENGGUNA & FASILITAS KESEHATAN
+// 1. ENTITAS PENGGUNA
 // ==========================================
 
 Table users {
@@ -9,22 +9,12 @@ Table users {
   role varchar(20) [note: 'pasien / nakes / super_admin']
 }
 
-Table faskes {
-  id_faskes integer [pk, increment]
-  nama_faskes varchar(100) [not null]
-  jenis varchar(50) [note: 'puskesmas / rs / klinik']
-  alamat text
-}
-
-Table nakes {
-  id_nakes integer [pk, increment]
+Table user_session {
+  id integer [pk, increment]
   id_user integer [ref: - users.id_user, unique]
-  id_faskes integer [ref: > faskes.id_faskes]
-  nama varchar(100) [not null]
-  no_str varchar(50) [note: 'Nomor Surat Tanda Registrasi (STR)']
-  no_sip varchar(50) [note: 'Surat Izin Praktik (SIP)']
-  jabatan varchar(50) [note: 'dokter / perawat / analis lab']
-  no_hp varchar(20)
+  session_token text [not null]
+  device_info text
+  last_active_at timestamp [default: 'now()', not null]
 }
 
 // ==========================================
@@ -34,15 +24,14 @@ Table nakes {
 Table pasien {
   id_pasien integer [pk, increment]
   id_user integer [ref: - users.id_user, unique]
-  id_nakes integer [ref: > nakes.id_nakes, note: 'nakes penanggung jawab tetap']
-  id_faskes integer [ref: > faskes.id_faskes]
-  no_rm varchar(50) [unique]
-  nik varchar(16) [unique, not null]
   nama_lengkap varchar(100) [not null]
-  tanggal_lahir date
+  usia varchar(20) [not null, note: 'Balita (< 5 tahun), Anak-anak (5-11 tahun), Remaja (12-25 tahun), Dewasa (26-45 tahun), Lansia (56-65 tahun), Manula (> 65 tahun), dkk']
   jenis_kelamin varchar(1) [note: 'L / P']
-  alamat text
+  domisili text
   no_telp varchar(20)
+  pendidikan varchar(50) [not null, note: 'SD, SMP, SMA, Diploma (D1/D2/D3/D4), Sarjana (S1), Magister (S2), Doktor (S3) dkk']
+  pekerjaan varcahr(50) [not null, note: 'Ibu Rumah Tangga, Wirausaha, PNS/ASN, TNI/Polri, Pegawai BUMN/BUMD, Karyawan Swasta, Buruh, Pensiun, dkk']
+  pendapatan varchar(50) [not null, note: 'Dibawa rata-rata (< 1.5jt), Kelas Bawah (1.5jt - 3jt), Kelas Menengah-Bawah (3jt - 5jt), Kelas Menengah (5jt - 10jt), Kelas Menegah Atas (10jt - 20jt), Kelas Atas (> 20jt)']
 }
 
 Table episode_pengobatan {
@@ -61,7 +50,6 @@ Table episode_pengobatan {
 Table pemeriksaan_klinis {
   id_periksa integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode, note: 'Terkunci ke episode untuk riwayat runtun waktu']
-  id_nakes integer [ref: > nakes.id_nakes]
   tanggal_periksa date [not null]
   keluhan text
   tensi varchar(20) [note: 'Disimpan teks, contoh: 120/80 mmHg']
@@ -76,7 +64,6 @@ Table pemeriksaan_klinis {
 Table pemeriksaan_lab {
   id_tes integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode]
-  id_nakes integer [ref: > nakes.id_nakes]
   tanggal_tes date
   jenis_tes varchar(50) [note: 'TCM / IGRA / Mantoux / BTA / Rontgen']
   periode_pemeriksaan varchar(50) [note: 'Bulan ke-2 / bulan ke-5 / akhir masa pengobatan']
@@ -102,7 +89,6 @@ Table pemeriksaan_lab {
 Table diagnosis {
   id_diagnosis integer [pk, increment]
   id_episode integer [ref: - episode_pengobatan.id_episode, unique, note: 'Satu diagnosis final per satu episode pengobatan']
-  id_nakes integer [ref: > nakes.id_nakes, note: 'Dokter yang menegakkan diagnosis']
   tanggal_diagnosis date [not null]
 
   // Standarisasi Medis
@@ -122,7 +108,6 @@ Table diagnosis {
 Table resep_pengobatan {
   id_resep integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode]
-  id_nakes integer [ref: > nakes.id_nakes, note: 'Dokter yang meresepkan']
   tanggal_resep date [not null]
 
   // Klasifikasi Rejimen
@@ -135,13 +120,20 @@ Table resep_pengobatan {
   status_resep varchar(20) [note: 'aktif / selesai / diganti']
 }
 
+Table obat {
+  id_obat integer [pk, increment]
+  nama_obat varchar(100) [not null, note: 'Contoh: KDT Lini 1 (4FDC), Streptomisin vial, Levofloxacin 250mg, Rifampisin 450mg']
+  jenis_obat varchar(50) [not null, note: 'KDT (Kombinasi Dosis Tetap) / Tunggal / Injeksi']
+  kategori_obat varchar(50) [not null, note: 'Lini Pertama, Lini Kedua, Suplement']
+  deskripsi text
+  dosis varchar(100)
+  isAktive boolean [default: true]
+}
+
 Table detail_obat {
   id_detail integer [pk, increment]
   id_resep integer [ref: > resep_pengobatan.id_resep]
-
-  // Detail Fisik Obat
-  nama_obat varchar(100) [note: 'Contoh: KDT Lini 1 (4FDC), Streptomisin vial, Levofloxacin 250mg, Rifampisin 450mg']
-  jenis_obat varchar(50) [note: 'KDT (Kombinasi Dosis Tetap) / Tunggal / Injeksi']
+  id_obat integer [ref: > obat.id_obat]
 
   // Aturan Pakai & Dosis (Sangat krusial berdasarkan berat badan pasien)
   jumlah_obat_per_minum decimal(4,2) [note: 'Contoh: 3.00 (artinya 3 tablet sekali minum), atau 1.50 (1 setengah tablet)']
@@ -186,22 +178,4 @@ Table notifikasi {
   pesan text [not null]
   waktu_kirim timestamp
   status_terkirim varchar(20)
-}
-
-Table pesan_chat {
-  id_pesan integer [pk, increment]
-  id_pasien integer [ref: > pasien.id_pasien, note: 'Menentukan room chat pasien tersebut']
-  id_pengirim integer [ref: > users.id_user, note: 'ID akun yang mengetik pesan']
-  isi_pesan text
-  lampiran_file_url varchar(255)
-  waktu_kirim timestamp [default:  `now()` ]
-  status_baca varchar(20) [note: 'dibaca / belum dibaca']
-}
-
-Table user_session {
-  id integer [pk, increment]
-  id_user integer [ref: - users.id_user, unique]
-  session_token text [not null]
-  device_info text
-  last_active_at timestamp [default: 'now()', not null]
 }

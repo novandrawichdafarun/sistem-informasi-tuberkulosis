@@ -154,11 +154,23 @@ CREATE TABLE resep_pengobatan (
 CREATE INDEX idx_resep_pengobatan_episode ON resep_pengobatan(id_episode);
 ALTER TABLE resep_pengobatan ENABLE ROW LEVEL SECURITY;
 
+CREATE TABLE obat (
+  id_obat SERIAL PRIMARY KEY,
+  nama_obat VARCHAR(100) NOT NULL UNIQUE,
+  jenis_obat VARCHAR(50) NOT NULL, -- KDT (Kombinasi Dosis Tetap) / Tunggal / Injeksi
+  kategori_obat VARCHAR(50) NOT NULL, -- Lini Pertama, Lini Kedua, Suplement, dll
+  deskripsi TEXT,
+  dosis VARCHAR(100), -- Contoh: "300mg", "150mg/75mg/400mg/275mg"
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+ALTER TABLE obat ENABLE ROW LEVEL SECURITY;
+
 CREATE TABLE detail_obat (
   id_detail_obat SERIAL PRIMARY KEY,
   id_resep INTEGER REFERENCES resep_pengobatan(id_resep) ON DELETE CASCADE NOT NULL,
-  nama_obat VARCHAR(100) NOT NULL, -- Rifampisin, Isoniazid, Pirazinamid, Etambutol
-  jenis_obat VARCHAR(50) NOT NULL, -- KDT (Kombinasi Dosis Tetap) / Tunggal / Injeksi
+  id_obat INTEGER REFERENCES obat(id_obat) ON DELETE RESTRICT NOT NULL,
 
   jumlah_obat_per_minum DECIMAL(4,2) NOT NULL, -- Contoh: 3.00 (artinya 3 tablet sekali minum), atau 1.50 (1 setengah tablet)
   frekuensi_minum VARCHAR(50) NOT NULL, -- 1x sehari / 3x seminggu / 1x seminggu
@@ -169,6 +181,7 @@ CREATE TABLE detail_obat (
 );
 
 CREATE INDEX idx_detail_obat_resep ON detail_obat(id_resep);
+CREATE INDEX idx_detail_obat_obat ON detail_obat(id_obat);
 ALTER TABLE detail_obat ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE jadwal_minum_obat (

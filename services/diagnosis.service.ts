@@ -50,8 +50,10 @@ export const getDaftarDiagnosis = async (
 
         let riwayat: DiagnosisData[] = [];
         rawEpisodes.forEach((ep) => {
-          if (ep.diagnosis) {
+          if (Array.isArray(ep.diagnosis)) {
             riwayat = [...riwayat, ...ep.diagnosis];
+          } else {
+            riwayat = [...riwayat, ep.diagnosis];
           }
         });
 
@@ -101,7 +103,14 @@ export const createDiagnosis = async (
 
     const { data: episode, error: checkError } = await supabase
       .from("episode_pengobatan")
-      .select("id_episode")
+      .select(
+        `
+          id_episode,
+          diagnosis (
+            id_diagnosis
+          )
+        `,
+      )
       .eq("id_episode", payload.id_episode)
       .single();
 
@@ -110,6 +119,16 @@ export const createDiagnosis = async (
         checkError?.message,
         "Episode pengobatan pasien tidak ada.",
       );
+
+    const diagnosisExsist =
+      episode.diagnosis &&
+      (Array.isArray(episode.diagnosis) ? episode.diagnosis.length > 0 : true);
+
+    if (diagnosisExsist)
+      return {
+        success: false,
+        error: "Gagal menyimpan karena diagnosis sudah ada pada episode ini",
+      };
 
     const { error: insertError } = await supabase
       .from("diagnosis")

@@ -9,6 +9,7 @@ export default function SuperAdminSidebar() {
   const menuItems = [
     { name: "Dashboard", href: "/dashboard" },
     { name: "Manajemen Pasien", href: "/dashboard/pasien" },
+    { name: "Manajemen Obat", href: "/dashboard/obat" },
     { name: "Episode Pengobatan", href: "/dashboard/episode-pengobatan" },
     { name: "Pemeriksaan Klinis", href: "/dashboard/pemeriksaan-klinis" },
     { name: "Pemeriksaan Lab", href: "/dashboard/pemeriksaan-lab" },

@@ -12,11 +12,16 @@ interface Props {
 export default function DiagnosisRowView({ data }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const isEpisodeAktif = data.episodeAktif?.status_episode === "aktif";
+
   const [isModalTambahOpen, setIsModalTambahOpen] = useState(false);
 
   const { nama_lengkap, usia, domisili, episodeAktif, riwayat_diagnosis } =
     data;
   const hasRiwayat = riwayat_diagnosis && riwayat_diagnosis.length > 0;
+  const isDiagnosisExists =
+    riwayat_diagnosis?.some(
+      (diagnosis) => diagnosis.id_episode === episodeAktif?.id_episode,
+    ) || false;
 
   return (
     <>
@@ -61,7 +66,7 @@ export default function DiagnosisRowView({ data }: Props) {
           </button>
 
           {/* Tombol Tambah Lab (Hanya muncul jika episode aktif) */}
-          {isEpisodeAktif && episodeAktif && (
+          {isEpisodeAktif && episodeAktif && !isDiagnosisExists && (
             <>
               <button
                 className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
