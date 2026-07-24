@@ -26,7 +26,10 @@ export default function ObatTableView({ data }: Props) {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {data.map((obat) => (
-              <tr key={obat.id_obat} className="border-b hover:bg-gray-50">
+              <tr
+                key={obat.id_obat}
+                className="hover:bg-gray-50 transition-colors group"
+              >
                 <td className="px-4 py-3">
                   <div className="font-medium text-gray-800">
                     {obat.nama_obat}
