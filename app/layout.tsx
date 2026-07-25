@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sistem Informasi Tuberkulosis",
+  title: "NU-TBCare",
   description: "Aplikasi pelaporan mandiri dan pemantauan pasien Tuberkulsis",
 };
 

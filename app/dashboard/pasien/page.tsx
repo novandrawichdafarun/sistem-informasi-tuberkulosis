@@ -1,13 +1,12 @@
-import { getDaftarPasienAction } from "@/actions/pasien";
 import Link from "next/link";
+import { getDaftarPasienAction } from "@/actions/pasien";
 import { PasienData } from "@/types/pasien";
 import TambahPasienModal from "@/components/pasien/TambahPasienModal";
-import { hitungUmur } from "@/utils/date";
 import EditPasienModal from "@/components/pasien/EditPasienModal";
 import DeletePasienButton from "@/components/pasien/DeletePasienButton";
 
 export const metadata = {
-  title: "Manajemen Pasien | PantauTB",
+  title: "Manajemen Pasien | NU-TBCare",
 };
 
 export default async function ManajemenPasienPage() {
@@ -17,21 +16,19 @@ export default async function ManajemenPasienPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Bagian Header */}
+      {/* Header */}
       <div className="sm:flex sm:items-center sm:justify-between mb-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Manajemen Pasien</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Daftar seluruh pasien TB yang berada di bawah pantauan Anda.
+            Daftar seluruh pasien TB yang terdaftar di sistem.
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
-          {/* Tombol Tambah Pasien */}
           <TambahPasienModal />
         </div>
       </div>
 
-      {/* Bagian Tabel (Bawaan Tailwind UI) */}
       {response.success === false ? (
         <div className="rounded-md bg-red-50 p-4 border border-red-200">
           <p className="text-sm text-red-600">{response.error}</p>
@@ -42,40 +39,25 @@ export default async function ManajemenPasienPage() {
             <table className="min-w-full divide-y divide-gray-300">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    scope="col"
-                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                  >
-                    No. RM
+                  <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                    Nama & Usia
                   </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Nama Pasien & Umur
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    L/P
                   </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    NIK / L/P
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     Kontak
                   </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Fisik Awal
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Domisili
                   </th>
-                  <th
-                    scope="col"
-                    className="relative py-3.5 pl-3 pr-4 sm:pr-6 text-gray-900"
-                  >
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Pendidikan / Pekerjaan
+                  </th>
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Pendapatan
+                  </th>
+                  <th className="relative py-3.5 pl-3 pr-4 sm:pr-6 text-gray-900">
                     Aksi
                   </th>
                 </tr>
@@ -84,7 +66,7 @@ export default async function ManajemenPasienPage() {
                 {pasienList.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="py-8 text-center text-sm text-gray-500"
                     >
                       Belum ada pasien yang didaftarkan.
@@ -96,18 +78,14 @@ export default async function ManajemenPasienPage() {
                       key={pasien.id_pasien}
                       className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 sm:pl-6">
-                        {pasien.no_rm || "-"}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium">
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 font-medium sm:pl-6">
                         {pasien.nama_lengkap} <br />
                         <span className="text-xs font-normal text-gray-500">
-                          {hitungUmur(pasien.tanggal_lahir)} Tahun
+                          {pasien.usia || "-"}
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {pasien.nik} <br />
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 mt-1 inline-block">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 inline-block">
                           {pasien.jenis_kelamin === "L"
                             ? "Laki-laki"
                             : "Perempuan"}
@@ -119,30 +97,26 @@ export default async function ManajemenPasienPage() {
                           {pasien.users?.email}
                         </span>
                       </td>
+                      <td className="px-3 py-4 text-sm text-gray-500 max-w-[14rem]">
+                        {pasien.domisili || "-"}
+                      </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        TB:{" "}
-                        {pasien.tinggi_badan_awal
-                          ? `${pasien.tinggi_badan_awal} cm`
-                          : "-"}{" "}
-                        <br />
-                        BB:{" "}
-                        {pasien.berat_badan_awal
-                          ? `${pasien.berat_badan_awal} kg`
-                          : "-"}
+                        {pasien.pendidikan || "-"} <br />
+                        <span className="text-xs text-gray-400">
+                          {pasien.pekerjaan || "-"}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {pasien.pendapatan || "-"}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-6">
                         <Link
                           href={`/dashboard/pasien/${pasien.id_pasien}`}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-brand-600 hover:text-brand-800"
                         >
                           Detail
-                          <span className="sr-only">
-                            , {pasien.nama_lengkap}
-                          </span>
                         </Link>
-
                         <EditPasienModal pasien={pasien} />
-
                         <DeletePasienButton
                           id_pasien={pasien.id_pasien}
                           nama={pasien.nama_lengkap}

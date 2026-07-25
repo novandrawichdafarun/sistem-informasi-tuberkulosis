@@ -101,13 +101,13 @@ export default function EditLabModal({
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Periode Bulanan{" "}
+                Periode Pemeriksaan{" "}
                 <span className="text-gray-400 font-normal">(Opsional)</span>
               </label>
               <input
                 type="text"
-                name="periode_bulanan"
-                defaultValue={data.periode_bulanan || ""}
+                name="periode_pemeriksaan"
+                defaultValue={data.periode_pemeriksaan || ""}
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>

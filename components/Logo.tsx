@@ -4,8 +4,12 @@ const sizeMap = {
   sm: 28,
   md: 40,
   lg: 64,
-  xl: 80,
+  xl: 88,
 } as const;
+
+// Dimensi asli file (public/logo.png) — dipakai sebagai rasio agar tidak gepeng.
+const INTRINSIC_W = 543;
+const INTRINSIC_H = 460;
 
 export default function Logo({
   size = "md",
@@ -20,30 +24,45 @@ export default function Logo({
 }) {
   const px = sizeMap[size];
 
+  // Logo polos (mempertahankan rasio asli, PNG transparan).
   const mark = (
     <Image
       src="/logo.png"
-      alt="Logo PantauTB"
-      width={px}
-      height={px}
+      alt="Logo NU-TBCare"
+      width={INTRINSIC_W}
+      height={INTRINSIC_H}
       quality={100}
       priority
-      className="shrink-0"
+      className="shrink-0 object-contain"
+      style={{ height: px, width: "auto" }}
     />
+  );
+
+  // Badge: logo memenuhi lingkaran putih (object-cover memangkas margin
+  // transparan di sisi kanan/kiri). Sumber besar → tetap tajam saat mengecil.
+  const badgeMark = (
+    <div
+      className="relative shrink-0 overflow-hidden rounded-full bg-white shadow-md ring-1 ring-black/5"
+      style={{ width: px, height: px }}
+    >
+      <Image
+        src="/logo.png"
+        alt="Logo NU-TBCare"
+        fill
+        sizes={`${px * 2}px`}
+        quality={100}
+        priority
+        className="object-cover"
+      />
+    </div>
   );
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      {badge ? (
-        <div className="rounded-2xl bg-white p-3 shadow-lg shadow-brand-900/10 ring-1 ring-brand-100">
-          {mark}
-        </div>
-      ) : (
-        mark
-      )}
+      {badge ? badgeMark : mark}
       {withWordmark && (
         <span className="text-xl font-bold tracking-tight text-brand-800">
-          Pantau<span className="text-brand-500">TB</span>
+          NU-TB<span className="text-brand-500">Care</span>
         </span>
       )}
     </div>

@@ -38,7 +38,7 @@ export default function LoginPage() {
       <div className="text-center">
         <h1 className="text-2xl font-bold text-brand-950">Selamat Datang</h1>
         <p className="mt-2 text-sm text-brand-900/60">
-          Masuk ke Sistem Informasi Tuberkulosis
+          Masuk ke Sistem Monitoring Kepatuhan Tuberkulosis
         </p>
       </div>
 

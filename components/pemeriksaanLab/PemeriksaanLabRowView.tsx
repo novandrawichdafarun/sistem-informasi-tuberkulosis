@@ -3,6 +3,7 @@
 
 import { PasienPemeriksaanLabOverview } from "@/types/pemeriksaanLab";
 import { useState } from "react";
+import Link from "next/link";
 import RiwayatLabSubRow from "./RiwayatLabSubRow";
 import TambahLabModal from "./TambahLabModal";
 
@@ -18,10 +19,14 @@ export default function PemeriksaanLabRowView({ data }: Props) {
   return (
     <>
       <tr className="hover:bg-gray-50 transition-colors group">
-        <td className="px-6 py-4 font-medium text-gray-900">{data.no_rm}</td>
+        <td className="px-6 py-4 font-medium text-gray-900">
+          {data.usia || "-"}
+        </td>
         <td className="px-6 py-4">
           <div className="font-medium text-gray-800">{data.nama_lengkap}</div>
-          <div className="text-xs text-gray-500">NIK: {data.nik}</div>
+          <div className="text-xs text-gray-500">
+            {data.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
+          </div>
         </td>
         <td className="px-6 py-4">
           {isEpisodeAktif ? (
@@ -46,7 +51,7 @@ export default function PemeriksaanLabRowView({ data }: Props) {
           </button>
 
           {/* Tombol Tambah Lab (Hanya muncul jika episode aktif) */}
-          {isEpisodeAktif && data.episodeAktif && (
+          {isEpisodeAktif && data.episodeAktif ? (
             <>
               <button
                 className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -60,6 +65,14 @@ export default function PemeriksaanLabRowView({ data }: Props) {
                 onClose={() => setIsModalTambahOpen(false)}
               />
             </>
+          ) : (
+            <Link
+              href="/dashboard/episode-pengobatan"
+              className="text-sm px-3 py-1.5 border border-amber-200 bg-amber-50 text-amber-700 rounded-md hover:bg-amber-100 transition-colors"
+              title="Pemeriksaan lab hanya bisa ditambah pada episode yang aktif"
+            >
+              Buka Episode dulu →
+            </Link>
           )}
         </td>
       </tr>

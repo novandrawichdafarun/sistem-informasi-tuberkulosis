@@ -28,7 +28,7 @@ export default async function episodePengobatanPage() {
           <table className="w-full border-collapse text-left text-sm text-gray-500">
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3">No. RM / NIK</th>
+                <th className="px-6 py-3">Usia / L-P</th>
                 <th className="px-6 py-3">Nama Pasien</th>
                 <th className="px-6 py-3">Status Pengobatan</th>
                 <th className="px-6 py-3">Tipe Kasus / Tgl Mulai</th>

@@ -1,47 +1,46 @@
+// Disesuaikan dengan skema tabel `pasien` di database live:
+// id_pasien, id_user, nama_lengkap, usia, jenis_kelamin, domisili,
+// no_telp, pendidikan, pekerjaan, pendapatan, created_at.
+
 export interface CreatePasienPayload {
   nama_lengkap: string;
-  nik: string;
   email: string;
   password: string;
-  no_rm: string; // Nomor Rekam Medis
-  tanggal_lahir: string; // Format: YYYY-MM-DD
+  usia: string;
   jenis_kelamin: "L" | "P";
-  alamat: string;
+  domisili: string;
   no_telp: string;
-
-  tinggi_badan_awal?: number;
-  berat_badan_awal?: number;
+  pendidikan: string;
+  pekerjaan: string;
+  pendapatan: string;
 }
 
 export interface UpdatePasienPayload {
   id_pasien: number;
   id_user: string;
   nama_lengkap: string;
-  nik: string;
   email: string;
   password?: string;
-  no_rm: string; // Nomor Rekam Medis
-  tanggal_lahir: string; // Format: YYYY-MM-DD
+  usia: string;
   jenis_kelamin: "L" | "P";
-  alamat: string;
+  domisili: string;
   no_telp: string;
-
-  tinggi_badan_awal?: number;
-  berat_badan_awal?: number;
+  pendidikan: string;
+  pekerjaan: string;
+  pendapatan: string;
 }
 
 export interface PasienData {
   id_pasien: number;
   id_user: string;
-  no_rm: string; // Nomor Rekam Medis
-  nik: string;
   nama_lengkap: string;
-  tanggal_lahir: string;
+  usia: string | null;
   jenis_kelamin: "L" | "P";
-  alamat: string;
-  no_telp: string;
-  tinggi_badan_awal: number | null;
-  berat_badan_awal: number | null;
+  domisili: string | null;
+  no_telp: string | null;
+  pendidikan: string | null;
+  pekerjaan: string | null;
+  pendapatan: string | null;
   created_at: string;
 
   users?: {

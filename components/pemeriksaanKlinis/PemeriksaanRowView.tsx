@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { PasienPemeriksaanOverview } from "@/types/pemeriksaanKlinis";
 import TambahPemeriksaanModal from "./TambahPemeriksaanModal";
 import RiwayatSubRow from "./RiwayatSubRow";
@@ -14,7 +15,8 @@ export default function PemeriksaanRowView({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalTambahOpen, setIsModalTambahOpen] = useState(false);
 
-  const { no_rm, nama_lengkap, nik, episodeAktif, riwayat_pemeriksaan } = item;
+  const { nama_lengkap, usia, jenis_kelamin, episodeAktif, riwayat_pemeriksaan } =
+    item;
   const hasRiwayat = riwayat_pemeriksaan && riwayat_pemeriksaan.length > 0;
 
   return (
@@ -23,8 +25,10 @@ export default function PemeriksaanRowView({
         className={`transition-colors ${isExpanded ? "bg-emerald-50/30" : "hover:bg-gray-50"}`}
       >
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="font-medium text-gray-900">{no_rm || "-"}</div>
-          <div className="text-xs text-gray-400">NIK {nik}</div>
+          <div className="font-medium text-gray-900">{usia || "-"}</div>
+          <div className="text-xs text-gray-400">
+            {jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
+          </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
           {nama_lengkap}
@@ -51,13 +55,21 @@ export default function PemeriksaanRowView({
           </button>
 
           {/* Tombol Tambah Periksa (Hanya muncul jika ada episode aktif) */}
-          {episodeAktif && (
+          {episodeAktif ? (
             <button
               onClick={() => setIsModalTambahOpen(true)}
               className="rounded bg-emerald-600 px-3 py-1.5 font-semibold text-white hover:bg-emerald-700 transition"
             >
               + Tambah Periksa
             </button>
+          ) : (
+            <Link
+              href="/dashboard/episode-pengobatan"
+              className="rounded border border-amber-200 bg-amber-50 px-3 py-1.5 font-semibold text-amber-700 hover:bg-amber-100 transition"
+              title="Pemeriksaan hanya bisa ditambah pada episode yang aktif"
+            >
+              Buka Episode dulu →
+            </Link>
           )}
         </td>
       </tr>
