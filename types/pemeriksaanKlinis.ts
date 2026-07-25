@@ -1,7 +1,9 @@
+// Disesuaikan dengan skema live: kolom tinggi_badan / berat_badan (tanpa _saat_ini),
+// dan tanpa id_nakes.
+
 export interface PemeriksaanKlinisData {
   id_periksa: number;
   id_episode: number;
-  id_nakes: number;
   tanggal_periksa: string;
   keluhan?: string | null;
   tensi?: string | null;
@@ -9,8 +11,8 @@ export interface PemeriksaanKlinisData {
   pernapasan?: number | null;
   nadi?: number | null;
   saturasi_o2?: number | null;
-  tinggi_badan_saat_ini?: number | null;
-  berat_badan_saat_ini?: number | null;
+  tinggi_badan?: number | null;
+  berat_badan?: number | null;
   created_at: string;
 }
 
@@ -23,8 +25,8 @@ export interface CreatePemeriksaanPayload {
   pernapasan?: number;
   nadi?: number;
   saturasi_o2?: number;
-  tinggi_badan_saat_ini?: number;
-  berat_badan_saat_ini?: number;
+  tinggi_badan?: number;
+  berat_badan?: number;
 }
 
 export interface UpdatePemeriksaanPayload extends CreatePemeriksaanPayload {
@@ -33,9 +35,9 @@ export interface UpdatePemeriksaanPayload extends CreatePemeriksaanPayload {
 
 export interface PasienPemeriksaanOverview {
   id_pasien: number;
-  no_rm: string;
   nama_lengkap: string;
-  nik: string;
+  usia: string | null;
+  jenis_kelamin: "L" | "P";
   episodeAktif: { id_episode: number; status_episode: string } | null;
   riwayat_pemeriksaan: PemeriksaanKlinisData[];
 }

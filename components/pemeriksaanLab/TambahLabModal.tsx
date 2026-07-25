@@ -100,12 +100,12 @@ export default function TambahLabModal({
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Periode Bulanan{" "}
+                Periode Pemeriksaan{" "}
                 <span className="text-gray-400 font-normal">(Opsional)</span>
               </label>
               <input
                 type="text"
-                name="periode_bulanan"
+                name="periode_pemeriksaan"
                 placeholder="Contoh: Bulan ke-2, Akhir Pengobatan"
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
               />

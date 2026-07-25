@@ -26,7 +26,7 @@ const basePemeriksaanLabSchema = {
 
   hasil_tes: z.string().trim().min(1, "Hasil tes tidak boleh kosong"),
 
-  periode_bulanan: optionalString(50),
+  periode_pemeriksaan: optionalString(50),
   berkas_pendukung_url: optionalString(255),
 };
 

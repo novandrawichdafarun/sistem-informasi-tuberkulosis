@@ -15,16 +15,24 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
   const [isModalTutupOpen, setIsModalTutupOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { id_pasien, no_rm, nama_lengkap, nik, episodeAktif, riwayat_episode } =
-    item;
+  const {
+    id_pasien,
+    nama_lengkap,
+    usia,
+    jenis_kelamin,
+    episodeAktif,
+    riwayat_episode,
+  } = item;
   const hasRiwayat = riwayat_episode && riwayat_episode.length > 0;
 
   return (
     <>
       <tr className="hover:bg-gray-50 transition-colors">
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="font-medium text-gray-900">{no_rm || "-"}</div>
-          <div className="text-xs text-gray-400">NIK {nik}</div>
+          <div className="font-medium text-gray-900">{usia || "-"}</div>
+          <div className="text-xs text-gray-400">
+            {jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
+          </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
           {nama_lengkap}

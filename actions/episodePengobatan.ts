@@ -8,7 +8,7 @@ import {
 import {
   bukaEpisode,
   editEpisode,
-  getDaftarPasienDanEpisodeByNakes,
+  getDaftarPasienDanEpisode,
   getEpisodeAktifByPasienId,
   hapusEpisode,
   tutupEpisode,
@@ -28,10 +28,10 @@ export async function getDaftarEpisodeOverviewAction(): Promise<
   ActionResponse<PasienEpisodeOverview[]>
 > {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
-    return await getDaftarPasienDanEpisodeByNakes(supabase, nakesId);
+    return await getDaftarPasienDanEpisode(supabase);
   } catch (error) {
     return handleActionError(error);
   }
@@ -41,10 +41,10 @@ export async function getEpisodeAktifAction(
   id_pasien: number,
 ): Promise<ActionResponse<EpisodePengobatanData>> {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
-    return await getEpisodeAktifByPasienId(supabase, id_pasien, nakesId);
+    return await getEpisodeAktifByPasienId(supabase, id_pasien);
   } catch (error) {
     return handleActionError(error);
   }
@@ -54,14 +54,14 @@ export async function bukaEpisodeAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, bukaEpisodeSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await bukaEpisode(supabase, data, nakesId);
+    const result = await bukaEpisode(supabase, data);
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
@@ -73,14 +73,14 @@ export async function tutupEpisodeAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, tutupEpisodeSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await tutupEpisode(supabase, data, nakesId);
+    const result = await tutupEpisode(supabase, data);
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
@@ -92,14 +92,14 @@ export async function editEpisodeAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, editEpisodeSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await editEpisode(supabase, data, nakesId);
+    const result = await editEpisode(supabase, data);
 
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
@@ -112,10 +112,10 @@ export async function hapusEpisodeAction(
   id_episode: number,
 ): Promise<ActionResponse> {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
-    const result = await hapusEpisode(supabase, id_episode, nakesId);
+    const result = await hapusEpisode(supabase, id_episode);
 
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
 

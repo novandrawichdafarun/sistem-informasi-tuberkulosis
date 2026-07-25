@@ -3,7 +3,7 @@
 import {
   createPasien,
   deletePasien,
-  getPasienByNakesId,
+  getAllPasien,
   updatePasien,
 } from "@/services/pasien.service";
 import { PasienData } from "@/types/pasien";
@@ -22,9 +22,9 @@ export async function getDaftarPasienAction(): Promise<
   ActionResponse<PasienData[]>
 > {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
-    return await getPasienByNakesId(supabase, nakesId);
+    return await getAllPasien(supabase);
   } catch (error) {
     return handleActionError(error);
   }
@@ -34,14 +34,14 @@ export async function createPasienAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, createPasienSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await createPasien(supabase, data, nakesId);
+    const result = await createPasien(supabase, data);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -55,14 +55,14 @@ export async function updatePasienAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, updatePasienSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await updatePasien(supabase, data, nakesId);
+    const result = await updatePasien(supabase, data);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -76,10 +76,10 @@ export async function deletePasienAction(
   id_pasien: number,
 ): Promise<ActionResponse> {
   try {
-    const nakesId = await requireNakesSession();
+    await requireNakesSession();
     const supabase = await getSupabaseServer();
 
-    const result = await deletePasien(supabase, id_pasien, nakesId);
+    const result = await deletePasien(supabase, id_pasien);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 

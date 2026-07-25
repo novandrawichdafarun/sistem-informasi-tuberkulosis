@@ -10,9 +10,9 @@ export interface EpisodePengobatanData {
 
 export interface PasienEpisodeOverview {
   id_pasien: number;
-  no_rm: string;
   nama_lengkap: string;
-  nik: string;
+  usia: string | null;
+  jenis_kelamin: "L" | "P";
   episodeAktif: EpisodePengobatanData | null;
   riwayat_episode: EpisodePengobatanData[];
 }

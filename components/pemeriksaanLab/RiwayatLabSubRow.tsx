@@ -30,7 +30,7 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
             <th className="px-4 py-3 font-medium">Tanggal Tes</th>
             <th className="px-4 py-3 font-medium">Jenis Tes</th>
             <th className="px-4 py-3 font-medium">Hasil</th>
-            <th className="px-4 py-3 font-medium">Periode Bulanan</th>
+            <th className="px-4 py-3 font-medium">Periode</th>
             <th className="px-4 py-3 font-medium text-right">Opsi</th>
           </tr>
         </thead>
@@ -55,7 +55,7 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
                 </span>
               </td>
               <td className="px-4 py-3 text-gray-500">
-                {lab.periode_bulanan || "-"}
+                {lab.periode_pemeriksaan || "-"}
               </td>
               <td className="px-4 py-3 text-right space-x-2">
                 <button

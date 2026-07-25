@@ -1,53 +1,57 @@
 import Link from "next/link";
 import {
   PillIcon,
-  BellIcon,
   TrendIcon,
   ChatIcon,
   CheckIcon,
   CloseIcon,
+  MinusIcon,
 } from "./icons";
+import { AdherenceDay, AdherenceSummary } from "@/types/pasienPortal";
 
-// NOTE: sample data for the UI. Replace with real adherence data from Supabase.
-const ADHERENCE_PERCENT = 87;
-const DOSES_TAKEN = 6;
-const DOSES_TOTAL = 7;
-const PHASE = "Intensif";
-const WEEK: { day: string; taken: boolean }[] = [
-  { day: "01", taken: true },
-  { day: "02", taken: true },
-  { day: "03", taken: true },
-  { day: "04", taken: true },
-  { day: "05", taken: false },
-  { day: "06", taken: true },
-  { day: "07", taken: true },
-];
+type CellKey = "diminum" | "terlewat" | "belum";
+
+const STATUS_STYLES: Record<
+  CellKey,
+  {
+    label: string;
+    cell: string;
+    icon: (props: { className?: string }) => React.ReactElement;
+  }
+> = {
+  diminum: { label: "Diminum", cell: "bg-brand-600 text-white", icon: CheckIcon },
+  terlewat: { label: "Terlewat", cell: "bg-red-100 text-red-500", icon: CloseIcon },
+  belum: { label: "Belum lapor", cell: "bg-slate-100 text-slate-400", icon: MinusIcon },
+};
+
+function cellKey(day: AdherenceDay): CellKey {
+  if (day.status === "diminum") return "diminum";
+  if (day.status === "terlewat") return "terlewat";
+  return "belum";
+}
+
+function dayNumber(tanggal: string) {
+  return tanggal.slice(8, 10); // "2026-07-25" -> "25"
+}
 
 const QUICK_ACTIONS = [
   {
     label: "Laporan Obat Harian",
-    href: "#",
+    href: "/dashboard/laporan-obat",
     icon: PillIcon,
     className: "border-brand-200 bg-brand-50/60 text-brand-700",
     iconClassName: "text-brand-600",
   },
   {
-    label: "Jadwal & Alarm",
-    href: "#",
-    icon: BellIcon,
-    className: "border-sky-200 bg-sky-50/60 text-sky-700",
-    iconClassName: "text-sky-600",
-  },
-  {
     label: "Riwayat Kepatuhan",
-    href: "#",
+    href: "/dashboard/riwayat-kepatuhan",
     icon: TrendIcon,
     className: "border-brand-200 bg-brand-50/60 text-brand-700",
     iconClassName: "text-brand-600",
   },
   {
     label: "Chat Nakes",
-    href: "#",
+    href: "/dashboard/chat",
     icon: ChatIcon,
     className: "border-violet-200 bg-violet-50/60 text-violet-700",
     iconClassName: "text-violet-600",
@@ -62,14 +66,7 @@ function AdherenceDonut({ percent }: { percent: number }) {
   return (
     <div className="relative h-32 w-32">
       <svg viewBox="0 0 128 128" className="h-32 w-32 -rotate-90">
-        <circle
-          cx="64"
-          cy="64"
-          r={radius}
-          fill="none"
-          stroke="#e2e8f0"
-          strokeWidth="12"
-        />
+        <circle cx="64" cy="64" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="12" />
         <circle
           cx="64"
           cy="64"
@@ -90,7 +87,17 @@ function AdherenceDonut({ percent }: { percent: number }) {
   );
 }
 
-export default function PatientOverview() {
+export default function PatientOverview({
+  summary,
+  fase,
+}: {
+  summary: AdherenceSummary;
+  fase?: string | null;
+}) {
+  const week = summary.days.slice(-7);
+  const diminum = week.filter((d) => d.status === "diminum").length;
+  const totalTerlapor = week.filter((d) => d.status !== null).length;
+
   return (
     <div className="space-y-6">
       {/* Adherence + weekly tracker */}
@@ -98,52 +105,95 @@ export default function PatientOverview() {
         {/* Adherence card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex justify-center">
-            <AdherenceDonut percent={ADHERENCE_PERCENT} />
+            <AdherenceDonut percent={summary.persentase} />
           </div>
           <div className="mt-6 space-y-2 border-t border-slate-100 pt-4 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">7 hari terakhir</span>
+              <span className="text-slate-500">Total dosis dilaporkan</span>
               <span className="font-semibold text-brand-950">
-                {DOSES_TAKEN} / {DOSES_TOTAL} dosis
+                {summary.diminum} / {summary.total} dosis
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">Fase pengobatan</span>
-              <span className="font-semibold text-brand-950">{PHASE}</span>
+              <span className="text-slate-500">Tipe kasus</span>
+              <span className="font-semibold text-brand-950">
+                {fase || "Belum ada episode aktif"}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Weekly tracker card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h3 className="text-base font-semibold text-brand-950">
-            7 Hari Terakhir
-          </h3>
-          <div className="mt-4 grid grid-cols-7 gap-2">
-            {WEEK.map((d) => (
-              <div key={d.day} className="flex flex-col items-center gap-1.5">
-                <div
-                  className={`flex h-11 w-full items-center justify-center rounded-xl ${
-                    d.taken
-                      ? "bg-brand-600 text-white"
-                      : "bg-red-100 text-red-500"
-                  }`}
-                >
-                  {d.taken ? (
-                    <CheckIcon className="h-5 w-5" />
-                  ) : (
-                    <CloseIcon className="h-5 w-5" />
-                  )}
-                </div>
-                <span className="text-xs text-slate-500">{d.day}</span>
-              </div>
-            ))}
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold text-brand-950">
+              7 Hari Terakhir
+            </h3>
+            {totalTerlapor > 0 && (
+              <span className="text-xs text-slate-500">
+                {diminum}/{totalTerlapor} dosis
+              </span>
+            )}
           </div>
+
+          {week.length === 0 ? (
+            <p className="mt-6 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
+              Belum ada jadwal minum obat dalam 7 hari terakhir.
+            </p>
+          ) : (
+            <>
+              <div
+                className="mt-4 grid gap-2"
+                style={{
+                  gridTemplateColumns: `repeat(${week.length}, minmax(0, 1fr))`,
+                }}
+              >
+                {week.map((d) => {
+                  const s = STATUS_STYLES[cellKey(d)];
+                  const Icon = s.icon;
+                  return (
+                    <div
+                      key={d.tanggal}
+                      className="flex flex-col items-center gap-1.5"
+                      title={`${d.tanggal} · ${s.label}`}
+                    >
+                      <div
+                        className={`flex h-11 w-full items-center justify-center rounded-xl ${s.cell}`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span className="text-xs text-slate-500">
+                        {dayNumber(d.tanggal)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-slate-100 pt-4">
+                {(Object.keys(STATUS_STYLES) as CellKey[]).map((key) => {
+                  const s = STATUS_STYLES[key];
+                  const Icon = s.icon;
+                  return (
+                    <div key={key} className="flex items-center gap-1.5">
+                      <span
+                        className={`flex h-5 w-5 items-center justify-center rounded-md ${s.cell}`}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-xs text-slate-500">{s.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon;
           return (

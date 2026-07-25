@@ -34,8 +34,8 @@ const basePemeriksaanSchema = {
   pernapasan: optionalNumber(10, 60, "Pernapasan"), // RR manusia wajar 10-60x/menit
   nadi: optionalNumber(30, 250, "Nadi"), // HR wajar 30-250 bpm
   saturasi_o2: optionalNumber(0, 100, "Saturasi O2"), // Saturasi maksimal 100%
-  tinggi_badan_saat_ini: optionalNumber(30, 300, "Tinggi badan"),
-  berat_badan_saat_ini: optionalNumber(1, 400, "Berat badan"),
+  tinggi_badan: optionalNumber(30, 300, "Tinggi badan"),
+  berat_badan: optionalNumber(1, 400, "Berat badan"),
 };
 
 export const createPemeriksaanSchema = z.object({
