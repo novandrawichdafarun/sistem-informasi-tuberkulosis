@@ -1,4 +1,4 @@
-import { ChatIcon } from "@/components/dashboard/icons";
+import { ChatIcon } from "@/components/asset/icons";
 
 export const metadata = { title: "Chat Nakes | NU-TBCare" };
 

@@ -1,9 +1,13 @@
-import MedicationBanner from "@/components/dashboard/MedicationBanner";
+import MedicationBanner from "@/components/banner/MedicationBanner";
 import {
   getTodayMedicationAction,
   getAdherenceAction,
 } from "@/actions/pasienPortal";
-import { formatTanggalID, formatJam, formatWaktuID } from "@/utils/formatTanggal";
+import {
+  formatTanggalID,
+  formatJam,
+  formatWaktuID,
+} from "@/utils/formatTanggal";
 
 export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
 
@@ -46,7 +50,9 @@ export default async function LaporanObatPage() {
                 key={`${o.nama_obat}-${i}`}
                 className="flex items-center justify-between py-3"
               >
-                <span className="font-medium text-slate-800">{o.nama_obat}</span>
+                <span className="font-medium text-slate-800">
+                  {o.nama_obat}
+                </span>
                 <span className="text-sm text-slate-500">{o.dosis}</span>
               </li>
             ))}

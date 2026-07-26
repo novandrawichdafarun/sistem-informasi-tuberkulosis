@@ -6,7 +6,7 @@ import {
   CheckIcon,
   CloseIcon,
   MinusIcon,
-} from "./icons";
+} from "../asset/icons";
 import { AdherenceDay, AdherenceSummary } from "@/types/pasienPortal";
 
 type CellKey = "diminum" | "terlewat" | "belum";
@@ -19,9 +19,21 @@ const STATUS_STYLES: Record<
     icon: (props: { className?: string }) => React.ReactElement;
   }
 > = {
-  diminum: { label: "Diminum", cell: "bg-brand-600 text-white", icon: CheckIcon },
-  terlewat: { label: "Terlewat", cell: "bg-red-100 text-red-500", icon: CloseIcon },
-  belum: { label: "Belum lapor", cell: "bg-slate-100 text-slate-400", icon: MinusIcon },
+  diminum: {
+    label: "Diminum",
+    cell: "bg-brand-600 text-white",
+    icon: CheckIcon,
+  },
+  terlewat: {
+    label: "Terlewat",
+    cell: "bg-red-100 text-red-500",
+    icon: CloseIcon,
+  },
+  belum: {
+    label: "Belum lapor",
+    cell: "bg-slate-100 text-slate-400",
+    icon: MinusIcon,
+  },
 };
 
 function cellKey(day: AdherenceDay): CellKey {
@@ -66,7 +78,14 @@ function AdherenceDonut({ percent }: { percent: number }) {
   return (
     <div className="relative h-32 w-32">
       <svg viewBox="0 0 128 128" className="h-32 w-32 -rotate-90">
-        <circle cx="64" cy="64" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="12" />
+        <circle
+          cx="64"
+          cy="64"
+          r={radius}
+          fill="none"
+          stroke="#e2e8f0"
+          strokeWidth="12"
+        />
         <circle
           cx="64"
           cy="64"

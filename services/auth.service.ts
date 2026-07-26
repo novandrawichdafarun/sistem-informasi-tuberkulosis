@@ -19,10 +19,10 @@ export const loginUserService = async (
       .single();
 
     if (error || !user)
-      return {
-        success: false,
-        error: "Kredensial tidak valid (Email tidak ditemukan)",
-      };
+      return handleServiceError(
+        error?.message,
+        "Kredensial tidak valid (Email tidak ditemukan)",
+      );
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid)
@@ -61,7 +61,10 @@ export const loginUserService = async (
       });
 
     if (sessionError)
-      return { success: false, error: "Gagal membuat sesi otentikasi" };
+      return handleServiceError(
+        sessionError?.message,
+        "Gagal membuat sesi otentikasi",
+      );
 
     return {
       success: true,
@@ -73,7 +76,7 @@ export const loginUserService = async (
       },
     };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(error, "Terjadi kesalahan internal saat login.");
   }
 };
 
@@ -88,7 +91,10 @@ export const clearDbSessionService = async (
       .eq("session_token", sessionToken);
     return { success: true };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat menghapus session.",
+    );
   }
 };
 
@@ -117,7 +123,9 @@ export const requestPasswordReset = async (
     const { error } = await supabase
       .from("password_resets")
       .insert({ email, token: otp, expires_at: expiresAt });
-    if (error) throw error;
+
+    if (error)
+      return handleServiceError(error?.message, "Gagal membuat kode otp");
 
     //TODO: KIRIM EMAIL
     // await sendEmail({ to: email, subject: "Kode Reset", body: `Kode OTP Anda: ${otp}` });
@@ -125,7 +133,10 @@ export const requestPasswordReset = async (
 
     return { success: true, message: "Kode OTP telah dikirim ke email." };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat membuat/mengirim kode otp.",
+    );
   }
 };
 
@@ -144,14 +155,17 @@ export const verifyOtp = async (
       .single();
 
     if (error || !resetRecord)
-      return {
-        success: false,
-        error: "Kode OTP salah atau sudah kedaluwarsa.",
-      };
+      return handleServiceError(
+        error?.message,
+        "Kode OOTP salah atau sudah kadaluarsa",
+      );
 
     return { success: true, message: "Kode OTP valid." };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal verifikasi kode otp.",
+    );
   }
 };
 
@@ -170,10 +184,10 @@ export const ResetPassword = async (
       .single();
 
     if (error || !resetRecord)
-      return {
-        success: false,
-        error: "Akses ditolak: Token tidak sah atau kedaluwarsa.",
-      };
+      return handleServiceError(
+        error?.message,
+        "Akses ditolak: Token tidak sah atau kedaluwarsa.",
+      );
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
@@ -183,7 +197,11 @@ export const ResetPassword = async (
       .update({ password_hash: hashedPassword })
       .eq("email", email);
 
-    if (updateError) throw updateError;
+    if (updateError)
+      return handleServiceError(
+        updateError?.message,
+        "Gagal memeperbarui password.",
+      );
 
     await supabase.from("password_resets").delete().eq("id", resetRecord.id);
 
@@ -192,6 +210,9 @@ export const ResetPassword = async (
       message: "Kata sandi berhasil diubah. Silakan login kembali.",
     };
   } catch (error: unknown) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat memperbarui password.",
+    );
   }
 };

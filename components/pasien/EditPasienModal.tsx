@@ -103,7 +103,7 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                   Edit Pasien: {pasien.nama_lengkap}
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Perbarui data pasien dan akun login terkait.
+                  Perbarui data demografi pasien dan akun login terkait.
                 </p>
               </div>
               <button
@@ -125,9 +125,10 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                 <input type="hidden" name="id_pasien" value={pasien.id_pasien} />
                 <input type="hidden" name="id_user" value={pasien.id_user} />
 
+                {/* --- INFO AKUN & IDENTITAS --- */}
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Info Akun & Identitas
+                    Info Akun & Identitas Dasar
                   </h4>
                   <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
@@ -168,9 +169,10 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                   </div>
                 </div>
 
+                {/* --- DATA DEMOGRAFI (FLEKSIBEL: PILIH ATAU KETIK) --- */}
                 <div className="border-t border-gray-100 pt-6">
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Demografi
+                    Data Demografi
                   </h4>
                   <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
                     <div>

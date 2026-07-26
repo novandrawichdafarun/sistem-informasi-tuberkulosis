@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-import MedicationBanner from "@/components/dashboard/MedicationBanner";
+import MedicationBanner from "@/components/banner/MedicationBanner";
 import PatientOverview from "@/components/dashboard/PatientOverview";
 import LineChart from "@/components/charts/LineChart";
 import {
@@ -67,7 +67,10 @@ function DistribusiBar({
         <span className="font-semibold text-slate-800">{count}</span>
       </div>
       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+        <div
+          className={`h-full rounded-full ${color}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );
@@ -88,7 +91,9 @@ export default async function DashboardPage() {
     const profile = profileRes.success ? (profileRes.data ?? null) : null;
     const medication = medRes.success ? (medRes.data ?? null) : null;
     const summary =
-      adherenceRes.success && adherenceRes.data ? adherenceRes.data : EMPTY_SUMMARY;
+      adherenceRes.success && adherenceRes.data
+        ? adherenceRes.data
+        : EMPTY_SUMMARY;
 
     return (
       <>
@@ -111,7 +116,7 @@ export default async function DashboardPage() {
     );
   }
 
-  // --- TAMPILAN ADMIN (Super Admin / Nakes): ringkasan + grafik ---
+  // --- TAMPILAN ADMIN (Super Admin): ringkasan + grafik ---
   const nama = session?.user?.name ?? session?.user?.email ?? "Admin";
   const statRes = await getStatistikAdminAction();
   const stat = statRes.success ? statRes.data : undefined;

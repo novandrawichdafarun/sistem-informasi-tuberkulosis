@@ -6,52 +6,72 @@ import {
   UpdatePasienPayload,
 } from "@/types/pasien";
 import { ActionResponse } from "@/types/action";
+import { verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
 
-// Kolom pasien sesuai skema live (tanpa nakes/faskes/nik/no_rm).
-const PASIEN_COLUMNS = `
-  id_pasien, id_user, nama_lengkap, usia, jenis_kelamin, domisili,
-  no_telp, pendidikan, pekerjaan, pendapatan, created_at,
-  users ( email )
-`;
-
-export const getAllPasien = async (
+export const getDaftarPasien = async (
   supabase: SupabaseClient,
+  id_super_admin: string,
 ): Promise<ActionResponse<PasienData[]>> => {
   try {
-    const { data: pasien, error } = await supabase
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const { data: pasien, error: pasienError } = await supabase
       .from("pasien")
-      .select(PASIEN_COLUMNS)
+      .select(
+        `
+        id_pasien, id_user, nama_lengkap, usia, jenis_kelamin,
+        domisili, no_telp, pendidikan, pekerjaan, pendapatan, created_at,
+        users ( email )
+      `,
+      )
       .order("created_at", { ascending: false });
 
-    if (error) {
+    if (pasienError)
       return handleServiceError(
-        error,
+        pasienError?.message,
         "Gagal mengambil data pasien dari sistem.",
       );
-    }
 
     return { success: true, data: pasien as unknown as PasienData[] };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
   }
 };
 
 export const createPasien = async (
   supabase: SupabaseClient,
   payload: CreatePasienPayload,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    // Cek duplikasi email
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    // Cek duplikasi Email
     const { data: existingUser } = await supabase
       .from("users")
       .select("id_user")
       .eq("email", payload.email)
       .single();
 
-    if (existingUser) {
-      return { success: false, error: "Email sudah terdaftar di sistem!" };
-    }
+    if (existingUser)
+      return handleServiceError(
+        existingUser,
+        "Email sudah terdaftar di sistem!",
+      );
 
     // Buat akun login pasien
     const salt = await bcrypt.genSalt(10);
@@ -67,10 +87,11 @@ export const createPasien = async (
       .select("id_user")
       .single();
 
-    if (userError || !newUser) {
-      console.error("[DB ERROR] Insert User:", userError?.message);
-      return { success: false, error: "Gagal membuat kredensial akun pasien." };
-    }
+    if (userError || !newUser)
+      return handleServiceError(
+        userError?.message,
+        "Gagal membuat kredensial akun pasien.",
+      );
 
     // Simpan data demografi pasien
     const { error: pasienError } = await supabase.from("pasien").insert({
@@ -89,23 +110,34 @@ export const createPasien = async (
     if (pasienError) {
       await supabase.from("users").delete().eq("id_user", newUser.id_user);
       return handleServiceError(
-        pasienError,
-        "Gagal menyimpan data pasien. Pendaftaran dibatalkan.",
+        pasienError?.message,
+        "Gagal menyimpan data medis pasien. Pendaftaran dibatalkan",
       );
     }
 
     return { success: true, message: "Pasien berhasil didaftarkan!" };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat menambah data.",
+    );
   }
 };
 
 export const updatePasien = async (
   supabase: SupabaseClient,
   payload: UpdatePasienPayload,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    // Update kredensial akun
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    // Update Data User (Kredensial)
     const updateUserData: { email: string; password_hash?: string } = {
       email: payload.email,
     };
@@ -120,13 +152,11 @@ export const updatePasien = async (
       .update(updateUserData)
       .eq("id_user", payload.id_user);
 
-    if (userError) {
-      console.error("[DB ERROR] Update User:", userError.message);
-      return {
-        success: false,
-        error: "Gagal memperbarui kredensial (Email mungkin sudah dipakai).",
-      };
-    }
+    if (userError)
+      return handleServiceError(
+        userError?.message,
+        "Gagal memperbarui kredensial (Email mungkin sudah dipakai).",
+      );
 
     // Update data demografi pasien
     const { error: pasienError } = await supabase
@@ -143,40 +173,52 @@ export const updatePasien = async (
       })
       .eq("id_pasien", payload.id_pasien);
 
-    if (pasienError) {
-      return handleServiceError(pasienError, "Gagal memperbarui data pasien.");
-    }
+    if (pasienError)
+      return handleServiceError(
+        pasienError?.message,
+        "Gagal memperbarui profil medis pasien.",
+      );
 
     return { success: true, message: "Data pasien berhasil diperbarui!" };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat memperbarui data.",
+    );
   }
 };
 
 export const deletePasien = async (
   supabase: SupabaseClient,
   id_pasien: number,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
     const { data: pasien } = await supabase
       .from("pasien")
       .select("id_user")
       .eq("id_pasien", id_pasien)
       .single();
 
-    if (!pasien) {
-      return { success: false, error: "Pasien tidak ditemukan." };
-    }
+    if (!pasien) return handleServiceError(pasien, "Pasien tidak ditmeukan");
 
     const { error: deletePasienError } = await supabase
       .from("pasien")
       .delete()
       .eq("id_pasien", id_pasien);
 
-    if (deletePasienError) {
-      console.error("[DB ERROR] Delete Pasien:", deletePasienError.message);
-      return { success: false, error: "Gagal menghapus data pasien." };
-    }
+    if (deletePasienError)
+      return handleServiceError(
+        deletePasienError?.message,
+        "Gagal menghapus data medis pasien.",
+      );
 
     // Hapus akun login terkait (data medis ikut terhapus via ON DELETE CASCADE)
     const { error: deleteUserError } = await supabase
@@ -184,18 +226,20 @@ export const deletePasien = async (
       .delete()
       .eq("id_user", pasien.id_user);
 
-    if (deleteUserError) {
+    if (deleteUserError)
       return handleServiceError(
         deleteUserError,
         "Data pasien terhapus, namun gagal menghapus akun login.",
       );
-    }
 
     return {
       success: true,
       message: "Pasien dan akunnya berhasil dihapus permanen.",
     };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat menghapus data.",
+    );
   }
 };

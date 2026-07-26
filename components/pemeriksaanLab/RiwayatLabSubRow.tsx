@@ -37,9 +37,29 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
         <tbody className="divide-y divide-gray-100">
           {riwayat.map((lab) => (
             <tr key={lab.id_tes} className="hover:bg-gray-50/50">
-              <td className="px-4 py-3">{lab.tanggal_tes}</td>
-              <td className="px-4 py-3 font-medium text-gray-800">
-                {lab.jenis_tes}
+              <td className="px-4 py-3">
+                <div className="font-medium text-gray-800">
+                  {lab.tanggal_tes}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {lab.periode_pemeriksaan || "-"}
+                </div>
+              </td>
+              <td className="px-4 py-3">
+                <div className="font-medium text-blue-700">{lab.jenis_tes}</div>
+                <div className="text-xs text-gray-500">
+                  {lab.jenis_sample || "-"} {lab.kualitas_sample || "-"}
+                </div>
+              </td>
+              <td className="px-4 py-3">
+                <div className="text-sm font-medium text-gray-800">
+                  {lab.dna_bakteri_tb}
+                </div>
+                <div
+                  className={`text-xs font-semibold mt-0.5 ${lab.status_resistensi.toLowerCase().includes("resisten") ? "text-red-600" : "text-green-600"}`}
+                >
+                  {lab.status_resistensi}
+                </div>
               </td>
               <td className="px-4 py-3">
                 <span
@@ -70,6 +90,7 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
           ))}
         </tbody>
       </table>
+
       {labToEdit && (
         <EditLabModal
           data={labToEdit}

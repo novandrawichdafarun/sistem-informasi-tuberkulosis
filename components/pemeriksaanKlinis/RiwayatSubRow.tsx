@@ -16,7 +16,7 @@ export default function RiwayatSubRow({
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPending] = useTransition();
 
-  // Nakes hanya bisa mengedit/menghapus data jika data tersebut milik episode yang sedang aktif
+  // Super admin hanya bisa mengedit/menghapus data jika data tersebut milik episode yang sedang aktif
   const isEditable = periksa.id_episode === id_episode_aktif;
   const imtData = hitungIMT(periksa.berat_badan, periksa.tinggi_badan);
 

@@ -5,10 +5,14 @@ const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,11}$/;
 // Regex Nama (huruf, spasi, titik, koma, tanda petik, strip)
 const nameRegex = /^[a-zA-Z\s.'-,]+$/;
 
-const kategori = (label: string) =>
-  z.string().trim().min(1, `${label} wajib dipilih`).max(50);
-
 export const createPasienSchema = z.object({
+  email: z.email("Format email tidak valid").trim().toLowerCase(),
+
+  password: z
+    .string()
+    .min(6, "Kata sandi minimal 6 karakter")
+    .max(50, "Kata sandi maksimal 50 karakter"),
+
   nama_lengkap: z
     .string()
     .trim()
@@ -16,25 +20,22 @@ export const createPasienSchema = z.object({
     .max(100, "Nama maksimal 100 karakter")
     .regex(nameRegex, "Nama hanya boleh berisi huruf dan tanda baca umum"),
 
-  email: z.email("Format email tidak valid").trim().toLowerCase(),
-  password: z
+  usia: z
     .string()
-    .min(6, "Kata sandi minimal 6 karakter")
-    .max(50, "Kata sandi maksimal 50 karakter"),
+    .trim()
+    .min(3, "Usia minimal 3 karakter")
+    .max(20, "Usia maksimal 20 karakter"),
 
   jenis_kelamin: z.enum(["L", "P"], {
     message: "Jenis kelamin wajib dipilih (L atau P)",
   }),
 
-  usia: kategori("Kelompok usia"),
   domisili: z
     .string()
     .trim()
-    .min(1, "Domisili wajib diisi")
-    .max(255, "Domisili maksimal 255 karakter"),
-  pendidikan: kategori("Pendidikan"),
-  pekerjaan: kategori("Pekerjaan"),
-  pendapatan: kategori("Pendapatan"),
+    .max(255, "Alamat maksimal 255 karakter")
+    .optional()
+    .default(""),
 
   no_telp: z
     .string()
@@ -43,6 +44,24 @@ export const createPasienSchema = z.object({
     .or(z.literal(""))
     .optional()
     .default(""),
+
+  pendidikan: z
+    .string()
+    .trim()
+    .min(3, "Pendidikan minimal 3 karakter")
+    .max(20, "Pendidikan maksimal 20 karakter"),
+
+  pekerjaan: z
+    .string()
+    .trim()
+    .min(3, "Pekerjaan minimal 3 karakter")
+    .max(50, "Pekerjaan maksimal 50 karakter"),
+
+  pendapatan: z
+    .string()
+    .trim()
+    .min(3, "Pendapatan minimal 3 karakter")
+    .max(50, "Pendapatan maksimal 50 karakter"),
 });
 
 export const updatePasienSchema = createPasienSchema.extend({

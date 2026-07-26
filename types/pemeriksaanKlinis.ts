@@ -36,8 +36,9 @@ export interface UpdatePemeriksaanPayload extends CreatePemeriksaanPayload {
 export interface PasienPemeriksaanOverview {
   id_pasien: number;
   nama_lengkap: string;
-  usia: string | null;
   jenis_kelamin: "L" | "P";
+  usia: string;
+  domisili: string;
   episodeAktif: { id_episode: number; status_episode: string } | null;
   riwayat_pemeriksaan: PemeriksaanKlinisData[];
 }
