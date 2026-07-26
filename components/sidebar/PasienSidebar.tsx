@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -118,6 +118,8 @@ function LogoutBtn() {
   );
 }
 
+const STORAGE_KEY = "pantautb:pasien-sidebar-open";
+
 export default function PasienSidebar({
   user,
   children,
@@ -126,19 +128,18 @@ export default function PasienSidebar({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const STORAGE_KEY = "pantautb:pasien-sidebar-open";
 
-  // Restore persisted state after mount (avoids SSR/CSR hydration mismatch).
-  const [open, setOpen] = useState(() => {
+  // Selalu mulai dari `false` agar cocok dengan HTML dari server.
+  const [open, setOpen] = useState(false);
+
+  // Pulihkan state tersimpan setelah mount (hindari hydration mismatch).
+  useEffect(() => {
     try {
-      return (
-        typeof window !== "undefined" &&
-        localStorage.getItem(STORAGE_KEY) === "1"
-      );
+      if (localStorage.getItem(STORAGE_KEY) === "1") setOpen(true);
     } catch {
       /* ignore */
     }
-  });
+  }, []);
 
   const toggle = (next: boolean) => {
     setOpen(next);
