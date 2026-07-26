@@ -1,3 +1,6 @@
+// Disesuaikan dengan skema live: kolom tinggi_badan / berat_badan (tanpa _saat_ini),
+// dan tanpa id_nakes.
+
 export interface PemeriksaanKlinisData {
   id_periksa: number;
   id_episode: number;
@@ -33,6 +36,7 @@ export interface UpdatePemeriksaanPayload extends CreatePemeriksaanPayload {
 export interface PasienPemeriksaanOverview {
   id_pasien: number;
   nama_lengkap: string;
+  jenis_kelamin: "L" | "P";
   usia: string;
   domisili: string;
   episodeAktif: { id_episode: number; status_episode: string } | null;

@@ -16,8 +16,8 @@ export default async function PemeriksaanKlinisPage() {
           Manajemen Pemeriksaan Klinis
         </h1>
         <p className="text-sm text-gray-500">
-          Kelola riwayat pemeriksaan fisik dan klinis pasien Tuberkulosis dalam
-          sistem.
+          Kelola riwayat pemeriksaan fisik dan klinis seluruh pasien
+          Tuberkulosis.
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export default async function PemeriksaanKlinisPage() {
                     colSpan={4}
                     className="px-6 py-10 text-center text-gray-400"
                   >
-                    Belum ada data pasien terdaftar di dalam sistem.
+                    Belum ada data pasien terdaftar.
                   </td>
                 </tr>
               ) : (

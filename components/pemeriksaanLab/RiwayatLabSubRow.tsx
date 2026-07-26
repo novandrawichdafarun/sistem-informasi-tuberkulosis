@@ -27,10 +27,10 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
       <table className="w-full text-left text-sm">
         <thead className="bg-gray-100/80 border-b border-gray-200 text-gray-600">
           <tr>
-            <th className="px-4 py-3 font-medium">Tanggal & Periode</th>
-            <th className="px-4 py-3 font-medium">Detail Sampel</th>
-            <th className="px-4 py-3 font-medium">Kuman & Resistensi</th>
-            <th className="px-4 py-3 font-medium">Hasil Umum / BTA</th>
+            <th className="px-4 py-3 font-medium">Tanggal Tes</th>
+            <th className="px-4 py-3 font-medium">Jenis Tes</th>
+            <th className="px-4 py-3 font-medium">Hasil</th>
+            <th className="px-4 py-3 font-medium">Periode</th>
             <th className="px-4 py-3 font-medium text-right">Opsi</th>
           </tr>
         </thead>
@@ -73,11 +73,9 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
                 >
                   {lab.hasil_tes}
                 </span>
-                {lab.hasil_bta && (
-                  <div className="text-xs text-gray-600 mt-1">
-                    BTA: {lab.hasil_bta}
-                  </div>
-                )}
+              </td>
+              <td className="px-4 py-3 text-gray-500">
+                {lab.periode_pemeriksaan || "-"}
               </td>
               <td className="px-4 py-3 text-right space-x-2">
                 <button

@@ -1,29 +1,29 @@
 "use client";
 
-import { deleteObatAction } from "@/actions/obat";
 import { useState } from "react";
-
-interface DeleteObatButtonProps {
-  id_obat: number;
-  nama_obat: string;
-}
+import { useRouter } from "next/navigation";
+import { deleteObatAction } from "@/actions/obat";
 
 export default function DeleteObatButton({
   id_obat,
-  nama_obat,
-}: DeleteObatButtonProps) {
+  nama,
+}: {
+  id_obat: number;
+  nama: string;
+}) {
+  const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    const isConfirmed = window.confirm(
-      `PERINGATAN!\n\nApakah Anda yakin ingin menghapus pasien "${nama_obat}" secara permanen? Akun login pasien juga akan terhapus.`,
-    );
-
-    if (isConfirmed) {
-      setIsDeleting(true);
-      await deleteObatAction(id_obat);
-      setIsDeleting(false);
+    if (!window.confirm(`Hapus obat "${nama}" dari master?`)) return;
+    setIsDeleting(true);
+    const res = await deleteObatAction(id_obat);
+    setIsDeleting(false);
+    if (!res.success) {
+      alert(res.error);
+      return;
     }
+    router.refresh();
   };
 
   return (

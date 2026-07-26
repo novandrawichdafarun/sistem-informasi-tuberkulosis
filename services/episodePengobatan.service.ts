@@ -26,7 +26,7 @@ export const getDaftarPasienDanEpisode = async (
       .from("pasien")
       .select(
         `
-        id_pasien, nama_lengkap, usia, domisili,
+        id_pasien, nama_lengkap, usia, domisili, jenis_kelamin,
         episode_pengobatan (
           id_episode, id_pasien, tanggal_mulai, tanggal_selesai,
           tipe_pasien, status_episode, created_at
@@ -36,10 +36,7 @@ export const getDaftarPasienDanEpisode = async (
       .order("created_at", { ascending: false });
 
     if (pasienError) {
-      return handleServiceError(
-        pasienError?.message,
-        "Pasien tidak ditemukan.",
-      );
+      return handleServiceError(pasienError, "Pasien tidak ditemukan.");
     }
 
     const formattedData: PasienEpisodeOverview[] = (pasienData || []).map(
@@ -61,6 +58,7 @@ export const getDaftarPasienDanEpisode = async (
           id_pasien: pasien.id_pasien,
           nama_lengkap: pasien.nama_lengkap,
           usia: pasien.usia,
+          jenis_kelamin: pasien.jenis_kelamin,
           domisili: pasien.domisili,
           episodeAktif,
           riwayat_episode: riwayat,
@@ -98,10 +96,7 @@ export const getEpisodeAktifByPasienId = async (
       .single();
 
     if (episodeError) {
-      return handleServiceError(
-        episodeError?.message,
-        "Episode aktif tidak ditemukan.",
-      );
+      return handleServiceError(episodeError, "Episode aktif tidak ditemukan.");
     }
 
     return { success: true, data: episode_pengobatan };
@@ -144,7 +139,7 @@ export const bukaEpisode = async (
       });
 
     if (episodeError) {
-      return handleServiceError(episodeError?.message, "Episode gagal dibuka.");
+      return handleServiceError(episodeError, "Episode gagal dibuka.");
     }
 
     return { success: true, message: "Episode berhasil dibuka." };
@@ -191,10 +186,7 @@ export const tutupEpisode = async (
       .eq("id_episode", payload.id_episode);
 
     if (episodeError) {
-      return handleServiceError(
-        episodeError?.message,
-        "Episode gagal diselesiakan.",
-      );
+      return handleServiceError(episodeError, "Episode gagal diselesaikan.");
     }
 
     return { success: true, message: "Episode berhasil diselesaikan." };

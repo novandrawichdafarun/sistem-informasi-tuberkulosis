@@ -1,12 +1,12 @@
-import { getDaftarPasienAction } from "@/actions/pasien";
 import Link from "next/link";
+import { getDaftarPasienAction } from "@/actions/pasien";
 import { PasienData } from "@/types/pasien";
 import TambahPasienModal from "@/components/pasien/TambahPasienModal";
 import EditPasienModal from "@/components/pasien/EditPasienModal";
 import DeletePasienButton from "@/components/pasien/DeletePasienButton";
 
 export const metadata = {
-  title: "Manajemen Pasien | PantauTB",
+  title: "Manajemen Pasien | NU-TBCare",
 };
 
 export default async function ManajemenPasienPage() {
@@ -16,22 +16,19 @@ export default async function ManajemenPasienPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Bagian Header */}
+      {/* Header */}
       <div className="sm:flex sm:items-center sm:justify-between mb-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Manajemen Pasien</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Daftar seluruh profil demografi pasien yang berada di bawah pantauan
-            Anda.
+            Daftar seluruh pasien TB yang terdaftar di sistem.
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
-          {/* Tombol Tambah Pasien */}
           <TambahPasienModal />
         </div>
       </div>
 
-      {/* Bagian Tabel (Bawaan Tailwind UI) */}
       {response.success === false ? (
         <div className="rounded-md bg-red-50 p-4 border border-red-200">
           <p className="text-sm text-red-600">{response.error}</p>
@@ -78,7 +75,7 @@ export default async function ManajemenPasienPage() {
                 {pasienList.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={7}
                       className="py-8 text-center text-sm text-gray-500"
                     >
                       Belum ada pasien yang didaftarkan.
@@ -90,15 +87,14 @@ export default async function ManajemenPasienPage() {
                       key={pasien.id_pasien}
                       className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 font-medium sm:pl-6">
                         {pasien.nama_lengkap} <br />
-                        <span className="text-xs font-normal text-gray-400">
+                        <span className="text-xs font-normal text-gray-500">
                           {pasien.usia || "-"}
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {pasien.domisili || "-"} <br />
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 mt-1 inline-block">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 inline-block">
                           {pasien.jenis_kelamin === "L"
                             ? "Laki-laki"
                             : "Perempuan"}
@@ -110,28 +106,26 @@ export default async function ManajemenPasienPage() {
                           {pasien.pekerjaan || "-"}
                         </span>
                       </td>
+                      <td className="px-3 py-4 text-sm text-gray-500 max-w-[14rem]">
+                        {pasien.domisili || "-"}
+                      </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <span className="font-medium text-gray-700">
-                          {pasien.pendapatan || "-"}
-                        </span>{" "}
-                        <br />
+                        {pasien.pendidikan || "-"} <br />
                         <span className="text-xs text-gray-400">
-                          {pasien.no_telp || "-"} ({pasien.users?.email})
+                          {pasien.pekerjaan || "-"}
                         </span>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {pasien.pendapatan || "-"}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-6 space-x-2">
                         <Link
                           href={`/dashboard/pasien/${pasien.id_pasien}`}
-                          className="text-blue-600 hover:text-blue-900 inline-block"
+                          className="text-brand-600 hover:text-brand-800"
                         >
                           Detail
-                          <span className="sr-only">
-                            , {pasien.nama_lengkap}
-                          </span>
                         </Link>
-
                         <EditPasienModal pasien={pasien} />
-
                         <DeletePasienButton
                           id_pasien={pasien.id_pasien}
                           nama={pasien.nama_lengkap}

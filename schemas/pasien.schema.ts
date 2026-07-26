@@ -1,8 +1,8 @@
 import z from "zod";
 
-// Regex untuk No Telp Indonesia (08.., 628.., +628..)
+// Regex No Telp Indonesia (08.., 628.., +628..)
 const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,11}$/;
-// Regex untuk Nama (Hanya huruf, spasi, titik, koma, tanda petik)
+// Regex Nama (huruf, spasi, titik, koma, tanda petik, strip)
 const nameRegex = /^[a-zA-Z\s.'-,]+$/;
 
 export const createPasienSchema = z.object({
@@ -41,7 +41,7 @@ export const createPasienSchema = z.object({
     .string()
     .trim()
     .regex(phoneRegex, "Format nomor telepon tidak valid")
-    .or(z.literal("")) // Mengizinkan string kosong jika user tidak mengisi
+    .or(z.literal(""))
     .optional()
     .default(""),
 

@@ -19,6 +19,7 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
     id_pasien,
     nama_lengkap,
     usia,
+    jenis_kelamin,
     domisili,
     episodeAktif,
     riwayat_episode,
@@ -28,8 +29,14 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
   return (
     <>
       <tr className="hover:bg-gray-50 transition-colors">
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="font-medium text-gray-900">{usia || "-"}</div>
+          <div className="text-xs text-gray-400">
+            {jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
+          </div>
+        </td>
         {/* Kolom 1: Nama Pasien */}
-        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
           {nama_lengkap}
         </td>
 

@@ -29,7 +29,7 @@ export default async function AuthLayout({
         <div className="mb-8 flex flex-col items-center">
           <Logo size="xl" badge />
           <span className="mt-4 text-2xl font-bold tracking-tight text-brand-800">
-            Pantau<span className="text-brand-500">TB</span>
+            NU-TB<span className="text-brand-500">Care</span>
           </span>
         </div>
         {children}

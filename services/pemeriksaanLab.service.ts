@@ -25,7 +25,7 @@ export const getDaftarPemeriksaanLab = async (
       .from("pasien")
       .select(
         `
-        id_pasien, nama_lengkap, usia, domisili,
+        id_pasien, nama_lengkap, usia, jenis_kelamin, domisili,
         episode_pengobatan (
           id_episode, status_episode,
           pemeriksaan_lab ( 
@@ -43,7 +43,7 @@ export const getDaftarPemeriksaanLab = async (
     if (pasienError)
       return handleServiceError(pasienError?.message, "Pasien tidak ditemukan");
 
-    const formattedData: PasienPemeriksaanLabOverview[] = pasienData.map(
+    const formattedData: PasienPemeriksaanLabOverview[] = (pasienData ?? []).map(
       (pasien) => {
         const rawEpisodes = pasien.episode_pengobatan || [];
         const episodeAktif =
@@ -66,6 +66,7 @@ export const getDaftarPemeriksaanLab = async (
           id_pasien: pasien.id_pasien,
           nama_lengkap: pasien.nama_lengkap,
           usia: pasien.usia,
+          jenis_kelamin: pasien.jenis_kelamin,
           domisili: pasien.domisili,
           episodeAktif: episodeAktif
             ? {
@@ -124,10 +125,7 @@ export const createPemeriksaanLab = async (
 
     return { success: true, message: "Pemeriksaan lab berhasil ditambahkan!" };
   } catch (error) {
-    return handleServiceError(
-      error,
-      "Terjadi kesalahan internal server saat menambah data.",
-    );
+    return handleServiceError(error, "Gagal menambah data pemeriksaan lab.");
   }
 };
 
@@ -170,10 +168,7 @@ export const updatePemeriksaanLab = async (
       message: "Data pemeriksaan lab berhasil diperbarui!",
     };
   } catch (error) {
-    return handleServiceError(
-      error,
-      "Terjadi kesalahan internal saat memperbarui data.",
-    );
+    return handleServiceError(error, "Gagal memperbarui data pemeriksaan lab.");
   }
 };
 
@@ -209,9 +204,6 @@ export const deletePemeriksaanLab = async (
 
     return { success: true, message: "Pemeriksaan lab berhasil dihapus." };
   } catch (error) {
-    return handleServiceError(
-      error,
-      "Terjadi kesalahan internal saat menghapus data.",
-    );
+    return handleServiceError(error, "Gagal menghapus data pemeriksaan lab.");
   }
 };

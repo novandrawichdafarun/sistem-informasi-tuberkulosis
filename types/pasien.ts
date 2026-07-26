@@ -1,3 +1,7 @@
+// Disesuaikan dengan skema tabel `pasien` di database live:
+// id_pasien, id_user, nama_lengkap, usia, jenis_kelamin, domisili,
+// no_telp, pendidikan, pekerjaan, pendapatan, created_at.
+
 export interface CreatePasienPayload {
   email: string;
   password: string;

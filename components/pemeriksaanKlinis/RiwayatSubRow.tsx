@@ -32,8 +32,7 @@ export default function RiwayatSubRow({
         </div>
         <div>
           TB:{" "}
-          <span className="font-semibold">{periksa.tinggi_badan || "-"}</span>{" "}
-          cm
+          <span className="font-semibold">{periksa.tinggi_badan || "-"}</span> cm
         </div>
 
         {/* TAMPILAN IMT */}

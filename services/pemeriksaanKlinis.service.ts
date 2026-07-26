@@ -25,25 +25,23 @@ export const getDaftarPemeriksaan = async (
       .from("pasien")
       .select(
         `
-      id_pasien, nama_lengkap, usia, domisili,
-      episode_pengobatan (
-        id_episode, status_episode,
-        pemeriksaan_klinis ( 
-          id_periksa, id_episode, 
-          tanggal_periksa, keluhan, tensi, suhu, 
-          pernapasan, nadi, saturasi_o2, 
-          tinggi_badan, berat_badan, 
-          created_at 
+        id_pasien, nama_lengkap, usia, jenis_kelamin, domisili,
+        episode_pengobatan (
+          id_episode, status_episode,
+          pemeriksaan_klinis (
+            id_periksa, id_episode, tanggal_periksa, keluhan, tensi,
+            suhu, pernapasan, nadi, saturasi_o2, tinggi_badan,
+            berat_badan, created_at
+          )
         )
-      )
-    `,
+      `,
       )
       .order("created_at", { ascending: false });
 
     if (pasienError)
       return handleServiceError(pasienError?.message, "Pasien tidak ditemukan");
 
-    const formattedData: PasienPemeriksaanOverview[] = pasienData.map(
+    const formattedData: PasienPemeriksaanOverview[] = (pasienData ?? []).map(
       (pasien) => {
         const rawEpisodes = pasien.episode_pengobatan || [];
         const episodeAktif =
@@ -66,6 +64,7 @@ export const getDaftarPemeriksaan = async (
           id_pasien: pasien.id_pasien,
           nama_lengkap: pasien.nama_lengkap,
           usia: pasien.usia,
+          jenis_kelamin: pasien.jenis_kelamin,
           domisili: pasien.domisili,
           episodeAktif: episodeAktif
             ? {

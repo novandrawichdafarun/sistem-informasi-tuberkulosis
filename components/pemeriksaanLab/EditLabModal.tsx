@@ -141,52 +141,6 @@ export default function EditLabModal({
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                DNA Bakteri *
-              </label>
-              <input
-                type="text"
-                name="dna_bakteri_tb"
-                required
-                placeholder="High, Medium, Trace"
-                defaultValue={data.dna_bakteri_tb}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Status Resistensi *
-              </label>
-              <input
-                type="text"
-                name="status_resistensi"
-                required
-                list="opsi-status-resistensi"
-                placeholder="Sensitif / Resisten"
-                defaultValue={data.status_resistensi}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
-              <datalist id="opsi-status-resistensi">
-                <option value="Sensitif" />
-                <option value="Resisten" />
-                <option value="Indeterminate" />
-              </datalist>
-            </div>
-
-            <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Hasil BTA (Khusus tes BTA)
-              </label>
-              <input
-                type="text"
-                name="hasil_bta"
-                placeholder="Negatif / 1+ / 2+"
-                defaultValue={data.hasil_bta || ""}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
-            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-5 mt-2 border-t border-gray-100">

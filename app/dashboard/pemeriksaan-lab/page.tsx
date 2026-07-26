@@ -27,8 +27,7 @@ export default async function PemeriksaanLabPage() {
           Manajemen Pemeriksaan Lab
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Kelola data pemeriksaan laboratorium pasien secara terpusat di dalam
-          sistem.
+          Kelola data pemeriksaan laboratorium seluruh pasien.
         </p>
       </div>
 

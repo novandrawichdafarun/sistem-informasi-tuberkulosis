@@ -11,6 +11,7 @@ export interface EpisodePengobatanData {
 export interface PasienEpisodeOverview {
   id_pasien: number;
   nama_lengkap: string;
+  jenis_kelamin: "L" | "P";
   usia: string;
   domisili: string;
   episodeAktif: EpisodePengobatanData | null;

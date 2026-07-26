@@ -73,7 +73,7 @@ export const createPasien = async (
         "Email sudah terdaftar di sistem!",
       );
 
-    // Hash Password & Insert User
+    // Buat akun login pasien
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(payload.password, salt);
 
@@ -93,7 +93,7 @@ export const createPasien = async (
         "Gagal membuat kredensial akun pasien.",
       );
 
-    // Insert Data Medis Pasien
+    // Simpan data demografi pasien
     const { error: pasienError } = await supabase.from("pasien").insert({
       id_user: newUser.id_user,
       nama_lengkap: payload.nama_lengkap,
@@ -106,7 +106,7 @@ export const createPasien = async (
       pendapatan: payload.pendapatan,
     });
 
-    // Rollback Manual jika insert pasien gagal
+    // Rollback manual bila insert pasien gagal
     if (pasienError) {
       await supabase.from("users").delete().eq("id_user", newUser.id_user);
       return handleServiceError(
@@ -158,7 +158,7 @@ export const updatePasien = async (
         "Gagal memperbarui kredensial (Email mungkin sudah dipakai).",
       );
 
-    // Update Data Medis Pasien
+    // Update data demografi pasien
     const { error: pasienError } = await supabase
       .from("pasien")
       .update({
@@ -220,6 +220,7 @@ export const deletePasien = async (
         "Gagal menghapus data medis pasien.",
       );
 
+    // Hapus akun login terkait (data medis ikut terhapus via ON DELETE CASCADE)
     const { error: deleteUserError } = await supabase
       .from("users")
       .delete()
@@ -227,8 +228,8 @@ export const deletePasien = async (
 
     if (deleteUserError)
       return handleServiceError(
-        deletePasienError,
-        "Gagal menghapus akun pasien. Operasi dibatalkan otomatis.",
+        deleteUserError,
+        "Data pasien terhapus, namun gagal menghapus akun login.",
       );
 
     return {
