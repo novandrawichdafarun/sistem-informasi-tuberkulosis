@@ -7,29 +7,22 @@ import {
   PasienResepOverview,
   ResepData,
 } from "@/types/resep";
-
-function todayISO(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-}
-
-// Tambah `n` hari ke tanggal "YYYY-MM-DD" (aman dari zona waktu, pakai UTC).
-function addDays(dateStr: string, n: number): string {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  dt.setUTCDate(dt.getUTCDate() + n);
-  return dt.toISOString().slice(0, 10);
-}
-
-/* --------------------------- Overview per pasien -------------------------- */
+import { verifySuperAdminAccess } from "@/utils/access";
+import { addDays, todayISO } from "@/utils/date";
 
 export const getDaftarResep = async (
   supabase: SupabaseClient,
+  id_super_admin: string,
 ): Promise<ActionResponse<PasienResepOverview[]>> => {
   try {
-    const { data, error } = await supabase
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const { data, error: resepError } = await supabase
       .from("pasien")
       .select(
         `
@@ -50,8 +43,11 @@ export const getDaftarResep = async (
       )
       .order("created_at", { ascending: false });
 
-    if (error) {
-      return handleServiceError(error, "Gagal memuat data resep.");
+    if (resepError) {
+      return handleServiceError(
+        resepError?.message,
+        "Gagal memuat data resep.",
+      );
     }
 
     const formatted: PasienResepOverview[] = (data ?? []).map((pasien) => {
@@ -114,13 +110,19 @@ export const getDaftarResep = async (
   }
 };
 
-/* --------------------- Buat resep + generate jadwal ---------------------- */
-
 export const createResepWithJadwal = async (
   supabase: SupabaseClient,
   payload: CreateResepPayload,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
     // 1) Resep
     const { data: resep, error: resepError } = await supabase
       .from("resep_pengobatan")
@@ -136,7 +138,7 @@ export const createResepWithJadwal = async (
       .single();
 
     if (resepError || !resep) {
-      return handleServiceError(resepError, "Gagal membuat resep.");
+      return handleServiceError(resepError?.message, "Gagal membuat resep.");
     }
 
     const cleanupResep = async () =>
@@ -161,7 +163,10 @@ export const createResepWithJadwal = async (
 
     if (detailError || !details || details.length === 0) {
       await cleanupResep();
-      return handleServiceError(detailError, "Gagal menyimpan detail obat.");
+      return handleServiceError(
+        detailError?.message,
+        "Gagal menyimpan detail obat.",
+      );
     }
 
     // 3) Jadwal harian (1x/hari) selama durasi
@@ -179,9 +184,15 @@ export const createResepWithJadwal = async (
       .insert(jadwalRows);
 
     if (jadwalError) {
-      await supabase.from("detail_obat").delete().eq("id_resep", resep.id_resep);
+      await supabase
+        .from("detail_obat")
+        .delete()
+        .eq("id_resep", resep.id_resep);
       await cleanupResep();
-      return handleServiceError(jadwalError, "Gagal membuat jadwal minum obat.");
+      return handleServiceError(
+        jadwalError?.message,
+        "Gagal membuat jadwal minum obat.",
+      );
     }
 
     return {
@@ -193,13 +204,19 @@ export const createResepWithJadwal = async (
   }
 };
 
-/* ------------------------------ Hapus resep ------------------------------ */
-
 export const deleteResep = async (
   supabase: SupabaseClient,
   id_resep: number,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
     // Hapus berurutan: log → jadwal → detail → resep (aman tanpa andalkan cascade).
     const { data: jadwal } = await supabase
       .from("jadwal_minum_obat")
@@ -214,12 +231,13 @@ export const deleteResep = async (
     await supabase.from("jadwal_minum_obat").delete().eq("id_resep", id_resep);
     await supabase.from("detail_obat").delete().eq("id_resep", id_resep);
 
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from("resep_pengobatan")
       .delete()
       .eq("id_resep", id_resep);
 
-    if (error) return handleServiceError(error, "Gagal menghapus resep.");
+    if (deleteError)
+      return handleServiceError(deleteError?.message, "Gagal menghapus resep.");
 
     return { success: true, message: "Resep & jadwalnya berhasil dihapus." };
   } catch (error) {

@@ -11,68 +11,24 @@ import {
   PemeriksaanKlinisData,
   PemeriksaanLabData,
 } from "@/types/pasienPortal";
-
-/* -------------------------------------------------------------------------- */
-/*  Helper internal                                                            */
-/* -------------------------------------------------------------------------- */
-
-function todayISO(): string {
-  const d = new Date();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
-
-function isoDaysAgo(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
-
-async function getPasienIdByUser(
-  supabase: SupabaseClient,
-  id_user: string,
-): Promise<number | null> {
-  const { data } = await supabase
-    .from("pasien")
-    .select("id_pasien")
-    .eq("id_user", id_user)
-    .single();
-  return data?.id_pasien ?? null;
-}
-
-async function getResepIdsByPasien(
-  supabase: SupabaseClient,
-  id_pasien: number,
-): Promise<number[]> {
-  const { data: episodes } = await supabase
-    .from("episode_pengobatan")
-    .select("id_episode")
-    .eq("id_pasien", id_pasien);
-
-  const episodeIds = (episodes ?? []).map((e) => e.id_episode as number);
-  if (episodeIds.length === 0) return [];
-
-  const { data: resep } = await supabase
-    .from("resep_pengobatan")
-    .select("id_resep")
-    .in("id_episode", episodeIds);
-
-  return (resep ?? []).map((r) => r.id_resep as number);
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Profil pasien                                                              */
-/* -------------------------------------------------------------------------- */
+import { isoDaysAgo, todayISO } from "@/utils/date";
+import { getPasienIdByUser, getResepIdsByPasien } from "@/utils/Pasien";
+import { verifyPasienAccess } from "@/utils/access";
 
 export const getPasienProfileByUser = async (
   supabase: SupabaseClient,
-  id_user: string,
+  id_user_pasien: string,
 ): Promise<ActionResponse<PasienPortalProfile>> => {
   try {
-    const { data, error } = await supabase
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const { data, error: profileError } = await supabase
       .from("pasien")
       .select(
         `
@@ -81,10 +37,10 @@ export const getPasienProfileByUser = async (
         episode_pengobatan ( id_episode, tanggal_mulai, tipe_pasien, status_episode )
       `,
       )
-      .eq("id_user", id_user)
+      .eq("id_user", id_user_pasien)
       .single();
 
-    if (error || !data) {
+    if (profileError || !data) {
       return handleServiceError(error, "Profil pasien tidak ditemukan.");
     }
 
@@ -117,16 +73,19 @@ export const getPasienProfileByUser = async (
   }
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Jadwal & laporan minum obat                                                */
-/* -------------------------------------------------------------------------- */
-
 export const getTodayMedicationByUser = async (
   supabase: SupabaseClient,
-  id_user: string,
+  id_user_pasien: string,
 ): Promise<ActionResponse<MedicationToday | null>> => {
   try {
-    const id_pasien = await getPasienIdByUser(supabase, id_user);
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
     if (!id_pasien) return { success: true, data: null };
 
     const resepIds = await getResepIdsByPasien(supabase, id_pasien);
@@ -179,11 +138,18 @@ export const getTodayMedicationByUser = async (
 
 export const reportTodayMedicationByUser = async (
   supabase: SupabaseClient,
-  id_user: string,
+  id_user_pasien: string,
   status: MedicationStatus,
 ): Promise<ActionResponse> => {
   try {
-    const id_pasien = await getPasienIdByUser(supabase, id_user);
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
     if (!id_pasien)
       return { success: false, error: "Profil pasien tidak ditemukan." };
 
@@ -253,7 +219,7 @@ export const reportTodayMedicationByUser = async (
 
 export const getAdherenceByUser = async (
   supabase: SupabaseClient,
-  id_user: string,
+  id_user_pasien: string,
   days = 30,
 ): Promise<ActionResponse<AdherenceSummary>> => {
   const empty: AdherenceSummary = {
@@ -266,7 +232,7 @@ export const getAdherenceByUser = async (
   };
 
   try {
-    const id_pasien = await getPasienIdByUser(supabase, id_user);
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
     if (!id_pasien) return { success: true, data: empty };
 
     const resepIds = await getResepIdsByPasien(supabase, id_pasien);
@@ -283,7 +249,8 @@ export const getAdherenceByUser = async (
       .order("tanggal_jadwal", { ascending: true });
 
     const daysArr: AdherenceDay[] = (jadwal ?? []).map((j) => {
-      const logArr = (j.medication_log as { status: string; reported_at: string }[]) ?? [];
+      const logArr =
+        (j.medication_log as { status: string; reported_at: string }[]) ?? [];
       const log = Array.isArray(logArr) ? logArr[0] : logArr;
       return {
         tanggal: j.tanggal_jadwal,
@@ -308,16 +275,12 @@ export const getAdherenceByUser = async (
   }
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Tanda vital & berat badan (dari pemeriksaan_klinis)                        */
-/* -------------------------------------------------------------------------- */
-
 export const getVitalSignsByUser = async (
   supabase: SupabaseClient,
-  id_user: string,
+  id_user_pasien: string,
 ): Promise<ActionResponse<PemeriksaanKlinisData[]>> => {
   try {
-    const id_pasien = await getPasienIdByUser(supabase, id_user);
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
     if (!id_pasien) return { success: true, data: [] };
 
     const { data: episodes } = await supabase
@@ -351,10 +314,10 @@ export const getVitalSignsByUser = async (
 
 export const getLabResultsByUser = async (
   supabase: SupabaseClient,
-  id_user: string,
+  id_user_pasien: string,
 ): Promise<ActionResponse<PemeriksaanLabData[]>> => {
   try {
-    const id_pasien = await getPasienIdByUser(supabase, id_user);
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
     if (!id_pasien) return { success: true, data: [] };
 
     const { data: episodes } = await supabase
@@ -386,7 +349,9 @@ export const getLabResultsByUser = async (
 /*  Chat (tabel pesan_chat belum tersedia di DB — placeholder)                 */
 /* -------------------------------------------------------------------------- */
 
-export const getChatByUser = async (): Promise<ActionResponse<ChatMessage[]>> => {
+export const getChatByUser = async (): Promise<
+  ActionResponse<ChatMessage[]>
+> => {
   // Belum ada tabel pesan_chat di database live.
   return { success: true, data: [] };
 };

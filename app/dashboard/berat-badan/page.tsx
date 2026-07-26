@@ -1,23 +1,11 @@
 import { getVitalSignsAction } from "@/actions/pasienPortal";
-import { formatTanggalID } from "@/utils/formatTanggal";
+import { formatTanggalID } from "@/utils/date";
+import { hitungBMI } from "@/utils/number";
 import WeightChart, {
   buildWeightPoints,
-} from "@/components/pasien-portal/WeightChart";
+} from "@/components/grafik/WeightChart";
 
 export const metadata = { title: "Berat Badan | NU-TBCare" };
-
-function bmi(berat?: number | null, tinggiCm?: number | null) {
-  if (!berat || !tinggiCm) return null;
-  const m = tinggiCm / 100;
-  return berat / (m * m);
-}
-
-function kategoriBMI(v: number) {
-  if (v < 18.5) return { label: "Kurang", tone: "text-amber-600" };
-  if (v < 25) return { label: "Normal", tone: "text-brand-700" };
-  if (v < 30) return { label: "Berlebih", tone: "text-amber-600" };
-  return { label: "Obesitas", tone: "text-red-600" };
-}
 
 export default async function BeratBadanPage() {
   const vitalRes = await getVitalSignsAction();
@@ -27,10 +15,13 @@ export default async function BeratBadanPage() {
 
   const beratAwal = points.length ? points[0].berat : null;
   const beratTerakhir = points.length ? points[points.length - 1].berat : null;
-  const tinggi = vitals.find((v) => v.tinggi_badan != null)?.tinggi_badan ?? null;
-  const nilaiBMI = bmi(beratTerakhir, tinggi);
+  const tinggi =
+    vitals.find((v) => v.tinggi_badan != null)?.tinggi_badan ?? null;
+  const bmiResult = hitungBMI(beratTerakhir, tinggi);
   const selisih =
-    beratAwal != null && beratTerakhir != null ? beratTerakhir - beratAwal : null;
+    beratAwal != null && beratTerakhir != null
+      ? beratTerakhir - beratAwal
+      : null;
 
   return (
     <div className="space-y-6">
@@ -55,8 +46,11 @@ export default async function BeratBadanPage() {
             {beratTerakhir != null ? `${beratTerakhir} kg` : "-"}
           </p>
           {selisih != null && (
-            <p className={`text-xs ${selisih >= 0 ? "text-brand-700" : "text-red-600"}`}>
-              {selisih >= 0 ? "▲" : "▼"} {Math.abs(selisih).toFixed(1)} kg dari awal
+            <p
+              className={`text-xs ${selisih >= 0 ? "text-brand-700" : "text-red-600"}`}
+            >
+              {selisih >= 0 ? "▲" : "▼"} {Math.abs(selisih).toFixed(1)} kg dari
+              awal
             </p>
           )}
         </div>
@@ -68,13 +62,13 @@ export default async function BeratBadanPage() {
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <p className="text-sm text-slate-500">IMT (BMI)</p>
-          {nilaiBMI != null ? (
+          {bmiResult ? (
             <>
               <p className="mt-1 text-3xl font-bold text-brand-950">
-                {nilaiBMI.toFixed(1)}
+                {bmiResult.nilai}
               </p>
-              <p className={`text-xs font-semibold ${kategoriBMI(nilaiBMI).tone}`}>
-                {kategoriBMI(nilaiBMI).label}
+              <p className={`text-xs font-semibold ${bmiResult.colorClass}`}>
+                {bmiResult.kategori}
               </p>
             </>
           ) : (
@@ -108,7 +102,6 @@ export default async function BeratBadanPage() {
           </h2>
           <ul className="mt-4 divide-y divide-slate-100">
             {[...points].reverse().map((p, idx, arr) => {
-              // delta terhadap pengukuran sebelumnya (yang lebih lama)
               const prev = arr[idx + 1];
               const delta = prev ? p.berat - prev.berat : null;
               return (

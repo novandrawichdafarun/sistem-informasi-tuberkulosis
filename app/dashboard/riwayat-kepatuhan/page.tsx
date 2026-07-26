@@ -1,36 +1,11 @@
 import { getAdherenceAction } from "@/actions/pasienPortal";
-import { formatTanggalID, formatJam } from "@/utils/formatTanggal";
+import { formatTanggalID, formatJam } from "@/utils/date";
 import { AdherenceDay } from "@/types/pasienPortal";
+import Donut from "@/components/grafik/Donut";
+import Legend from "@/components/molecules/Legend";
+import StatCard from "@/components/card/StatCard";
 
 export const metadata = { title: "Riwayat Kepatuhan | NU-TBCare" };
-
-function Donut({ percent }: { percent: number }) {
-  const radius = 60;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - percent / 100);
-  return (
-    <div className="relative h-40 w-40">
-      <svg viewBox="0 0 144 144" className="h-40 w-40 -rotate-90">
-        <circle cx="72" cy="72" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="14" />
-        <circle
-          cx="72"
-          cy="72"
-          r={radius}
-          fill="none"
-          stroke="var(--brand-600)"
-          strokeWidth="14"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-brand-950">{percent}%</span>
-        <span className="text-xs text-slate-500">Kepatuhan</span>
-      </div>
-    </div>
-  );
-}
 
 function cellClass(d: AdherenceDay) {
   if (d.status === "diminum") return "bg-brand-600 text-white";
@@ -43,7 +18,14 @@ export default async function RiwayatKepatuhanPage() {
   const summary =
     res.success && res.data
       ? res.data
-      : { total: 0, diminum: 0, terlewat: 0, belum: 0, persentase: 0, days: [] };
+      : {
+          total: 0,
+          diminum: 0,
+          terlewat: 0,
+          belum: 0,
+          persentase: 0,
+          days: [],
+        };
 
   return (
     <div className="space-y-6">
@@ -60,9 +42,21 @@ export default async function RiwayatKepatuhanPage() {
           <Donut percent={summary.persentase} />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:col-span-2 lg:grid-cols-1 xl:grid-cols-3">
-          <StatCard label="Diminum" value={summary.diminum} tone="brand" />
-          <StatCard label="Terlewat" value={summary.terlewat} tone="red" />
-          <StatCard label="Belum lapor" value={summary.belum} tone="slate" />
+          <StatCard
+            label="Diminum"
+            value={String(summary.diminum)}
+            tone="brand"
+          />
+          <StatCard
+            label="Terlewat"
+            value={String(summary.terlewat)}
+            tone="red"
+          />
+          <StatCard
+            label="Belum lapor"
+            value={String(summary.belum)}
+            tone="slate"
+          />
         </div>
       </div>
 
@@ -102,38 +96,6 @@ export default async function RiwayatKepatuhanPage() {
           </>
         )}
       </div>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: "brand" | "red" | "slate";
-}) {
-  const tones = {
-    brand: "text-brand-700",
-    red: "text-red-600",
-    slate: "text-slate-500",
-  } as const;
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className={`mt-1 text-3xl font-bold ${tones[tone]}`}>{value}</p>
-      <p className="text-xs text-slate-400">dosis</p>
-    </div>
-  );
-}
-
-function Legend({ className, label }: { className: string; label: string }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className={`h-4 w-4 rounded ${className}`} />
-      {label}
     </div>
   );
 }

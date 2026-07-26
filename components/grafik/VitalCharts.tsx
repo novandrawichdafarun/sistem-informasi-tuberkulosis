@@ -1,28 +1,8 @@
-import LineChart from "@/components/charts/LineChart";
+import LineChart from "@/components/grafik/LineChart";
 import { PemeriksaanKlinisData } from "@/types/pasienPortal";
-import { formatTanggalID } from "@/utils/formatTanggal";
-
-function parseTensi(t?: string | null): { sis: number | null; dia: number | null } {
-  if (!t) return { sis: null, dia: null };
-  const m = t.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
-  if (!m) return { sis: null, dia: null };
-  return { sis: Number(m[1]), dia: Number(m[2]) };
-}
-
-function ChartCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
-      <h3 className="text-base font-semibold text-brand-950">{title}</h3>
-      <div className="mt-4 overflow-x-auto">{children}</div>
-    </div>
-  );
-}
+import { formatTanggalID } from "@/utils/date";
+import { parseTensi } from "@/utils/Pasien";
+import ChartCard from "../card/ChartCard";
 
 export default function VitalCharts({
   vitals,
@@ -74,7 +54,9 @@ export default function VitalCharts({
         <ChartCard title="Suhu Tubuh">
           <LineChart
             labels={labels}
-            series={[{ name: "Suhu (°C)", color: "#f59e0b", values: suhu, area: true }]}
+            series={[
+              { name: "Suhu (°C)", color: "#f59e0b", values: suhu, area: true },
+            ]}
             suffix="°"
           />
         </ChartCard>

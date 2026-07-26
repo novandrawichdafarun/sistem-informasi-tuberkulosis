@@ -1,64 +1,15 @@
 import Link from "next/link";
 import { getPasienDetailAction } from "@/actions/pasienDetail";
-import { formatTanggalID } from "@/utils/formatTanggal";
-import VitalCharts from "@/components/pasien-portal/VitalCharts";
+import { formatTanggalID } from "@/utils/date";
+import VitalCharts from "@/components/grafik/VitalCharts";
 import WeightChart, {
   buildWeightPoints,
-} from "@/components/pasien-portal/WeightChart";
+} from "@/components/grafik/WeightChart";
+import Section from "@/components/molecules/Section";
+import Info from "@/components/molecules/Info";
+import Donut from "@/components/grafik/Donut";
 
 export const metadata = { title: "Detail Pasien | NU-TBCare" };
-
-function Donut({ percent }: { percent: number }) {
-  const r = 52;
-  const c = 2 * Math.PI * r;
-  const off = c * (1 - percent / 100);
-  return (
-    <div className="relative h-32 w-32">
-      <svg viewBox="0 0 128 128" className="h-32 w-32 -rotate-90">
-        <circle cx="64" cy="64" r={r} fill="none" stroke="#e2e8f0" strokeWidth="12" />
-        <circle
-          cx="64"
-          cy="64"
-          r={r}
-          fill="none"
-          stroke="var(--brand-600)"
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={off}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-brand-950">{percent}%</span>
-        <span className="text-xs text-slate-500">Kepatuhan</span>
-      </div>
-    </div>
-  );
-}
-
-function Info({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div>
-      <dt className="text-xs uppercase tracking-wide text-slate-400">{label}</dt>
-      <dd className="mt-0.5 text-sm font-medium text-slate-800">{value || "-"}</dd>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
-      <h2 className="text-base font-semibold text-brand-950">{title}</h2>
-      <div className="mt-4">{children}</div>
-    </div>
-  );
-}
 
 export default async function PasienDetailPage({
   params,
@@ -81,7 +32,10 @@ export default async function PasienDetailPage({
   if (!res.success || !res.data) {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/dashboard/pasien" className="text-sm text-brand-600 hover:underline">
+        <Link
+          href="/dashboard/pasien"
+          className="text-sm text-brand-600 hover:underline"
+        >
           ← Kembali ke daftar pasien
         </Link>
         <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
@@ -98,7 +52,10 @@ export default async function PasienDetailPage({
   return (
     <div className="max-w-6xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 py-8">
       <div>
-        <Link href="/dashboard/pasien" className="text-sm text-brand-600 hover:underline">
+        <Link
+          href="/dashboard/pasien"
+          className="text-sm text-brand-600 hover:underline"
+        >
           ← Kembali ke daftar pasien
         </Link>
         <div className="mt-2 flex items-center gap-4">
@@ -151,15 +108,21 @@ export default async function PasienDetailPage({
             <Donut percent={adherence.persentase} />
             <div className="grid flex-1 grid-cols-3 gap-3 text-center">
               <div className="rounded-xl bg-brand-50 p-4">
-                <p className="text-2xl font-bold text-brand-700">{adherence.diminum}</p>
+                <p className="text-2xl font-bold text-brand-700">
+                  {adherence.diminum}
+                </p>
                 <p className="text-xs text-slate-500">Diminum</p>
               </div>
               <div className="rounded-xl bg-red-50 p-4">
-                <p className="text-2xl font-bold text-red-600">{adherence.terlewat}</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {adherence.terlewat}
+                </p>
                 <p className="text-xs text-slate-500">Terlewat</p>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <p className="text-2xl font-bold text-slate-500">{adherence.belum}</p>
+                <p className="text-2xl font-bold text-slate-500">
+                  {adherence.belum}
+                </p>
                 <p className="text-xs text-slate-500">Belum lapor</p>
               </div>
             </div>
@@ -176,7 +139,9 @@ export default async function PasienDetailPage({
         </Section>
       ) : (
         <div>
-          <h2 className="mb-3 text-base font-semibold text-brand-950">Tanda Vital</h2>
+          <h2 className="mb-3 text-base font-semibold text-brand-950">
+            Tanda Vital
+          </h2>
           <VitalCharts vitals={vitals} />
         </div>
       )}
@@ -214,10 +179,16 @@ export default async function PasienDetailPage({
               <tbody className="divide-y divide-slate-100 text-slate-600">
                 {lab.map((l) => (
                   <tr key={l.id_tes}>
-                    <td className="py-2 pr-4">{formatTanggalID(l.tanggal_tes)}</td>
-                    <td className="py-2 pr-4 font-medium text-slate-800">{l.jenis_tes}</td>
+                    <td className="py-2 pr-4">
+                      {formatTanggalID(l.tanggal_tes)}
+                    </td>
+                    <td className="py-2 pr-4 font-medium text-slate-800">
+                      {l.jenis_tes}
+                    </td>
                     <td className="py-2 pr-4">{l.hasil_tes}</td>
-                    <td className="py-2 pr-4">{l.periode_pemeriksaan || "-"}</td>
+                    <td className="py-2 pr-4">
+                      {l.periode_pemeriksaan || "-"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -235,12 +206,19 @@ export default async function PasienDetailPage({
         ) : (
           <ul className="divide-y divide-slate-100">
             {episodes.map((e) => (
-              <li key={e.id_episode} className="flex items-center justify-between py-3 text-sm">
+              <li
+                key={e.id_episode}
+                className="flex items-center justify-between py-3 text-sm"
+              >
                 <div>
-                  <p className="font-medium text-slate-800">{e.tipe_pasien || "-"}</p>
+                  <p className="font-medium text-slate-800">
+                    {e.tipe_pasien || "-"}
+                  </p>
                   <p className="text-xs text-slate-400">
                     {formatTanggalID(e.tanggal_mulai)} —{" "}
-                    {e.tanggal_selesai ? formatTanggalID(e.tanggal_selesai) : "sekarang"}
+                    {e.tanggal_selesai
+                      ? formatTanggalID(e.tanggal_selesai)
+                      : "sekarang"}
                   </p>
                 </div>
                 <span

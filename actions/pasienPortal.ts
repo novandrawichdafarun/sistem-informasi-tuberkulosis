@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { ActionResponse } from "@/types/action";
 import { getSupabaseServer } from "@/utils/supabase/server";
-import { requirePasienSession } from "@/utils/sessionPasien";
+import { requirePasienSession } from "@/utils/session";
 import { handleActionError } from "@/utils/error";
 import {
   getAdherenceByUser,

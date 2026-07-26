@@ -7,7 +7,7 @@ import {
   formatTanggalID,
   formatJam,
   formatWaktuID,
-} from "@/utils/formatTanggal";
+} from "@/utils/date";
 
 export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
 

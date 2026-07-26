@@ -1,6 +1,6 @@
-import LineChart from "@/components/charts/LineChart";
+import LineChart from "@/components/grafik/LineChart";
 import { PemeriksaanKlinisData } from "@/types/pasienPortal";
-import { formatTanggalID } from "@/utils/formatTanggal";
+import { formatTanggalID } from "@/utils/date";
 
 export type WeightPoint = { label: string; berat: number; tanggal: string };
 
@@ -37,7 +37,12 @@ export default function WeightChart({ points }: { points: WeightPoint[] }) {
     <LineChart
       labels={points.map((p) => p.label)}
       series={[
-        { name: "Berat (kg)", color: "var(--brand-600)", values: points.map((p) => p.berat), area: true },
+        {
+          name: "Berat (kg)",
+          color: "var(--brand-600)",
+          values: points.map((p) => p.berat),
+          area: true,
+        },
       ]}
       showLegend={false}
     />

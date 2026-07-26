@@ -106,7 +106,7 @@ export default async function ManajemenPasienPage() {
                           {pasien.pekerjaan || "-"}
                         </span>
                       </td>
-                      <td className="px-3 py-4 text-sm text-gray-500 max-w-[14rem]">
+                      <td className="px-3 py-4 text-sm text-gray-500 max-w-56">
                         {pasien.domisili || "-"}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">

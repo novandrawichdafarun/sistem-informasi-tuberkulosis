@@ -61,7 +61,10 @@ export default function TambahResepModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-2xl text-gray-600">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Buat Resep &amp; Jadwal Minum Obat
@@ -81,7 +84,11 @@ export default function TambahResepModal({
               <label className="block text-sm font-medium text-gray-700">
                 Kategori Regimen *
               </label>
-              <select name="kategori_regimen" required className={`${inputClass} bg-white`}>
+              <select
+                name="kategori_regimen"
+                required
+                className={`${inputClass} bg-white`}
+              >
                 <option value="">-- Pilih --</option>
                 {REGIMEN.map((r) => (
                   <option key={r} value={r}>
@@ -94,7 +101,11 @@ export default function TambahResepModal({
               <label className="block text-sm font-medium text-gray-700">
                 Fase Pengobatan *
               </label>
-              <select name="fase_pengobatan" required className={`${inputClass} bg-white`}>
+              <select
+                name="fase_pengobatan"
+                required
+                className={`${inputClass} bg-white`}
+              >
                 <option value="">-- Pilih --</option>
                 {FASE.map((f) => (
                   <option key={f} value={f}>
@@ -176,7 +187,10 @@ export default function TambahResepModal({
             {obatList.length === 0 ? (
               <div className="rounded border border-dashed border-gray-300 p-4 text-center text-sm text-gray-500">
                 Belum ada obat di master.{" "}
-                <Link href="/dashboard/obat" className="text-blue-600 underline">
+                <Link
+                  href="/dashboard/obat"
+                  className="text-blue-600 underline"
+                >
                   Tambahkan di Master Obat
                 </Link>{" "}
                 dulu.
@@ -194,7 +208,9 @@ export default function TambahResepModal({
                       onChange={() => toggle(o.id_obat)}
                       className="h-4 w-4 rounded border-gray-300 text-blue-600"
                     />
-                    <span className="font-medium text-gray-800">{o.nama_obat}</span>
+                    <span className="font-medium text-gray-800">
+                      {o.nama_obat}
+                    </span>
                     <span className="text-xs text-gray-400">
                       {o.dosis || ""} {o.jenis_obat ? `· ${o.jenis_obat}` : ""}
                     </span>

@@ -2,44 +2,21 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { ActionResponse } from "@/types/action";
 import { handleServiceError } from "@/utils/error";
 import { MonthlyPoint, StatistikAdmin } from "@/types/statistik";
-
-const BULAN_ID = [
-  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-  "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
-];
-
-function todayISO(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-}
-
-type MonthMeta = { key: string; label: string; start: string; end: string };
-
-function buildMonths(n = 6): MonthMeta[] {
-  const months: MonthMeta[] = [];
-  const now = new Date();
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const y = d.getFullYear();
-    const m = d.getMonth();
-    const key = `${y}-${String(m + 1).padStart(2, "0")}`;
-    const endDay = new Date(y, m + 1, 0).getDate();
-    months.push({
-      key,
-      label: BULAN_ID[m],
-      start: `${key}-01`,
-      end: `${key}-${String(endDay).padStart(2, "0")}`,
-    });
-  }
-  return months;
-}
+import { buildMonths, todayISO } from "@/utils/date";
+import { verifySuperAdminAccess } from "@/utils/access";
 
 export const getStatistikAdmin = async (
   supabase: SupabaseClient,
+  id_super_admin: string,
 ): Promise<ActionResponse<StatistikAdmin>> => {
   try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
     const months = buildMonths(6);
     const today = todayISO();
     const windowStart = months[0].start;
@@ -49,7 +26,9 @@ export const getStatistikAdmin = async (
       supabase.from("pasien").select("id_pasien, created_at"),
       supabase
         .from("episode_pengobatan")
-        .select("id_episode, id_pasien, status_episode, tanggal_mulai, tanggal_selesai"),
+        .select(
+          "id_episode, id_pasien, status_episode, tanggal_mulai, tanggal_selesai",
+        ),
       supabase.from("resep_pengobatan").select("id_resep, id_episode"),
       supabase
         .from("jadwal_minum_obat")
@@ -168,7 +147,8 @@ export const getStatistikAdmin = async (
     const data: StatistikAdmin = {
       totalPasien: pasien.length,
       pasienAktif: activeSet.size,
-      rataKepatuhanBulanIni: trenKepatuhan[trenKepatuhan.length - 1]?.value ?? 0,
+      rataKepatuhanBulanIni:
+        trenKepatuhan[trenKepatuhan.length - 1]?.value ?? 0,
       pasienBaruBulanIni:
         pasienBaruPerBulan[pasienBaruPerBulan.length - 1]?.value ?? 0,
       bulanIniLabel,

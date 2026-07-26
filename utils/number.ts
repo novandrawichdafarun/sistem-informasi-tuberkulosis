@@ -9,7 +9,7 @@ export function parseOptionalNumber(
   return isNaN(parsed) ? undefined : parsed;
 }
 
-export function hitungIMT(bb?: number | null, tb?: number | null) {
+export function hitungBMI(bb?: number | null, tb?: number | null) {
   if (!bb || !tb) return null;
 
   const tbMeter = tb / 100; // Ubah cm ke meter

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import PasienSidebar from "@/components/sidebar/PasienSidebar";
-import AdminShell from "@/components/dashboard/AdminShell";
+import AdminSidebar from "@/components/sidebar/SuperAdminSidebar";
 
 export default async function DashboardLayout({
   children,
@@ -30,13 +30,13 @@ export default async function DashboardLayout({
     session?.user?.role === "super_admin" ? "Super Admin" : "Tenaga Kesehatan";
 
   return (
-    <AdminShell
+    <AdminSidebar
       user={{
         name: session?.user?.name ?? session?.user?.email ?? "Admin",
         roleLabel,
       }}
     >
       {children}
-    </AdminShell>
+    </AdminSidebar>
   );
 }

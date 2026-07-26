@@ -1,148 +1,11 @@
 import { getStatistikAdminAction } from "@/actions/statistik";
-import { MonthlyPoint } from "@/types/statistik";
-import LineChart from "@/components/charts/LineChart";
+import StatCard from "@/components/card/StatCard";
+import DistribusiBar from "@/components/grafik/DistribusiBar";
+import LineChart from "@/components/grafik/LineChart";
+import ChartCard from "@/components/card/ChartCard";
+import BarChart from "@/components/grafik/BarChart";
 
 export const metadata = { title: "Statistik | NU-TBCare" };
-
-/* --------------------------------- Charts -------------------------------- */
-
-function BarChart({
-  points,
-  fill = "#f59e0b",
-}: {
-  points: MonthlyPoint[];
-  fill?: string;
-}) {
-  const W = 680,
-    H = 240,
-    padL = 40,
-    padR = 16,
-    padT = 16,
-    padB = 28;
-  const innerW = W - padL - padR;
-  const innerH = H - padT - padB;
-  const max = Math.max(...points.map((p) => p.value), 4);
-  const n = points.length;
-  const slot = innerW / n;
-  const barW = Math.min(slot * 0.55, 48);
-
-  const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(max * t));
-  const y = (v: number) => padT + innerH * (1 - v / max);
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" preserveAspectRatio="xMidYMid meet">
-      {ticks.map((t) => (
-        <g key={t}>
-          <line x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} stroke="#e2e8f0" strokeDasharray="3 3" />
-          <text x={4} y={y(t) + 4} fontSize="10" fill="#94a3b8">
-            {t}
-          </text>
-        </g>
-      ))}
-      {points.map((p, i) => {
-        const cx = padL + slot * i + slot / 2;
-        const h = innerH * (p.value / max);
-        return (
-          <g key={p.key}>
-            <rect
-              x={cx - barW / 2}
-              y={padT + innerH - h}
-              width={barW}
-              height={h}
-              rx="4"
-              fill={fill}
-            >
-              <title>
-                {p.label}: {p.value} pasien
-              </title>
-            </rect>
-            <text x={cx} y={H - 8} fontSize="11" fill="#64748b" textAnchor="middle">
-              {p.label}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-/* --------------------------------- Page ---------------------------------- */
-
-function StatCard({
-  label,
-  value,
-  sub,
-  tone = "brand",
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  tone?: "brand" | "slate";
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-        {label}
-      </p>
-      <p
-        className={`mt-2 text-4xl font-bold ${
-          tone === "brand" ? "text-brand-700" : "text-brand-950"
-        }`}
-      >
-        {value}
-      </p>
-      {sub && <p className="mt-1 text-sm text-slate-500">{sub}</p>}
-    </div>
-  );
-}
-
-function DistribusiBar({
-  label,
-  range,
-  count,
-  total,
-  color,
-}: {
-  label: string;
-  range: string;
-  count: number;
-  total: number;
-  color: string;
-}) {
-  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-  return (
-    <div>
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium text-slate-700">
-          {label} <span className="text-slate-400">{range}</span>
-        </span>
-        <span className="font-semibold text-slate-800">{count} pasien</span>
-      </div>
-      <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
-      </div>
-      <p className="mt-1 text-xs text-slate-400">{pct}% dari pasien dinilai</p>
-    </div>
-  );
-}
-
-function ChartCard({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
-      <h2 className="text-base font-semibold text-brand-950">{title}</h2>
-      {subtitle && <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>}
-      <div className="mt-4 overflow-x-auto">{children}</div>
-    </div>
-  );
-}
 
 export default async function StatistikPage() {
   const res = await getStatistikAdminAction();
@@ -249,7 +112,10 @@ export default async function StatistikPage() {
 
       {/* Pasien aktif & pasien baru */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ChartCard title="Jumlah Pasien Aktif" subtitle="Per bulan (6 bulan terakhir)">
+        <ChartCard
+          title="Jumlah Pasien Aktif"
+          subtitle="Per bulan (6 bulan terakhir)"
+        >
           <LineChart
             labels={s.pasienAktifPerBulan.map((p) => p.label)}
             series={[

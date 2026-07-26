@@ -9,19 +9,10 @@ export async function requireSuperAdminSession(): Promise<string> {
   return session.user.id;
 }
 
-// Role yang dianggap sebagai "admin/pengelola" di sistem ini.
-// DB live tidak punya tabel `nakes`; pengelola tunggal = super_admin.
-// `nakes` tetap diizinkan untuk kompatibilitas bila suatu saat ada.
-const ADMIN_ROLES = ["super_admin", "nakes"];
-
-/**
- * Memastikan pemanggil adalah admin (super_admin / nakes) dan
- * mengembalikan id_user (UUID) miliknya.
- */
-export async function requireNakesSession(): Promise<string> {
+export async function requirePasienSession(): Promise<string> {
   const session = await getServerSession(authOptions);
-  if (!session || !ADMIN_ROLES.includes(session.user.role)) {
-    throw new Error("Akses ditolak: Hanya Admin yang diizinkan.");
+  if (!session || session.user.role !== "pasien") {
+    throw new Error("Akses ditolak: Hanya Pasien yang diizinkan.");
   }
   return session.user.id;
 }

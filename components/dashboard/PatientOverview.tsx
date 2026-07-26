@@ -2,12 +2,13 @@ import Link from "next/link";
 import {
   PillIcon,
   TrendIcon,
-  ChatIcon,
   CheckIcon,
   CloseIcon,
   MinusIcon,
 } from "../asset/icons";
 import { AdherenceDay, AdherenceSummary } from "@/types/pasienPortal";
+import AdherenceDonut from "../grafik/AdherenceDonut";
+import { dayNumber } from "@/utils/date";
 
 type CellKey = "diminum" | "terlewat" | "belum";
 
@@ -42,10 +43,6 @@ function cellKey(day: AdherenceDay): CellKey {
   return "belum";
 }
 
-function dayNumber(tanggal: string) {
-  return tanggal.slice(8, 10); // "2026-07-25" -> "25"
-}
-
 const QUICK_ACTIONS = [
   {
     label: "Laporan Obat Harian",
@@ -58,53 +55,10 @@ const QUICK_ACTIONS = [
     label: "Riwayat Kepatuhan",
     href: "/dashboard/riwayat-kepatuhan",
     icon: TrendIcon,
-    className: "border-brand-200 bg-brand-50/60 text-brand-700",
-    iconClassName: "text-brand-600",
-  },
-  {
-    label: "Chat Nakes",
-    href: "/dashboard/chat",
-    icon: ChatIcon,
     className: "border-violet-200 bg-violet-50/60 text-violet-700",
     iconClassName: "text-violet-600",
   },
 ];
-
-function AdherenceDonut({ percent }: { percent: number }) {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - percent / 100);
-
-  return (
-    <div className="relative h-32 w-32">
-      <svg viewBox="0 0 128 128" className="h-32 w-32 -rotate-90">
-        <circle
-          cx="64"
-          cy="64"
-          r={radius}
-          fill="none"
-          stroke="#e2e8f0"
-          strokeWidth="12"
-        />
-        <circle
-          cx="64"
-          cy="64"
-          r={radius}
-          fill="none"
-          stroke="var(--brand-600)"
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-brand-950">{percent}%</span>
-        <span className="text-xs text-slate-500">Kepatuhan</span>
-      </div>
-    </div>
-  );
-}
 
 export default function PatientOverview({
   summary,

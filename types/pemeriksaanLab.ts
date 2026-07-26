@@ -1,6 +1,3 @@
-// Disesuaikan dengan skema live: kolom periode_pemeriksaan (bukan periode_bulanan),
-// dan tanpa id_nakes.
-
 export interface PemeriksaanLabData {
   id_tes: number;
   id_episode: number;

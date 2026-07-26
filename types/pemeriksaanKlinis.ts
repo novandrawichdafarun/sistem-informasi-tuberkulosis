@@ -1,6 +1,3 @@
-// Disesuaikan dengan skema live: kolom tinggi_badan / berat_badan (tanpa _saat_ini),
-// dan tanpa id_nakes.
-
 export interface PemeriksaanKlinisData {
   id_periksa: number;
   id_episode: number;

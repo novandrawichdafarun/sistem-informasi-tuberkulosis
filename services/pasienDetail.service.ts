@@ -4,28 +4,28 @@ import { handleServiceError } from "@/utils/error";
 import { PasienData } from "@/types/pasien";
 import { PemeriksaanKlinisData } from "@/types/pemeriksaanKlinis";
 import { PemeriksaanLabData } from "@/types/pemeriksaanLab";
-import { AdherenceDay, AdherenceSummary, MedicationStatus } from "@/types/pasienPortal";
+import {
+  AdherenceDay,
+  AdherenceSummary,
+  MedicationStatus,
+} from "@/types/pasienPortal";
 import { EpisodeRingkas, PasienDetail } from "@/types/pasienDetail";
-
-function todayISO(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-}
-function isoDaysAgo(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-}
+import { verifySuperAdminAccess } from "@/utils/access";
+import { isoDaysAgo, todayISO } from "@/utils/date";
 
 export const getPasienDetail = async (
   supabase: SupabaseClient,
   id_pasien: number,
+  id_super_admin: string,
 ): Promise<ActionResponse<PasienDetail>> => {
   try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
     // Profil + akun
     const { data: profil, error: profilError } = await supabase
       .from("pasien")
@@ -37,13 +37,18 @@ export const getPasienDetail = async (
       .single();
 
     if (profilError || !profil) {
-      return handleServiceError(profilError, "Pasien tidak ditemukan.");
+      return handleServiceError(
+        profilError?.message,
+        "Pasien tidak ditemukan.",
+      );
     }
 
     // Episodes
     const { data: episodes } = await supabase
       .from("episode_pengobatan")
-      .select("id_episode, tanggal_mulai, tanggal_selesai, tipe_pasien, status_episode")
+      .select(
+        "id_episode, tanggal_mulai, tanggal_selesai, tipe_pasien, status_episode",
+      )
       .eq("id_pasien", id_pasien)
       .order("tanggal_mulai", { ascending: false });
 
@@ -116,14 +121,17 @@ async function computeAdherence(
 
   const { data: jadwal } = await supabase
     .from("jadwal_minum_obat")
-    .select("tanggal_jadwal, jam_jadwal, medication_log ( status, reported_at )")
+    .select(
+      "tanggal_jadwal, jam_jadwal, medication_log ( status, reported_at )",
+    )
     .in("id_resep", resepIds)
     .gte("tanggal_jadwal", isoDaysAgo(29))
     .lte("tanggal_jadwal", todayISO())
     .order("tanggal_jadwal", { ascending: true });
 
   const days: AdherenceDay[] = (jadwal ?? []).map((j) => {
-    const logArr = (j.medication_log as { status: string; reported_at: string }[]) ?? [];
+    const logArr =
+      (j.medication_log as { status: string; reported_at: string }[]) ?? [];
     const log = Array.isArray(logArr) ? logArr[0] : logArr;
     return {
       tanggal: j.tanggal_jadwal,

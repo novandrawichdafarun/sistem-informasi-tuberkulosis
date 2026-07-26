@@ -10,7 +10,7 @@ import {
 } from "@/services/resep.service";
 import { createResepSchema } from "@/schemas/resep.schema";
 import { getSupabaseServer } from "@/utils/supabase/server";
-import { requireNakesSession } from "@/utils/session";
+import { requireSuperAdminSession } from "@/utils/session";
 import { validateFormData } from "@/utils/validation";
 import { handleActionError } from "@/utils/error";
 
@@ -18,9 +18,9 @@ export async function getDaftarResepAction(): Promise<
   ActionResponse<PasienResepOverview[]>
 > {
   try {
-    await requireNakesSession();
+    const superAdminId = await requireSuperAdminSession();
     const supabase = await getSupabaseServer();
-    return await getDaftarResep(supabase);
+    return await getDaftarResep(supabase, superAdminId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -30,14 +30,14 @@ export async function createResepAction(
   formData: FormData,
 ): Promise<ActionResponse> {
   try {
-    await requireNakesSession();
+    const superAdminId = await requireSuperAdminSession();
     const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, createResepSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await createResepWithJadwal(supabase, data);
+    const result = await createResepWithJadwal(supabase, data, superAdminId);
     if (result.success) {
       revalidatePath("/dashboard/resep-obat");
       revalidatePath("/dashboard/statistik");
@@ -52,10 +52,10 @@ export async function deleteResepAction(
   id_resep: number,
 ): Promise<ActionResponse> {
   try {
-    await requireNakesSession();
+    const superAdminId = await requireSuperAdminSession();
     const supabase = await getSupabaseServer();
 
-    const result = await deleteResep(supabase, id_resep);
+    const result = await deleteResep(supabase, id_resep, superAdminId);
     if (result.success) {
       revalidatePath("/dashboard/resep-obat");
       revalidatePath("/dashboard/statistik");
