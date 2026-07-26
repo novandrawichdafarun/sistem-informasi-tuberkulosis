@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CheckIcon, PillIcon, ClockIcon } from "./icons";
+import { CheckIcon, PillIcon, ClockIcon } from "../asset/icons";
 import { reportMedicationAction } from "@/actions/pasienPortal";
 import { MedicationToday } from "@/types/pasienPortal";
 
@@ -100,7 +100,8 @@ export default function MedicationBanner({
         <div className="min-w-0 flex-1">
           <p className="text-lg font-bold text-red-900">Dosis terlewat</p>
           <p className="mt-0.5 text-sm text-red-800/80">
-            Dosis pukul {jam} tercatat terlewat. Segera hubungi Nakes bila perlu.
+            Dosis pukul {jam} tercatat terlewat. Segera hubungi Nakes bila
+            perlu.
           </p>
         </div>
       </div>

@@ -1,7 +1,6 @@
 CREATE TABLE pemeriksaan_klinis (
   id_periksa SERIAL PRIMARY KEY,
   id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  id_nakes INTEGER REFERENCES nakes(id_nakes) ON DELETE SET NULL NOT NULL,
   tanggal_periksa DATE DEFAULT CURRENT_DATE NOT NULL,
   keluhan TEXT,
   tensi VARCHAR(20),
@@ -9,8 +8,8 @@ CREATE TABLE pemeriksaan_klinis (
   pernapasan INTEGER,
   nadi INTEGER,
   saturasi_o2 INTEGER,
-  tinggi_badan_saat_ini INTEGER,
-  berat_badan_saat_ini DECIMAL(5,2),
+  tinggi_badan INTEGER,
+  berat_badan DECIMAL(5,2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 

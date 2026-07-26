@@ -5,38 +5,41 @@ import {
   PemeriksaanKlinisData,
   UpdatePemeriksaanPayload,
 } from "@/types/pemeriksaanKlinis";
+import { verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-const KLINIS_COLUMNS = `
-  id_periksa, id_episode, tanggal_periksa, keluhan, tensi, suhu,
-  pernapasan, nadi, saturasi_o2, tinggi_badan, berat_badan, created_at
-`;
-
-// Admin melihat SELURUH pasien — tanpa scoping nakes.
 export const getDaftarPemeriksaan = async (
   supabase: SupabaseClient,
+  id_super_admin: string,
 ): Promise<ActionResponse<PasienPemeriksaanOverview[]>> => {
   try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
     const { data: pasienData, error: pasienError } = await supabase
       .from("pasien")
       .select(
         `
-        id_pasien, nama_lengkap, usia, jenis_kelamin,
+        id_pasien, nama_lengkap, usia, jenis_kelamin, domisili,
         episode_pengobatan (
           id_episode, status_episode,
-          pemeriksaan_klinis ( ${KLINIS_COLUMNS} )
+          pemeriksaan_klinis (
+            id_periksa, id_episode, tanggal_periksa, keluhan, tensi,
+            suhu, pernapasan, nadi, saturasi_o2, tinggi_badan,
+            berat_badan, created_at
+          )
         )
       `,
       )
       .order("created_at", { ascending: false });
 
-    if (pasienError) {
-      return handleServiceError(
-        pasienError,
-        "Gagal mengambil data pasien dari sistem.",
-      );
-    }
+    if (pasienError)
+      return handleServiceError(pasienError?.message, "Pasien tidak ditemukan");
 
     const formattedData: PasienPemeriksaanOverview[] = (pasienData ?? []).map(
       (pasien) => {
@@ -62,6 +65,7 @@ export const getDaftarPemeriksaan = async (
           nama_lengkap: pasien.nama_lengkap,
           usia: pasien.usia,
           jenis_kelamin: pasien.jenis_kelamin,
+          domisili: pasien.domisili,
           episodeAktif: episodeAktif
             ? {
                 id_episode: episodeAktif.id_episode,
@@ -75,25 +79,47 @@ export const getDaftarPemeriksaan = async (
 
     return { success: true, data: formattedData };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
   }
 };
 
 export const createPemeriksaanKlinis = async (
   supabase: SupabaseClient,
   payload: CreatePemeriksaanPayload,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { error: pemeriksaanError } = await supabase
-      .from("pemeriksaan_klinis")
-      .insert({ ...payload });
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
 
-    if (pemeriksaanError) {
+    const { data: episode, error: checkError } = await supabase
+      .from("episode_pengobatan")
+      .select("id_episode")
+      .eq("id_episode", payload.id_episode)
+      .single();
+
+    if (checkError || !episode)
       return handleServiceError(
-        pemeriksaanError,
+        checkError?.message,
+        "Episode pengobatan pasien tidak ada.",
+      );
+
+    const { error: insertError } = await supabase
+      .from("pemeriksaan_klinis")
+      .insert(payload);
+
+    if (insertError)
+      return handleServiceError(
+        insertError?.message,
         "Gagal menyimpan pemeriksaan klinis.",
       );
-    }
 
     return {
       success: true,
@@ -107,37 +133,81 @@ export const createPemeriksaanKlinis = async (
 export const updatePemeriksaanKlinis = async (
   supabase: SupabaseClient,
   payload: UpdatePemeriksaanPayload,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const { data: periksa, error: checkError } = await supabase
+      .from("pemeriksaan_klinis")
+      .select("id_periksa")
+      .eq("id_periksa", payload.id_periksa)
+      .single();
+
+    if (checkError || !periksa)
+      return handleServiceError(checkError?.message, "Data tidak ditemukan");
+
     const { id_periksa, ...updateData } = payload;
-    const { error: pemeriksaanError } = await supabase
+    const { error: updateError } = await supabase
       .from("pemeriksaan_klinis")
       .update(updateData)
       .eq("id_periksa", id_periksa);
 
-    if (pemeriksaanError)
-      return { success: false, error: "Gagal memperbarui data." };
+    if (updateError)
+      return handleServiceError(
+        updateError?.message,
+        "Gagal memeperbarui data.",
+      );
+
     return { success: true, message: "Data pemeriksaan berhasil diperbarui!" };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat memperbarui data.",
+    );
   }
 };
 
 export const deletePemeriksaanKlinis = async (
   supabase: SupabaseClient,
   id_periksa: number,
+  id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { error: pemeriksaanError } = await supabase
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const { data: periksa, error: checkError } = await supabase
+      .from("pemeriksaan_klinis")
+      .select("id_periksa")
+      .eq("id_periksa", id_periksa)
+      .single();
+
+    if (checkError || !periksa)
+      return handleServiceError(checkError?.message, "Data tidak ditemukan");
+
+    const { error: deleteError } = await supabase
       .from("pemeriksaan_klinis")
       .delete()
       .eq("id_periksa", id_periksa);
 
-    if (pemeriksaanError)
-      return { success: false, error: "Gagal menghapus data pemeriksaan." };
+    if (deleteError)
+      return handleServiceError(deleteError?.message, "Gagal menghapus data");
 
     return { success: true, message: "Pemeriksaan berhasil dihapus." };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat menghapus data.",
+    );
   }
 };

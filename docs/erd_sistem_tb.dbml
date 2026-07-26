@@ -1,5 +1,5 @@
 // ==========================================
-// 1. ENTITAS PENGGUNA & FASILITAS KESEHATAN
+// 1. ENTITAS PENGGUNA
 // ==========================================
 
 Table users {
@@ -9,22 +9,12 @@ Table users {
   role varchar(20) [note: 'pasien / nakes / super_admin']
 }
 
-Table faskes {
-  id_faskes integer [pk, increment]
-  nama_faskes varchar(100) [not null]
-  jenis varchar(50) [note: 'puskesmas / rs / klinik']
-  alamat text
-}
-
-Table nakes {
-  id_nakes integer [pk, increment]
+Table user_session {
+  id integer [pk, increment]
   id_user integer [ref: - users.id_user, unique]
-  id_faskes integer [ref: > faskes.id_faskes]
-  nama varchar(100) [not null]
-  no_str varchar(50) [note: 'Nomor Surat Tanda Registrasi (STR)']
-  no_sip varchar(50) [note: 'Surat Izin Praktik (SIP)']
-  jabatan varchar(50) [note: 'dokter / perawat / analis lab']
-  no_hp varchar(20)
+  session_token text [not null]
+  device_info text
+  last_active_at timestamp [default: 'now()', not null]
 }
 
 // ==========================================
@@ -34,17 +24,14 @@ Table nakes {
 Table pasien {
   id_pasien integer [pk, increment]
   id_user integer [ref: - users.id_user, unique]
-  id_nakes integer [ref: > nakes.id_nakes, note: 'nakes penanggung jawab tetap']
-  id_faskes integer [ref: > faskes.id_faskes]
-  no_rm varchar(50) [unique]
-  nik varchar(16) [unique, not null]
   nama_lengkap varchar(100) [not null]
-  tanggal_lahir date
+  usia varchar(20) [not null, note: 'Balita (< 5 tahun), Anak-anak (5-11 tahun), Remaja (12-25 tahun), Dewasa (26-45 tahun), Lansia (56-65 tahun), Manula (> 65 tahun), dkk']
   jenis_kelamin varchar(1) [note: 'L / P']
-  alamat text
+  domisili text
   no_telp varchar(20)
-  tinggi_badan_awal integer [note: 'Dalam satuan cm, angka bulat']
-  berat_badan_awal decimal(5,2) [note: 'Menggunakan desimal presisi, contoh 45.50 kg']
+  pendidikan varchar(50) [not null, note: 'SD, SMP, SMA, Diploma (D1/D2/D3/D4), Sarjana (S1), Magister (S2), Doktor (S3) dkk']
+  pekerjaan varcahr(50) [not null, note: 'Ibu Rumah Tangga, Wirausaha, PNS/ASN, TNI/Polri, Pegawai BUMN/BUMD, Karyawan Swasta, Buruh, Pensiun, dkk']
+  pendapatan varchar(50) [not null, note: 'Dibawa rata-rata (< 1.5jt), Kelas Bawah (1.5jt - 3jt), Kelas Menengah-Bawah (3jt - 5jt), Kelas Menengah (5jt - 10jt), Kelas Menegah Atas (10jt - 20jt), Kelas Atas (> 20jt)']
 }
 
 Table episode_pengobatan {
@@ -63,7 +50,6 @@ Table episode_pengobatan {
 Table pemeriksaan_klinis {
   id_periksa integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode, note: 'Terkunci ke episode untuk riwayat runtun waktu']
-  id_nakes integer [ref: > nakes.id_nakes]
   tanggal_periksa date [not null]
   keluhan text
   tensi varchar(20) [note: 'Disimpan teks, contoh: 120/80 mmHg']
@@ -71,60 +57,107 @@ Table pemeriksaan_klinis {
   pernapasan integer [note: 'Angka bulat per menit']
   nadi integer [note: 'Angka bulat bpm']
   saturasi_o2 integer [note: 'Persentase 0-100']
-  tinggi_badan_saat_ini integer
-  berat_badan_saat_ini decimal(5,2)
+  tinggi_badan integer
+  berat_badan decimal(5,2)
 }
 
 Table pemeriksaan_lab {
   id_tes integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode]
-  id_nakes integer [ref: > nakes.id_nakes]
-  jenis_tes varchar(50) [note: 'TCM / IGRA / Mantoux / BTA / Rontgen']
   tanggal_tes date
-  hasil_tes varchar(100) [note: 'positif / negatif']
-  pemeriksaan_ke varchar(50) [note: 'diagnostik awal / follow-up bulan ke-2 / ke-5']
+  jenis_tes varchar(50) [note: 'TCM / IGRA / Mantoux / BTA / Rontgen']
+  periode_pemeriksaan varchar(50) [note: 'Bulan ke-2 / bulan ke-5 / akhir masa pengobatan']
+  
+  // Data Sample
+  jenis_sample varchar(50) [note: 'Sputum (Dahak) / Cairan Serebrospinal (LCS) / Jaringan (Biopsi) / Bilasan Lambung']
+  kualitas_sample varchar(50) [note: 'Purulen / Mukoid / Saliva']
+  
+  // Hasil Tes Khusus Molekuler (TCM) & Kepekaan Obat
+  dna_bakteri_tb varchar(50) [note: 'Isi beban kuman khusus TCM: High / Medium / Low / Very Low / Trace']
+  status_resistensi_obat varchar(50) [note: 'Resisten / Sensitif / Indeterminate (Terutama untuk Rifampisin pada TCM atau obat lain)']
+  
+  // Hasil Tes Umum (Untuk Rontgen, Mantoux, IGRA)
+  hasil_tes varchar(100) [note: 'Hasil umum: Positif / Negatif / Normal / Kesan TB Paru Aktif']
+  
+  // Hasil Tes Mikroskopis (BTA)
+  hasil_bta varchar(100) [note: 'Khusus tes BTA: Negatif / Scanty (tulis jumlahnya) / 1+ / 2+ / 3+']
+
+  catatan_lab text
   berkas_pendukung_url varchar(255)
 }
 
 Table diagnosis {
   id_diagnosis integer [pk, increment]
-  id_episode integer [ref: - episode_pengobatan.id_episode, unique]
-  id_tes integer [ref: > pemeriksaan_lab.id_tes]
-  id_nakes integer [ref: > nakes.id_nakes]
-  tanggal_diagnosis date
-  kode_icd10 varchar(10) [note: 'Contoh: A15']
-  jenis_tb varchar(50) [note: 'TB paru / TB ekstraparu']
-  status_resistensi varchar(50) [note: 'sensitif obat / resisten obat']
+  id_episode integer [ref: - episode_pengobatan.id_episode, unique, note: 'Satu diagnosis final per satu episode pengobatan']
+  tanggal_diagnosis date [not null]
+
+  // Standarisasi Medis
+  kode_icd10 varchar(10) [note: 'Contoh: A15.0 (TB Paru), A18.2 (TB Kelenjar)']
+  klasifikasi_anatomi varchar(50) [note: 'TB Paru / TB Ekstraparu']
+  lokasi_anatomi_detail varchar(100) [note: 'Jika Ekstraparu, sebutkan: Kelenjar getah bening / Pleura / Meninges / Tulang']
+
+  // Kesimpulan Resistensi (Pondasi penentu jenis regimen obat)
+  klasifikasi_resistensi varchar(50) [note: 'TB-SO (Sensitif Obat) / TB-RO (Resisten Obat) / Terduga TB-RO']
+  tipe_resistensi_detail varchar(50) [note: 'Monoresisten Rifampisin (TB-RR) / MDR-TB / XDR-TB / Null jika SO']
+
+  // Dasar Penegakan Diagnosis
+  dasar_diagnosis varchar(50) [note: 'Terkonfirmasi Bakteriologis (TCM/BTA+) / Terdiagnosis Klinis (Gejala + Rontgen)']
+  catatan_klinis text [note: 'Catatan tambahan dokter terkait kondisi komorbid seperti TB-HIV atau TB-DM']
 }
 
 Table resep_pengobatan {
   id_resep integer [pk, increment]
   id_episode integer [ref: > episode_pengobatan.id_episode]
-  id_nakes integer [ref: > nakes.id_nakes]
-  tanggal_mulai_obat date
-  kategori_regimen varchar(50) [note: 'kategori 1 / kategori 2 / Kategori 3 / OAT Sisipan / OAT Anak']
-  durasi_hari integer
+  tanggal_resep date [not null]
+
+  // Klasifikasi Rejimen
+  kategori_regimen varchar(50) [note: 'Kategori 1 (2RHZE/4RH) / Kategori 2 / OAT Anak / Rejimen TB-RO Jangka Pendek / Rejimen TB-RO Jangka Panjang']
+  fase_pengobatan varchar(20) [note: 'Intensif / Lanjutan']
+
+  // Manajemen Waktu
+  tanggal_mulai_obat date [not null]
+  durasi_hari integer [note: 'Durasi resep berlaku, misal: 28 hari atau 56 hari']
+  status_resep varchar(20) [note: 'aktif / selesai / diganti']
+}
+
+Table obat {
+  id_obat integer [pk, increment]
+  nama_obat varchar(100) [not null, note: 'Contoh: KDT Lini 1 (4FDC), Streptomisin vial, Levofloxacin 250mg, Rifampisin 450mg']
+  jenis_obat varchar(50) [not null, note: 'KDT (Kombinasi Dosis Tetap) / Tunggal / Injeksi']
+  kategori_obat varchar(50) [not null, note: 'Lini Pertama, Lini Kedua, Suplement']
+  deskripsi text
+  dosis varchar(100)
+  isAktive boolean [default: true]
 }
 
 Table detail_obat {
   id_detail integer [pk, increment]
   id_resep integer [ref: > resep_pengobatan.id_resep]
-  nama_obat varchar(100)
-  dosis varchar(50)
+  id_obat integer [ref: > obat.id_obat]
+
+  // Aturan Pakai & Dosis (Sangat krusial berdasarkan berat badan pasien)
+  jumlah_obat_per_minum decimal(4,2) [note: 'Contoh: 3.00 (artinya 3 tablet sekali minum), atau 1.50 (1 setengah tablet)']
+  frekuensi_minum varchar(50) [note: '1x sehari / 3x seminggu / 1x seminggu']
+  aturan_pakai varchar(100) [note: 'Sebelum makan / sesudah makan / saat perut kosong pagi hari']
+  jumlah_total_diberikan integer [note: 'Total fisik obat yang dibawa pulang pasien, misal: 84 tablet']
 }
 
 Table jadwal_minum_obat {
   id_jadwal integer [pk, increment]
   id_resep integer [ref: > resep_pengobatan.id_resep]
-  tanggal_jadwal date
-  jam_jadwal time
+  id_detail_obat integer [ref: > detail_obat.id_detail, note: 'Spesifik ke obatnya']
+  tanggal_jadwal date [not null]
+  jam_jadwal time [not null]
+  status_pengingat varchar(20) [default: 'pending', note: 'pending / terkirim / gagal_kirim']
 }
 
 Table medication_log {
   id_log integer [pk, increment]
-  id_jadwal integer [ref: - jadwal_minum_obat.id_jadwal, unique, note: 'Cukup lewat jadwal untuk tahu relasi pasien']
-  status varchar(20) [note: 'diminum / terlewat']
-  reported_by varchar(20) [note: 'pasien / pendamping']
+  id_jadwal integer [ref: - jadwal_minum_obat.id_jadwal, note: 'Cukup lewat jadwal untuk tahu relasi pasien']
+  status varchar(20) [note: 'diminum / terlewat / ditunda']
+  waktu_aktual_diminum timestamp [note: 'Mencatat waktu asli saat tombol "Sudah Minum" diklik di aplikasi']
+  reported_by varchar(20) [note: 'pasien_mandiri / pmo_keluarga / pmo_nakes']
+  catatan_kepatuhan text [note: 'Alasan jika obat terlewat/ditunda, misal: muntah, pusing berat, atau lupa bawa obat']
 }
 
 Table hasil_akhir {
@@ -138,20 +171,11 @@ Table hasil_akhir {
 // 4. ENTITAS PENDUKUNG (NOTIFIKASI & CHAT)
 // ==========================================
 
-Table notifikasi_wa {
-  id_notifikasi_wa integer [pk, increment]
+Table notifikasi {
+  id_notifikasi integer [pk, increment]
   id_user integer [ref: > users.id_user, note: 'Mengarah ke id_user penerima email/notif']
-  jenis varchar(50) [note: 'pengingat obat / edukasi']
+  judul varchar(50) [note: 'pengingat obat', not null]
+  pesan text [not null]
   waktu_kirim timestamp
   status_terkirim varchar(20)
-}
-
-Table pesan_chat {
-  id_pesan integer [pk, increment]
-  id_pasien integer [ref: > pasien.id_pasien, note: 'Menentukan room chat pasien tersebut']
-  id_pengirim integer [ref: > users.id_user, note: 'ID akun yang mengetik pesan']
-  isi_pesan text
-  lampiran_file_url varchar(255)
-  waktu_kirim timestamp [default: `now()` ]
-  status_baca varchar(20) [note: 'dibaca / belum dibaca']
 }

@@ -1,6 +1,9 @@
-import React from "react";
 import { getDaftarPemeriksaanAction } from "@/actions/pemeriksaanKlinis";
 import PemeriksaanRowView from "@/components/pemeriksaanKlinis/PemeriksaanRowView";
+
+export const metadata = {
+  title: "Manajemen Pemeriksaan Klinis | PantauTB",
+};
 
 export default async function PemeriksaanKlinisPage() {
   const res = await getDaftarPemeriksaanAction();
@@ -29,8 +32,8 @@ export default async function PemeriksaanKlinisPage() {
           <table className="w-full border-collapse text-left text-sm text-gray-500">
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3">Usia / L-P</th>
                 <th className="px-6 py-3">Nama Pasien</th>
+                <th className="px-6 py-3">Usia & Domisili</th>
                 <th className="px-6 py-3">Status Episode</th>
                 <th className="px-6 py-3 text-right">Aksi</th>
               </tr>

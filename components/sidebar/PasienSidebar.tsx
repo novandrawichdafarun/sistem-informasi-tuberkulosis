@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import Logo from "@/components/Logo";
+import Logo from "@/components/asset/Logo";
 import {
   HomeIcon,
   PillIcon,
@@ -15,7 +15,7 @@ import {
   LogoutIcon,
   MenuIcon,
   CloseIcon,
-} from "./icons";
+} from "../asset/icons";
 
 type NavItem = {
   label: string;
@@ -25,8 +25,16 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { label: "Beranda", href: "/dashboard", icon: HomeIcon },
-  { label: "Laporan Obat Harian", href: "/dashboard/laporan-obat", icon: PillIcon },
-  { label: "Riwayat Kepatuhan", href: "/dashboard/riwayat-kepatuhan", icon: TrendIcon },
+  {
+    label: "Laporan Obat Harian",
+    href: "/dashboard/laporan-obat",
+    icon: PillIcon,
+  },
+  {
+    label: "Riwayat Kepatuhan",
+    href: "/dashboard/riwayat-kepatuhan",
+    icon: TrendIcon,
+  },
   { label: "Tanda Vital", href: "/dashboard/tanda-vital", icon: PulseIcon },
   { label: "Berat Badan", href: "/dashboard/berat-badan", icon: ScaleIcon },
   { label: "Chat Nakes", href: "/dashboard/chat", icon: ChatIcon },
@@ -74,7 +82,9 @@ function NavLinks({
                 : "text-slate-600 hover:bg-slate-50 hover:text-brand-700"
             }`}
           >
-            <Icon className={`h-5 w-5 ${active ? "text-brand-600" : "text-slate-400"}`} />
+            <Icon
+              className={`h-5 w-5 ${active ? "text-brand-600" : "text-slate-400"}`}
+            />
             {item.label}
           </Link>
         );
@@ -108,7 +118,7 @@ function LogoutBtn() {
   );
 }
 
-export default function PatientShell({
+export default function PasienSidebar({
   user,
   children,
 }: {
@@ -116,10 +126,32 @@ export default function PatientShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const STORAGE_KEY = "pantautb:pasien-sidebar-open";
+
+  // Restore persisted state after mount (avoids SSR/CSR hydration mismatch).
+  const [open, setOpen] = useState(() => {
+    try {
+      return (
+        typeof window !== "undefined" &&
+        localStorage.getItem(STORAGE_KEY) === "1"
+      );
+    } catch {
+      /* ignore */
+    }
+  });
+
+  const toggle = (next: boolean) => {
+    setOpen(next);
+    try {
+      localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  };
 
   const activeLabel =
-    [...NAV].reverse().find((n) => isActive(pathname, n.href))?.label ?? "Beranda";
+    [...NAV].reverse().find((n) => isActive(pathname, n.href))?.label ??
+    "Beranda";
   const initial = user.name.trim().charAt(0).toUpperCase() || "P";
 
   return (
@@ -185,7 +217,9 @@ export default function PatientShell({
 
             <div className="flex items-center gap-3">
               <div className="text-right leading-tight">
-                <p className="text-sm font-semibold text-brand-950">{user.name}</p>
+                <p className="text-sm font-semibold text-brand-950">
+                  {user.name}
+                </p>
                 <p className="text-xs text-slate-500">
                   {user.roleLabel}
                   {user.phase ? ` · ${user.phase}` : ""}

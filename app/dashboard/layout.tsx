@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-import PatientShell from "@/components/dashboard/PatientShell";
+import PasienSidebar from "@/components/sidebar/PasienSidebar";
 import AdminShell from "@/components/dashboard/AdminShell";
 
 export default async function DashboardLayout({
@@ -10,10 +10,10 @@ export default async function DashboardLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  // Patients get the app-shell with a collapsible sidebar.
+  //? Pasien
   if (session?.user?.role === "pasien") {
     return (
-      <PatientShell
+      <PasienSidebar
         user={{
           name: session.user.name ?? session.user.email ?? "Pasien",
           roleLabel: "Pasien",
@@ -21,7 +21,7 @@ export default async function DashboardLayout({
         }}
       >
         {children}
-      </PatientShell>
+      </PasienSidebar>
     );
   }
 

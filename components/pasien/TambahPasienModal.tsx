@@ -29,7 +29,11 @@ function SelectField({
       <label className="block text-sm font-medium text-gray-700">
         {label} {required && "*"}
       </label>
-      <select name={name} required={required} className={`${inputClass} bg-white`}>
+      <select
+        name={name}
+        required={required}
+        className={`${inputClass} bg-white`}
+      >
         <option value="">-- Pilih --</option>
         {options.map((o) => (
           <option key={o} value={o}>
@@ -97,7 +101,7 @@ export default function TambahPasienModal() {
                   Daftarkan Pasien Baru
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Pasien otomatis akan dibuatkan akun login.
+                  Pasien otomatis akan dibuatkan akun login sistem.
                 </p>
               </div>
               <button
@@ -119,7 +123,7 @@ export default function TambahPasienModal() {
                 {/* Akun & Identitas */}
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Info Akun & Identitas
+                    Info Akun & Identitas Dasar
                   </h4>
                   <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
@@ -162,9 +166,10 @@ export default function TambahPasienModal() {
                 {/* Demografi */}
                 <div className="border-t border-gray-100 pt-6">
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
-                    Demografi
+                    Data Demografi (Bisa Pilih atau Ketik Manual)
                   </h4>
                   <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
+                    {/* USIA */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
                         Jenis Kelamin *
@@ -174,7 +179,7 @@ export default function TambahPasienModal() {
                         required
                         className={`${inputClass} bg-white`}
                       >
-                        <option value="">-- Pilih --</option>
+                        <option value="">-- Pilih Jenis Kelamin --</option>
                         <option value="L">Laki-laki</option>
                         <option value="P">Perempuan</option>
                       </select>

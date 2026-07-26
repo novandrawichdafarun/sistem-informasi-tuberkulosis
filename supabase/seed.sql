@@ -12,7 +12,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111', 
     'dr.budi@faskes.go.id', 
     crypt('password123', gen_salt('bf', 10)), 
-    'nakes', 
+    'super_admin', 
     NOW()
   ),
   (
@@ -24,63 +24,26 @@ VALUES
   )
 ON CONFLICT (id_user) DO NOTHING;
 
-
 -- =========================================================================
--- 2. SEED DATA TABEL faskes (Fasilitas Kesehatan)
--- =========================================================================
-
-INSERT INTO faskes (id_faskes, nama_faskes, jenis, alamat, created_at)
-VALUES
-  (
-    1, 
-    'Puskesmas Klampis Ngasem', 
-    'Puskesmas', 
-    'Jl. Klampis Anom No.14, Sukolilo, Surabaya',
-    NOW()
-  )
-ON CONFLICT (id_faskes) DO NOTHING;
-
-
--- =========================================================================
--- 3. SEED DATA TABEL nakes (Tenaga Kesehatan)
--- =========================================================================
-
-INSERT INTO nakes (id_nakes, id_user, id_faskes, nama, no_str_sip, jabatan, no_hp, created_at)
-VALUES
-  (
-    1,
-    '11111111-1111-1111-1111-111111111111', 
-    1, -- Merujuk ke id_faskes = 1 (Puskesmas Klampis)
-    'dr. Budi Setiawan, Sp.P', 
-    'SIP/2026/00432/DISKES', 
-    'Dokter Spesialis Paru',
-    '081111111111',
-    NOW()
-  )
-ON CONFLICT (id_nakes) DO NOTHING;
-
-
--- =========================================================================
--- 4. SEED DATA TABEL pasien (Data Medis Pasien TB)
+-- 2. SEED DATA TABEL pasien (Data Medis Pasien TB)
 -- =========================================================================
 
 INSERT INTO pasien (
-  id_pasien, id_user, id_nakes, id_faskes, no_rm, nik, 
-  nama_lengkap, tanggal_lahir, jenis_kelamin, alamat, no_telp, created_at
+  id_pasien, id_user, nama_lengkap, usia, jenis_kelamin, 
+  domisili, no_telp, pendidikan, pekerjaan, pendapatan, created_at
 )
 VALUES
   (
     1,
-    '22222222-2222-2222-2222-222222222222', 
-    1, -- Merujuk ke id_nakes = 1 (dr. Budi)
-    1, -- Merujuk ke id_faskes = 1 (Puskesmas Klampis)
-    'RM-2026-001',
-    '3578012345670001', 
+    '22222222-2222-2222-2222-222222222222', -- Menghubungkan ke ID user pasien di tabel users
     'Budi Santoso', 
-    '1995-08-17', 
-    'L',
-    'Jl. Menur Pumpungan No.10, Surabaya',
-    '081234567890',
+    'Dewasa (26-45 tahun)', -- Kategori usia baru
+    'L', -- Jenis kelamin (L/P)
+    'Surabaya', -- Domisili tempat tinggal
+    '081234567890',  -- Nomor telepon
+    'Sarjana (S1)', -- Tingkat pendidikan terakhir
+    'Karyawan Swasta', -- Pekerjaan
+    'Kelas Menengah (5jt - 10jt)', -- Kategori Pendapatan
     NOW()
   )
 ON CONFLICT (id_pasien) DO NOTHING;

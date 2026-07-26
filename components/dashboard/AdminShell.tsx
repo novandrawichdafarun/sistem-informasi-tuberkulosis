@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import Logo from "@/components/Logo";
+import Logo from "@/components/asset/Logo";
 import {
   HomeIcon,
   PulseIcon,
@@ -13,13 +13,13 @@ import {
   LogoutIcon,
   MenuIcon,
   CloseIcon,
-} from "./icons";
+} from "../asset/icons";
 import {
   UsersIcon,
   CalendarIcon,
   FlaskIcon,
   PillBottleIcon,
-} from "./adminIcons";
+} from "../asset/adminIcons";
 
 type NavItem = {
   label: string;
