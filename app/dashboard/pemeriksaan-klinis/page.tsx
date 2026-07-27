@@ -29,20 +29,21 @@ export default async function PemeriksaanKlinisPage() {
 
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-sm text-gray-500">
+          <table className="w-full border-collapse text-left text-sm text-gray-500 whitespace-nowrap">
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3">Nama Pasien</th>
+                <th className="px-6 py-3">Nama Pasien & Jenis Kelamin</th>
                 <th className="px-6 py-3">Usia & Domisili</th>
                 <th className="px-6 py-3">Status Episode</th>
-                <th className="px-6 py-3 text-right">Aksi</th>
+                <th className="px-6 py-3">Total Pemeriksaan</th>
+                <th className="px-6 py-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {daftarPemeriksaan.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-6 py-10 text-center text-gray-400"
                   >
                     Belum ada data pasien terdaftar.

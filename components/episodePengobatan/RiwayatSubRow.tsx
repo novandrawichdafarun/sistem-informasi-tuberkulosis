@@ -25,7 +25,7 @@ export default function RiwayatSubRow({
           {episode.status_episode}
         </span>
       </td>
-      <td className="px-4 py-3 text-right space-x-2">
+      <td className="px-4 py-3 text-center space-x-2">
         {episode.status_episode !== "aktif" && (
           <button
             onClick={() => setIsEditOpen(true)}

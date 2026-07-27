@@ -40,7 +40,7 @@ export default function TambahObatModal() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+        className="items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
       >
         + Tambah Obat
       </button>

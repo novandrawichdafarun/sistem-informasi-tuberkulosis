@@ -29,15 +29,12 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
   return (
     <>
       <tr className="hover:bg-gray-50 transition-colors">
+        {/* Kolom 1: Nama Pasien & Jenis Kelamin */}
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="font-medium text-gray-900">{usia || "-"}</div>
+          <div className="font-medium text-gray-800">{nama_lengkap}</div>
           <div className="text-xs text-gray-400">
             {jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
           </div>
-        </td>
-        {/* Kolom 1: Nama Pasien */}
-        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
-          {nama_lengkap}
         </td>
 
         {/* Kolom 2: Usia & Domisili */}
@@ -76,7 +73,7 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
         </td>
 
         {/* Kolom 5: Aksi */}
-        <td className="px-6 py-4 whitespace-nowrap text-right text-xs space-x-2">
+        <td className="px-6 py-4 whitespace-nowrap text-center text-xs space-x-2">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             disabled={!hasRiwayat}
@@ -99,7 +96,7 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
           ) : (
             <button
               onClick={() => setIsModalBukaOpen(true)}
-              className="rounded bg-blue-600 px-3 py-1.5 font-semibold text-white hover:bg-blue-700 transition"
+              className="rounded bg-brand-600 px-3 py-1.5 font-semibold text-white hover:bg-brand-700 transition"
             >
               Buka Episode
             </button>
@@ -114,7 +111,7 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
             colSpan={5}
             className="bg-slate-50 border-b border-gray-200 p-0 shadow-inner"
           >
-            <div className="p-4 pl-10 border-l-4 border-blue-400">
+            <div className="p-4 pl-10 border-l-4 border-brand-400">
               <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
                 Histori Pengobatan ({riwayat_episode.length})
               </h4>
@@ -126,7 +123,7 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
                       <th className="px-4 py-2 border-b">Tanggal Mulai</th>
                       <th className="px-4 py-2 border-b">Tanggal Selesai</th>
                       <th className="px-4 py-2 border-b">Status</th>
-                      <th className="px-4 py-2 border-b text-right">Aksi</th>
+                      <th className="px-4 py-2 border-b text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>

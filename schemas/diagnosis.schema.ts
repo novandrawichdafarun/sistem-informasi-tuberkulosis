@@ -18,12 +18,6 @@ const baseDiagnosisSchema = {
       { message: "Tanggal diagnosis tidak boleh melebihi hari ini" },
     ),
 
-  kode_icd10: z
-    .string()
-    .trim()
-    .min(1, "Kode icd10 tidak boleh kosong")
-    .max(30, "Kode icd10 maksimal 30 karakter"),
-
   klasifikasi_anatomi: optionalString(50),
   lokasi_anatomi: optionalString(100),
 

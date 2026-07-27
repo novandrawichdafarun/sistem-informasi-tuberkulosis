@@ -7,18 +7,7 @@ export const metadata = {
 
 export default async function PemeriksaanLabPage() {
   const result = await getDaftarPemeriksaanLabAction();
-
-  if (result.success === false) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 text-red-600 p-4 rounded-md shadow-sm border border-red-200">
-          Terjadi kesalahan: {result.error || "Gagal memuat data."}
-        </div>
-      </div>
-    );
-  }
-
-  const daftarPasien = result.data || [];
+  const daftarPasien = result.success && result.data ? result.data : [];
 
   return (
     <div className="p-6 space-y-6">
@@ -26,28 +15,35 @@ export default async function PemeriksaanLabPage() {
         <h1 className="text-2xl font-bold text-gray-800">
           Manajemen Pemeriksaan Lab
         </h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-sm text-gray-500">
           Kelola data pemeriksaan laboratorium seluruh pasien.
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {result.success === false && (
+        <div className="rounded bg-red-50 p-4 text-sm text-red-600 border border-red-200">
+          {result.error || "Gagal memuat data episode pengobatan."}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-gray-50 border-b border-gray-200 text-gray-600">
+          <table className="w-full border-collapse whitespace-nowrap text-left text-sm text-gray-500">
+            <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 font-semibold">Nama Pasien</th>
-                <th className="px-6 py-4 font-semibold">Usia & Domisili</th>
-                <th className="px-6 py-4 font-semibold">Status Episode</th>
-                <th className="px-6 py-4 font-semibold text-right">Aksi</th>
+                <th className="px-6 py-4">Nama Pasien & Jenis Kelamin</th>
+                <th className="px-6 py-4">Usia & Domisili</th>
+                <th className="px-6 py-4">Status Episode</th>
+                <th className="px-6 py-4">Total Pemeriksaan</th>
+                <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {daftarPasien.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
-                    className="px-6 py-8 text-center text-gray-500"
+                    colSpan={5}
+                    className="px-6 py-10 text-center text-gray-400"
                   >
                     Belum ada data pasien atau pemeriksaan lab.
                   </td>

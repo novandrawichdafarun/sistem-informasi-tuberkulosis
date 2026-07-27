@@ -23,20 +23,23 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-gray-100/80 border-b border-gray-200 text-gray-600">
+    <div className="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
+      <table className="w-full text-left text-sm text-gray-600 whitespace-nowrap">
+        <thead className="bg-gray-100 text-xs font-semibold text-gray-700">
           <tr>
-            <th className="px-4 py-3 font-medium">Tanggal Tes</th>
-            <th className="px-4 py-3 font-medium">Jenis Tes</th>
-            <th className="px-4 py-3 font-medium">Hasil</th>
-            <th className="px-4 py-3 font-medium">Periode</th>
-            <th className="px-4 py-3 font-medium text-right">Opsi</th>
+            <th className="px-4 py-2 border-b">Tanggal Tes</th>
+            <th className="px-4 py-2 border-b">Jenis Tes</th>
+            <th className="px-4 py-2 border-b">Detail Sample</th>
+            <th className="px-4 py-2 border-b">Hasil Tes</th>
+            <th className="px-4 py-2 border-b text-center">Opsi</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
           {riwayat.map((lab) => (
-            <tr key={lab.id_tes} className="hover:bg-gray-50/50">
+            <tr
+              key={lab.id_tes}
+              className="border-b border-gray-100 hover:bg-gray-50/50 transition"
+            >
               <td className="px-4 py-3">
                 <div className="font-medium text-gray-800">
                   {lab.tanggal_tes}
@@ -47,37 +50,55 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
               </td>
               <td className="px-4 py-3">
                 <div className="font-medium text-blue-700">{lab.jenis_tes}</div>
-                <div className="text-xs text-gray-500">
-                  {lab.jenis_sample || "-"} {lab.kualitas_sample || "-"}
+              </td>
+              <td className="px-4 py-3 text-sm">
+                <div>
+                  DNA:{" "}
+                  <span className="font-medium text-gray-800">
+                    {lab.dna_bakteri_tb}
+                  </span>
+                </div>
+                <div>
+                  Status:{" "}
+                  <span
+                    className={`font-semibold mt-0.5 ${lab.status_resistensi.toLowerCase().includes("resisten") ? "text-red-600" : "text-green-600"}`}
+                  >
+                    {lab.status_resistensi}
+                  </span>
+                </div>
+                <div>
+                  Jenis Sample:{" "}
+                  <span className="font-medium">{lab.jenis_sample || "-"}</span>
+                </div>
+                <div>
+                  Kualitas Sample:{" "}
+                  <span className="font-medium">
+                    {lab.kualitas_sample || "-"}
+                  </span>
                 </div>
               </td>
               <td className="px-4 py-3">
-                <div className="text-sm font-medium text-gray-800">
-                  {lab.dna_bakteri_tb}
+                <div>
+                  <span
+                    className={`inline-flex px-2 py-1 rounded text-xs font-semibold ${
+                      lab.hasil_tes.toLowerCase().includes("positif")
+                        ? "bg-red-100 text-red-700"
+                        : lab.hasil_tes.toLowerCase().includes("negatif")
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {lab.hasil_tes}
+                  </span>
                 </div>
-                <div
-                  className={`text-xs font-semibold mt-0.5 ${lab.status_resistensi.toLowerCase().includes("resisten") ? "text-red-600" : "text-green-600"}`}
-                >
-                  {lab.status_resistensi}
+                <div>
+                  BTA:{" "}
+                  <span className="inline-flex px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-700 mt-1">
+                    {lab.hasil_bta || "-"}
+                  </span>
                 </div>
               </td>
-              <td className="px-4 py-3">
-                <span
-                  className={`inline-flex px-2 py-1 rounded text-xs font-semibold ${
-                    lab.hasil_tes.toLowerCase().includes("positif")
-                      ? "bg-red-100 text-red-700"
-                      : lab.hasil_tes.toLowerCase().includes("negatif")
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {lab.hasil_tes}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-gray-500">
-                {lab.periode_pemeriksaan || "-"}
-              </td>
-              <td className="px-4 py-3 text-right space-x-2">
+              <td className="px-4 py-3 text-center space-x-2">
                 <button
                   onClick={() => setLabToEdit(lab)}
                   className="text-blue-600 hover:text-blue-800 text-xs font-medium"

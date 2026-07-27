@@ -12,7 +12,7 @@ export default async function EpisodePengobatanPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-800">
           Manajemen Episode Pengobatan
         </h1>
         <p className="text-sm text-gray-500">
@@ -32,11 +32,11 @@ export default async function EpisodePengobatanPage() {
           <table className="w-full border-collapse text-left text-sm text-gray-500">
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3">Nama Pasien</th>
+                <th className="px-6 py-3">Nama Pasien & Jenis Kelamin</th>
                 <th className="px-6 py-3">Usia & Domisili</th>
                 <th className="px-6 py-3">Status Pengobatan</th>
                 <th className="px-6 py-3">Tipe Kasus / Tgl Mulai</th>
-                <th className="px-6 py-3 text-right">Aksi</th>
+                <th className="px-6 py-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">

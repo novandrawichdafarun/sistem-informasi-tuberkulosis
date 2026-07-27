@@ -34,7 +34,7 @@ export default async function ManajemenPasienPage() {
           <p className="text-sm text-red-600">{response.error}</p>
         </div>
       ) : (
-        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg bg-white">
+        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-300">
               <thead className="bg-gray-50">
@@ -49,7 +49,13 @@ export default async function ManajemenPasienPage() {
                     scope="col"
                     className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Domisili / L/P
+                    Jenis Kelamin
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Domisili
                   </th>
                   <th
                     scope="col"
@@ -100,12 +106,6 @@ export default async function ManajemenPasienPage() {
                             : "Perempuan"}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {pasien.pendidikan || "-"} <br />
-                        <span className="text-xs text-gray-400">
-                          {pasien.pekerjaan || "-"}
-                        </span>
-                      </td>
                       <td className="px-3 py-4 text-sm text-gray-500 max-w-56">
                         {pasien.domisili || "-"}
                       </td>
@@ -116,7 +116,10 @@ export default async function ManajemenPasienPage() {
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {pasien.pendapatan || "-"}
+                        {pasien.pendapatan || "-"} <br />
+                        <span className="text-xs text-gray-400">
+                          {pasien.no_telp || "-"}
+                        </span>
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-6 space-x-2">
                         <Link

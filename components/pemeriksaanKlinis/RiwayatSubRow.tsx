@@ -1,7 +1,7 @@
 "use client";
 
 import { PemeriksaanKlinisData } from "@/types/pemeriksaanKlinis";
-import { hitungIMT } from "@/utils/number";
+import { hitungBMI } from "@/utils/number";
 import { useState, useTransition } from "react";
 import EditPemeriksaanModal from "./EditPemeriksaanModal";
 import DeletePemeriksaanButton from "./DeletePemeriksaanButton";
@@ -18,7 +18,7 @@ export default function RiwayatSubRow({
 
   // Super admin hanya bisa mengedit/menghapus data jika data tersebut milik episode yang sedang aktif
   const isEditable = periksa.id_episode === id_episode_aktif;
-  const imtData = hitungIMT(periksa.berat_badan, periksa.tinggi_badan);
+  const imtData = hitungBMI(periksa.berat_badan, periksa.tinggi_badan);
 
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition">
@@ -32,7 +32,8 @@ export default function RiwayatSubRow({
         </div>
         <div>
           TB:{" "}
-          <span className="font-semibold">{periksa.tinggi_badan || "-"}</span> cm
+          <span className="font-semibold">{periksa.tinggi_badan || "-"}</span>{" "}
+          cm
         </div>
 
         {/* TAMPILAN IMT */}
@@ -52,10 +53,11 @@ export default function RiwayatSubRow({
       </td>
       <td className="px-4 py-3">
         <div>Tensi: {periksa.tensi || "-"}</div>
-        <div>Suhu: {periksa.suhu ? `${periksa.suhu}°C` : "-"}</div>
+        <div>Suhu: {`${periksa.suhu}°C` || "-"}</div>
+        <div>Nadi: {`${periksa.nadi}/menit` || "-"}</div>
       </td>
       <td className="px-4 py-3 text-gray-600">{periksa.keluhan || "-"}</td>
-      <td className="px-4 py-3 text-right space-x-2">
+      <td className="px-4 py-3 text-center space-x-2">
         {isEditable ? (
           <>
             <button

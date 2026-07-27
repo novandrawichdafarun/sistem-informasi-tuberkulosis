@@ -99,7 +99,7 @@ export default function EditEpisodeModal({
             <button
               type="submit"
               disabled={isPending}
-              className="bg-blue-600 text-white px-4 py-2 text-sm rounded"
+              className="bg-brand-600 text-white px-4 py-2 text-sm rounded"
             >
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </button>

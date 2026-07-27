@@ -49,7 +49,7 @@ export default function TambahDiagnosisModal({
           <input type="hidden" name="id_episode" value={id_episode} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="col-span-1 md:col-span-2">
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Tanggal Diagnosa *
               </label>
@@ -62,24 +62,6 @@ export default function TambahDiagnosisModal({
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Kode ICD-10 *
-              </label>
-              <input
-                type="text"
-                name="kode_icd10"
-                required
-                list="opsi-kode-icd10"
-                placeholder="A15.0 (TB Paru), A18.2 (TB Kelenjar), dll"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
-              <datalist id="opsi-kode-icd10">
-                <option value="A15.0 (TB Paru)" />
-                <option value="A18.2 (TB Kelenjar)" />
-              </datalist>
-            </div>
-
             <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
               <h4 className="text-sm font-semibold text-gray-600">
                 Detail Diagnosa
@@ -88,15 +70,17 @@ export default function TambahDiagnosisModal({
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Klasifikasi Anatomi
+                Klasifikasi Jenis TB *
               </label>
               <select
                 name="klasifikasi_anatomi"
+                required
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               >
                 <option value="">-- Klasifikasikan TB --</option>
                 <option value="TB Paru">TB Paru</option>
                 <option value="TB Ekstra Paru">TB Ekstra Paru</option>
+                <option value="Bukan TB">Bukan TB</option>
               </select>
             </div>
             <div>
@@ -138,7 +122,7 @@ export default function TambahDiagnosisModal({
                 type="text"
                 name="tipe_resistensi"
                 list="opsi-tipe-resistensi"
-                placeholder="Kosong jika SO"
+                placeholder="Kosongkan jika SO"
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
               <datalist id="opsi-tipe-resistensi">

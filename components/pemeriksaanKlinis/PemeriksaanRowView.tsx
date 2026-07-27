@@ -15,8 +15,14 @@ export default function PemeriksaanRowView({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalTambahOpen, setIsModalTambahOpen] = useState(false);
 
-  const { nama_lengkap, usia, domisili, jenis_kelamin, episodeAktif, riwayat_pemeriksaan } =
-    item;
+  const {
+    nama_lengkap,
+    usia,
+    domisili,
+    jenis_kelamin,
+    episodeAktif,
+    riwayat_pemeriksaan,
+  } = item;
   const hasRiwayat = riwayat_pemeriksaan && riwayat_pemeriksaan.length > 0;
 
   return (
@@ -24,14 +30,12 @@ export default function PemeriksaanRowView({
       <tr
         className={`transition-colors ${isExpanded ? "bg-emerald-50/30" : "hover:bg-gray-50"}`}
       >
+        {/* Kolom 1: Nama Pasien & Jenis Kelamin */}
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="font-medium text-gray-900">{usia || "-"}</div>
+          <div className="font-medium text-gray-800">{nama_lengkap}</div>
           <div className="text-xs text-gray-400">
             {jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
           </div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
-          {nama_lengkap}
         </td>
 
         {/* Kolom 2: Usia & Domisili */}
@@ -53,8 +57,15 @@ export default function PemeriksaanRowView({
           )}
         </td>
 
-        {/* Kolom 4: Aksi */}
-        <td className="px-6 py-4 whitespace-nowrap text-right text-xs space-x-2">
+        {/* Kolom 4: Total Pemeriksaan */}
+        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+          <div className="font-semibold text-gray-700">
+            {riwayat_pemeriksaan.length} Pemeriksaan Klinis
+          </div>
+        </td>
+
+        {/* Kolom 5: Aksi */}
+        <td className="px-6 py-4 whitespace-nowrap text-center text-xs space-x-2">
           {/* Tombol Lihat Log */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
@@ -74,7 +85,7 @@ export default function PemeriksaanRowView({
               onClick={() => setIsModalTambahOpen(true)}
               className="rounded bg-emerald-600 px-3 py-1.5 font-semibold text-white hover:bg-emerald-700 transition"
             >
-              + Tambah Periksa
+              + Tambah Data Klinis
             </button>
           ) : (
             <Link
@@ -92,7 +103,7 @@ export default function PemeriksaanRowView({
       {isExpanded && (
         <tr>
           <td
-            colSpan={4}
+            colSpan={5}
             className="bg-slate-50 border-b border-gray-200 p-0 shadow-inner"
           >
             <div className="p-4 pl-10 border-l-4 border-emerald-400">
@@ -109,10 +120,10 @@ export default function PemeriksaanRowView({
                       </th>
                       <th className="px-4 py-2 border-b">Tanda Vital</th>
                       <th className="px-4 py-2 border-b">Keluhan</th>
-                      <th className="px-4 py-2 border-b text-right">Aksi</th>
+                      <th className="px-4 py-2 border-b text-center">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100">
                     {riwayat_pemeriksaan.map((periksa) => (
                       <RiwayatSubRow
                         key={periksa.id_periksa}

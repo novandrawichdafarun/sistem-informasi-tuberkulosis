@@ -1,4 +1,3 @@
-// components/pemeriksaanLab/EditLabModal.tsx
 "use client";
 
 import React, { useState, useTransition } from "react";
@@ -77,7 +76,7 @@ export default function EditLabModal({
               />
             </div>
 
-            <div>
+            <div className="col-span-1 md:col-span-2">
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Jenis Tes *
               </label>
@@ -97,24 +96,39 @@ export default function EditLabModal({
                 <option value="Rontgen" />
               </datalist>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Hasil Tes Umum *
-              </label>
-              <input
-                type="text"
-                name="hasil_tes"
-                required
-                placeholder="Positif / Negatif"
-                defaultValue={data.hasil_tes}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
-            </div>
 
             <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
               <h4 className="text-sm font-semibold text-gray-600">
                 Detail Sampel & TCM
               </h4>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                DNA bakteri *
+              </label>
+              <input
+                type="text"
+                name="dna_bakteri_tb"
+                placeholder="Isi beban kuman"
+                required
+                defaultValue={data.dna_bakteri_tb}
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Status Resistensi *
+              </label>
+              <input
+                type="text"
+                name="status_resistensi"
+                placeholder="Resisten / Sensitif / Indeterminate"
+                required
+                defaultValue={data.status_resistensi}
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
             </div>
 
             <div>
@@ -138,6 +152,39 @@ export default function EditLabModal({
                 name="kualitas_sample"
                 placeholder="Purulen / Mukoid"
                 defaultValue={data.kualitas_sample || ""}
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
+              <h4 className="text-sm font-semibold text-gray-600">
+                Hasil Tes Lab
+              </h4>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Hasil Tes Umum *
+              </label>
+              <input
+                type="text"
+                name="hasil_tes"
+                required
+                placeholder="Positif / Negatif"
+                defaultValue={data.hasil_tes}
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Hasil Tes BTA
+              </label>
+              <input
+                type="text"
+                name="hasil_bta"
+                placeholder="Negatif / 1+ / 2+ /3+"
+                defaultValue={data.hasil_bta || ""}
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>

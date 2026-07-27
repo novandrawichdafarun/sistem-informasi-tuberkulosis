@@ -1,4 +1,3 @@
-// components/pemeriksaanLab/TambahLabModal.tsx
 "use client";
 
 import React, { useState, useTransition } from "react";
@@ -69,12 +68,13 @@ export default function TambahLabModal({
               <input
                 type="text"
                 name="periode_pemeriksaan"
+                required
                 placeholder="Contoh: Bulan ke-2"
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>
 
-            <div>
+            <div className="col-span-1 md:col-span-2">
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Jenis Tes *
               </label>
@@ -93,23 +93,37 @@ export default function TambahLabModal({
                 <option value="Rontgen" />
               </datalist>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Hasil Tes Umum *
-              </label>
-              <input
-                type="text"
-                name="hasil_tes"
-                required
-                placeholder="Positif / Negatif"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
-            </div>
 
             <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
               <h4 className="text-sm font-semibold text-gray-600">
                 Detail Sampel & TCM
               </h4>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                DNA bakteri *
+              </label>
+              <input
+                type="text"
+                name="dna_bakteri_tb"
+                placeholder="Isi beban kuman"
+                required
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Status Resistensi *
+              </label>
+              <input
+                type="text"
+                name="status_resistensi"
+                placeholder="Resisten / Sensitif / Indeterminate"
+                required
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
             </div>
 
             <div>
@@ -131,6 +145,37 @@ export default function TambahLabModal({
                 type="text"
                 name="kualitas_sample"
                 placeholder="Purulen / Mukoid"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
+              <h4 className="text-sm font-semibold text-gray-600">
+                Hasil Tes Lab
+              </h4>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Hasil Tes Umum *
+              </label>
+              <input
+                type="text"
+                name="hasil_tes"
+                required
+                placeholder="Positif / Negatif"
+                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Hasil Tes BTA
+              </label>
+              <input
+                type="text"
+                name="hasil_bta"
+                placeholder="Negatif / 1+ / 2+ /3+"
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
               />
             </div>

@@ -3,8 +3,7 @@ export interface DiagnosisData {
   id_episode: number;
   tanggal_diagnosis: string;
 
-  kode_icd10: string;
-  klasifikasi_anatomi?: string | null;
+  klasifikasi_anatomi: string;
   lokasi_anatomi?: string | null;
 
   klasifikasi_resistensi: string;
@@ -19,7 +18,6 @@ export interface CreateDiagnosisPayload {
   id_episode: number;
   tanggal_diagnosis: string;
 
-  kode_icd10: string;
   klasifikasi_anatomi?: string | null;
   lokasi_anatomi?: string | null;
 
@@ -37,6 +35,7 @@ export interface UpdateDaignosisPayload extends CreateDiagnosisPayload {
 export interface PasienDiagnosisOverview {
   id_pasien: number;
   nama_lengkap: string;
+  jenis_kelamin: string;
   usia: string;
   domisili: string;
   episodeAktif: { id_episode: number; status_episode: string } | null;

@@ -11,7 +11,7 @@ interface Props {
 
 export default function ObatTableView({ data }: Props) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-gray-50 border-b border-gray-200 text-gray-600">
@@ -20,8 +20,8 @@ export default function ObatTableView({ data }: Props) {
               <th className="px-4 py-3 font-semibold">Kategori & Jenis</th>
               <th className="px-4 py-3 font-semibold">Dosis</th>
               <th className="px-4 py-3 font-semibold">Deskripsi</th>
-              <th className="px-4 py-3 font-semibold">status</th>
-              <th className="px-4 py-3 font-semibold text-right">Aksi</th>
+              <th className="px-4 py-3 font-semibold text-center">status</th>
+              <th className="px-4 py-3 font-semibold text-center">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -51,13 +51,13 @@ export default function ObatTableView({ data }: Props) {
                     {obat.deskripsi || "-"}
                   </div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 items-center text-center">
                   <ToggleStatusObat
                     id_obat={obat.id_obat}
                     status={obat.is_active}
                   />
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-center">
                   <div className="flex gap-3 items-center">
                     <EditObatModal data={obat} />
                     <DeleteObatButton

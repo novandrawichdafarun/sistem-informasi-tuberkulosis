@@ -22,26 +22,26 @@ export default function RiwayatDiagnosisSubRow({ riwayat }: Props) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-gray-100/80 border-b border-gray-200 text-gray-600">
+    <div className="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
+      <table className="w-full text-left text-sm text-gray-600">
+        <thead className="bg-gray-100 text-xs font-semibold text-gray-700">
           <tr>
-            <th className="px-4 py-3 font-medium">Tanggal & Kode</th>
-            <th className="px-4 py-3 font-medium">Detail Diagnosa</th>
-            <th className="px-4 py-3 font-medium">Resistensi</th>
-            <th className="px-4 py-3 font-medium">Dasar Diagnosa</th>
-            <th className="px-4 py-3 font-medium text-right">Opsi</th>
+            <th className="px-4 py-2 border-b">Tanggal & Kode</th>
+            <th className="px-4 py-2 border-b">Detail Diagnosa</th>
+            <th className="px-4 py-2 border-b">Resistensi</th>
+            <th className="px-4 py-2 border-b">Dasar Diagnosa</th>
+            <th className="px-4 py-2 border-b text-center">Opsi</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
           {riwayat.map((diagnosis) => (
-            <tr key={diagnosis.id_diagnosis} className="hover:bg-gray-50/50">
+            <tr
+              key={diagnosis.id_diagnosis}
+              className="border-b border-gray-100 hover:bg-gray-50/50 transition"
+            >
               <td className="px-4 py-3">
                 <div className="font-medium text-gray-800">
                   {diagnosis.tanggal_diagnosis}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {diagnosis.kode_icd10}
                 </div>
               </td>
               <td className="px-4 py-3">
@@ -66,11 +66,11 @@ export default function RiwayatDiagnosisSubRow({ riwayat }: Props) {
                 <div className="font-medium text-gray-800">
                   {diagnosis.dasar_diagnosis || "-"}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 whitespace-normal break-all leading-relaxed">
                   {diagnosis.catatan_klinis || "-"}
                 </div>
               </td>
-              <td className="px-4 py-3 text-right space-x-2">
+              <td className="px-4 py-3 text-center space-x-2">
                 <button
                   onClick={() => setToEdit(diagnosis)}
                   className="text-blue-600 hover:text-blue-800 text-xs font-medium"

@@ -43,41 +43,40 @@ export const getDaftarPemeriksaanLab = async (
     if (pasienError)
       return handleServiceError(pasienError?.message, "Pasien tidak ditemukan");
 
-    const formattedData: PasienPemeriksaanLabOverview[] = (pasienData ?? []).map(
-      (pasien) => {
-        const rawEpisodes = pasien.episode_pengobatan || [];
-        const episodeAktif =
-          rawEpisodes.find((ep) => ep.status_episode === "aktif") || null;
+    const formattedData: PasienPemeriksaanLabOverview[] = (
+      pasienData ?? []
+    ).map((pasien) => {
+      const rawEpisodes = pasien.episode_pengobatan || [];
+      const episodeAktif =
+        rawEpisodes.find((ep) => ep.status_episode === "aktif") || null;
 
-        let riwayat: PemeriksaanLabData[] = [];
-        rawEpisodes.forEach((ep) => {
-          if (ep.pemeriksaan_lab) {
-            riwayat = [...riwayat, ...ep.pemeriksaan_lab];
-          }
-        });
+      let riwayat: PemeriksaanLabData[] = [];
+      rawEpisodes.forEach((ep) => {
+        if (ep.pemeriksaan_lab) {
+          riwayat = [...riwayat, ...ep.pemeriksaan_lab];
+        }
+      });
 
-        riwayat.sort(
-          (a, b) =>
-            new Date(b.tanggal_tes).getTime() -
-            new Date(a.tanggal_tes).getTime(),
-        );
+      riwayat.sort(
+        (a, b) =>
+          new Date(b.tanggal_tes).getTime() - new Date(a.tanggal_tes).getTime(),
+      );
 
-        return {
-          id_pasien: pasien.id_pasien,
-          nama_lengkap: pasien.nama_lengkap,
-          usia: pasien.usia,
-          jenis_kelamin: pasien.jenis_kelamin,
-          domisili: pasien.domisili,
-          episodeAktif: episodeAktif
-            ? {
-                id_episode: episodeAktif.id_episode,
-                status_episode: episodeAktif.status_episode,
-              }
-            : null,
-          riwayat_pemeriksaan_lab: riwayat,
-        };
-      },
-    );
+      return {
+        id_pasien: pasien.id_pasien,
+        nama_lengkap: pasien.nama_lengkap,
+        jenis_kelamin: pasien.jenis_kelamin,
+        usia: pasien.usia,
+        domisili: pasien.domisili,
+        episodeAktif: episodeAktif
+          ? {
+              id_episode: episodeAktif.id_episode,
+              status_episode: episodeAktif.status_episode,
+            }
+          : null,
+        riwayat_pemeriksaan_lab: riwayat,
+      };
+    });
 
     return { success: true, data: formattedData };
   } catch (error) {

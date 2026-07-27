@@ -25,12 +25,12 @@ export const getDaftarDiagnosis = async (
       .from("pasien")
       .select(
         `
-        id_pasien, nama_lengkap, usia, domisili,
+        id_pasien, nama_lengkap, jenis_kelamin, usia, domisili,
         episode_pengobatan (
           id_episode, status_episode,
           diagnosis (
             id_diagnosis, id_episode, tanggal_diagnosis,
-            kode_icd10, klasifikasi_anatomi, lokasi_anatomi,
+            klasifikasi_anatomi, lokasi_anatomi,
             klasifikasi_resistensi, tipe_resistensi, 
             dasar_diagnosis, catatan_klinis, created_at
           )
@@ -51,8 +51,8 @@ export const getDaftarDiagnosis = async (
         let riwayat: DiagnosisData[] = [];
         rawEpisodes.forEach((ep) => {
           if (Array.isArray(ep.diagnosis)) {
-            riwayat = [...riwayat, ...ep.diagnosis];
-          } else {
+            riwayat = [...riwayat, ...ep.diagnosis.filter((d) => d !== null)];
+          } else if (ep.diagnosis) {
             riwayat = [...riwayat, ep.diagnosis];
           }
         });
@@ -66,6 +66,7 @@ export const getDaftarDiagnosis = async (
         return {
           id_pasien: pasien.id_pasien,
           nama_lengkap: pasien.nama_lengkap,
+          jenis_kelamin: pasien.jenis_kelamin,
           usia: pasien.usia,
           domisili: pasien.domisili,
           episodeAktif: episodeAktif
@@ -165,7 +166,7 @@ export const updateDiagnosis = async (
     const { data: diagnosis, error: checkError } = await supabase
       .from("diagnosis")
       .select("id_diagnosis")
-      .eq("id_tes", payload.id_diagnosis)
+      .eq("id_diagnosis", payload.id_diagnosis)
       .single();
 
     if (checkError || !diagnosis)

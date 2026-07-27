@@ -13,6 +13,7 @@ import {
   CalendarIcon,
   FlaskIcon,
   PillBottleIcon,
+  DiagnosisIcon,
 } from "../asset/icons";
 import Brand from "../molecules/Brand";
 import RoleBadge from "../molecules/RoleBadge";
@@ -23,6 +24,7 @@ const NAV: NavItem[] = [
   { label: "Beranda", href: "/dashboard", icon: HomeIcon },
   { label: "Statistik", href: "/dashboard/statistik", icon: TrendIcon },
   { label: "Manajemen Pasien", href: "/dashboard/pasien", icon: UsersIcon },
+  { label: "Master Obat", href: "/dashboard/obat", icon: PillBottleIcon },
   {
     label: "Episode Pengobatan",
     href: "/dashboard/episode-pengobatan",
@@ -38,8 +40,8 @@ const NAV: NavItem[] = [
     href: "/dashboard/pemeriksaan-lab",
     icon: FlaskIcon,
   },
+  { label: "Diagnosis", href: "/dashboard/diagnosis", icon: DiagnosisIcon },
   { label: "Resep & Jadwal", href: "/dashboard/resep-obat", icon: PillIcon },
-  { label: "Master Obat", href: "/dashboard/obat", icon: PillBottleIcon },
 ];
 
 export default function AdminSidebar({
