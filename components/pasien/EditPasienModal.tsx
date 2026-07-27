@@ -10,6 +10,7 @@ import {
   PEKERJAAN_OPTIONS,
   PENDAPATAN_OPTIONS,
 } from "@/utils/pasienOptions";
+import { EditIcon } from "../asset/icons";
 
 const inputClass =
   "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
@@ -84,9 +85,10 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="text-yellow-600 hover:text-yellow-900 mx-2"
+        title="Edit Data Pasien"
+        className="flex p-2 items-center bg-yellow-100 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition shadow-sm"
       >
-        Edit
+        <EditIcon className="w-4 h-4" />
       </button>
 
       {isOpen && (
@@ -122,7 +124,11 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
               )}
 
               <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-                <input type="hidden" name="id_pasien" value={pasien.id_pasien} />
+                <input
+                  type="hidden"
+                  name="id_pasien"
+                  value={pasien.id_pasien}
+                />
                 <input type="hidden" name="id_user" value={pasien.id_user} />
 
                 {/* --- INFO AKUN & IDENTITAS --- */}
@@ -252,7 +258,7 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
+                    className="rounded-md bg-yellow-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
                   >
                     {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
                   </button>

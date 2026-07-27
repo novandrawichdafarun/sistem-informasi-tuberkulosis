@@ -2,6 +2,7 @@
 
 import { deletePasienAction } from "@/actions/pasien";
 import { useState } from "react";
+import { DeleteIcon } from "../asset/icons";
 
 export default function DeletePasienButton({
   id_pasien,
@@ -28,9 +29,10 @@ export default function DeletePasienButton({
     <button
       onClick={handleDelete}
       disabled={isDeleting}
-      className="text-red-600 hover:text-red-900 disabled:text-gray-400"
+      title="Hapus Data Pasien"
+      className="flex p-2 items-center bg-red-100 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition shadow-sm"
     >
-      {isDeleting ? "Menghapus..." : "Hapus"}
+      <DeleteIcon className="w-4 h-4" />
     </button>
   );
 }

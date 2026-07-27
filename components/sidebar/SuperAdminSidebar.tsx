@@ -4,16 +4,16 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
-  PulseIcon,
   PillIcon,
   TrendIcon,
   MenuIcon,
   CloseIcon,
   UsersIcon,
   CalendarIcon,
-  FlaskIcon,
   PillBottleIcon,
   DiagnosisIcon,
+  PemeriksaanLabIcon,
+  PemeriksaanKlinisIcon,
 } from "../asset/icons";
 import Brand from "../molecules/Brand";
 import RoleBadge from "../molecules/RoleBadge";
@@ -33,12 +33,12 @@ const NAV: NavItem[] = [
   {
     label: "Pemeriksaan Klinis",
     href: "/dashboard/pemeriksaan-klinis",
-    icon: PulseIcon,
+    icon: PemeriksaanKlinisIcon,
   },
   {
     label: "Pemeriksaan Lab",
     href: "/dashboard/pemeriksaan-lab",
-    icon: FlaskIcon,
+    icon: PemeriksaanLabIcon,
   },
   { label: "Diagnosis", href: "/dashboard/diagnosis", icon: DiagnosisIcon },
   { label: "Resep & Jadwal", href: "/dashboard/resep-obat", icon: PillIcon },

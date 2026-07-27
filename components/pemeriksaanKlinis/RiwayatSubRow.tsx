@@ -56,7 +56,9 @@ export default function RiwayatSubRow({
         <div>Suhu: {`${periksa.suhu}°C` || "-"}</div>
         <div>Nadi: {`${periksa.nadi}/menit` || "-"}</div>
       </td>
-      <td className="px-4 py-3 text-gray-600">{periksa.keluhan || "-"}</td>
+      <td className="px-4 py-3 text-gray-600 max-w-65 whitespace-normal break-all leading-relaxed">
+        {periksa.keluhan || "-"}
+      </td>
       <td className="px-4 py-3 text-center space-x-2">
         {isEditable ? (
           <>

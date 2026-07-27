@@ -4,6 +4,7 @@ import { PasienData } from "@/types/pasien";
 import TambahPasienModal from "@/components/pasien/TambahPasienModal";
 import EditPasienModal from "@/components/pasien/EditPasienModal";
 import DeletePasienButton from "@/components/pasien/DeletePasienButton";
+import { DetailIcon } from "@/components/asset/icons";
 
 export const metadata = {
   title: "Manajemen Pasien | NU-TBCare",
@@ -121,18 +122,21 @@ export default async function ManajemenPasienPage() {
                           {pasien.no_telp || "-"}
                         </span>
                       </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-6 space-x-2">
-                        <Link
-                          href={`/dashboard/pasien/${pasien.id_pasien}`}
-                          className="text-brand-600 hover:text-brand-800"
-                        >
-                          Detail
-                        </Link>
-                        <EditPasienModal pasien={pasien} />
-                        <DeletePasienButton
-                          id_pasien={pasien.id_pasien}
-                          nama={pasien.nama_lengkap}
-                        />
+                      <td className="py-4 px-3 sm:pr-6 align-middle">
+                        <div className="flex justify-center items-center gap-2">
+                          <Link
+                            href={`/dashboard/pasien/${pasien.id_pasien}`}
+                            title="Detail Pasien"
+                            className="flex p-2 items-center bg-blue-100 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-white transition shadow-sm"
+                          >
+                            <DetailIcon className="w-4 h-4" />
+                          </Link>
+                          <EditPasienModal pasien={pasien} />
+                          <DeletePasienButton
+                            id_pasien={pasien.id_pasien}
+                            nama={pasien.nama_lengkap}
+                          />
+                        </div>
                       </td>
                     </tr>
                   ))
