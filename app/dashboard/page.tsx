@@ -20,6 +20,8 @@ const EMPTY_SUMMARY: AdherenceSummary = {
   days: [],
 };
 
+export const metadata = { title: "Beranda | NU-TBCare" };
+
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const role = session?.user?.role;

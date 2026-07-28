@@ -1,19 +1,18 @@
 "use client";
 
 import { tutupEpisodeAction } from "@/actions/episodePengobatan";
+import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
 import { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
 interface TutupEpisodeModalProps {
   id_episode: number;
-  tipePasienSekarang: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function TutupEpisodeModal({
   id_episode,
-  tipePasienSekarang,
   isOpen,
   onClose,
 }: TutupEpisodeModalProps) {
@@ -59,36 +58,49 @@ export default function TutupEpisodeModal({
           <input type="hidden" name="id_episode" value={id_episode} />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Pembaruan Tipe Pasien *
-            </label>
-            <input
-              type="text"
-              name="tipe_pasien"
-              list="list-tipe-pasien-tutup"
-              defaultValue={tipePasienSekarang}
-              required
-              placeholder="Pilih atau ketik tipe pasien..."
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-            <datalist id="list-tipe-pasien-tutup">
-              <option value="Kasus Baru" />
-              <option value="Kambuh" />
-              <option value="Pengobatan Ulang" />
-              <option value="Pindahan" />
-            </datalist>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tanggal Selesai Pengobatan
+            <label className="block text-sm font-medium mb-1 text-gray-700">
+              Tanggal Penetapan *
             </label>
             <input
               type="date"
-              name="tanggal_selesai"
-              defaultValue={todayDate}
+              name="tanggal_penetapan"
               required
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
+              defaultValue={todayDate}
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">
+              Status Akhir *
+            </label>
+            <select
+              name="status_akhir"
+              required
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none bg-white"
+            >
+              <option value="">-- Pilih Status Akhir --</option>
+              <option value="Sembuh">Sembuh</option>
+              <option value="Pengobatan Lengkap">Pengobatan Lengkap</option>
+              <option value="Gagal">Gagal</option>
+              <option value="Putus Berobat (Loss to Follow-up)">
+                Putus Berobat (Loss to Follow-up)
+              </option>
+              <option value="Meninggal">Meninggal</option>
+              <option value="Pindah">Pindah</option>
+              <option value="Tidak Dievaluasi">Tidak Dievaluasi</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">
+              Catatan Akhir (Opsional)
+            </label>
+            <textarea
+              name="catatan_akhir"
+              rows={3}
+              placeholder="Tambahkan catatan jika diperlukan..."
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none resize-none"
             />
           </div>
 
@@ -97,14 +109,14 @@ export default function TutupEpisodeModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+              className={submitBtnClass}
             >
               {isPending ? "Memproses..." : "Selesaikan Episode"}
             </button>

@@ -101,7 +101,7 @@ CREATE TABLE pemeriksaan_lab (
   status_resistensi VARCHAR(50) NOT NULL, -- Resisten / Sensitif / Indeterminate (Terutama untuk Rifampisin pada TCM atau obat lain)
 
   -- Hasil Tes Umum (Untuk Rontgen, Mantoux, IGRA)
-  hasil_tes VARCHAR(100) NOT NULL, -- Hasil umum: Positif / Negatif / Normal / Kesan TB Paru Aktif
+  hasil_tes CHAR(1) CHECK (hasil_tes IN ('P', 'N')) NOT NULL, -- Hasil umum: Positif / Negatif 
 
   -- Hasil Tes Mikroskopis (BTA)
   hasil_bta VARCHAR(100), -- Khusus tes BTA: Negatif / Scanty (tulis jumlahnya) / 1+ / 2+ / 3+
@@ -128,7 +128,7 @@ CREATE TABLE diagnosis (
   tipe_resistensi VARCHAR(50), -- Monoresisten Rifampisin (TB-RR) / MDR-TB / XDR-TB / Null jika SO
 
   dasar_diagnosis VARCHAR(50), -- Terkonfirmasi Bakteriologis (TCM/BTA+) / Terdiagnosis Klinis (Gejala + Rontgen) 
-  catatan_klinis text, -- Catatan tambahan dokter terkait kondisi komorbid seperti TB-HIV atau TB-DM
+  catatan_klinis TEXT, -- Catatan tambahan dokter terkait kondisi komorbid seperti TB-HIV atau TB-DM
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
@@ -224,8 +224,9 @@ CREATE POLICY "Pasien kelola log sendiri" ON medication_log
 CREATE TABLE hasil_akhir (
   id_hasil SERIAL PRIMARY KEY,
   id_episode INTEGER UNIQUE REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
-  tanggal_selesai DATE DEFAULT CURRENT_DATE NOT NULL,
+  tanggal_penetapan DATE DEFAULT CURRENT_DATE NOT NULL,
   status_akhir VARCHAR(50) CHECK (status_akhir IN ('Sembuh', 'Pengobatan Lengkap', 'Meninggal', 'Gagal', 'Putus Berobat')) NOT NULL,
+  catatan_akhir TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 

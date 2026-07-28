@@ -22,7 +22,9 @@ export default function ResepRowView({
 
   return (
     <>
-      <tr className={`transition-colors ${isExpanded ? "bg-blue-50/30" : "hover:bg-gray-50"}`}>
+      <tr
+        className={`transition-colors ${isExpanded ? "bg-blue-50/30" : "hover:bg-gray-50"}`}
+      >
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="font-medium text-gray-900">{usia || "-"}</div>
           <div className="text-xs text-gray-400">
@@ -42,7 +44,9 @@ export default function ResepRowView({
               Tidak Ada Episode
             </span>
           )}
-          <span className="ml-2 text-xs text-gray-400">{resepList.length} resep</span>
+          <span className="ml-2 text-xs text-gray-400">
+            {resepList.length} resep
+          </span>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-right text-xs space-x-2">
           <button
@@ -60,7 +64,7 @@ export default function ResepRowView({
           {episodeAktif ? (
             <button
               onClick={() => setIsTambahOpen(true)}
-              className="rounded bg-blue-600 px-3 py-1.5 font-semibold text-white hover:bg-blue-700 transition"
+              className="rounded bg-brand-600 px-3 py-1.5 font-semibold text-white hover:bg-brand-700 transition"
             >
               + Tambah Resep
             </button>
@@ -77,7 +81,10 @@ export default function ResepRowView({
 
       {isExpanded && (
         <tr>
-          <td colSpan={4} className="bg-slate-50 border-b border-gray-200 p-0 shadow-inner">
+          <td
+            colSpan={4}
+            className="bg-slate-50 border-b border-gray-200 p-0 shadow-inner"
+          >
             <div className="p-4 pl-10 border-l-4 border-blue-400 space-y-3">
               {resepList.map((r) => {
                 const persen =
@@ -98,8 +105,8 @@ export default function ResepRowView({
                           </span>
                         </p>
                         <p className="text-xs text-gray-500">
-                          Mulai {r.tanggal_mulai_obat || "-"} · {r.durasi_hari || 0}{" "}
-                          hari
+                          Mulai {r.tanggal_mulai_obat || "-"} ·{" "}
+                          {r.durasi_hari || 0} hari
                           {r.statusEpisode !== "aktif" && (
                             <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
                               episode selesai
@@ -113,7 +120,9 @@ export default function ResepRowView({
                     {/* Obat */}
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {r.detail_obat.length === 0 ? (
-                        <span className="text-xs text-gray-400">Tidak ada obat</span>
+                        <span className="text-xs text-gray-400">
+                          Tidak ada obat
+                        </span>
                       ) : (
                         r.detail_obat.map((d) => (
                           <span
@@ -133,7 +142,9 @@ export default function ResepRowView({
                         <span>
                           Kepatuhan: {r.jumlahDiminum}/{r.jumlahJadwal} dosis
                         </span>
-                        <span className="font-semibold text-gray-700">{persen}%</span>
+                        <span className="font-semibold text-gray-700">
+                          {persen}%
+                        </span>
                       </div>
                       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
                         <div

@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { updatePemeriksaanAction } from "@/actions/pemeriksaanKlinis";
 import { PemeriksaanKlinisData } from "@/types/pemeriksaanKlinis";
+import { cencelBtnClass, editBtnClass } from "@/utils/classTailwind";
 
 interface EditPemeriksaanModalProps {
   periksa: PemeriksaanKlinisData;
@@ -167,14 +168,14 @@ export default function EditPemeriksaanModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="bg-gray-100 px-4 py-2 text-sm font-medium rounded text-gray-700"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-blue-700"
+              className={editBtnClass}
             >
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </button>

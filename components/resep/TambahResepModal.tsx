@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createResepAction } from "@/actions/resep";
 import { ObatData } from "@/types/obat";
-
-const inputClass =
-  "mt-1 block w-full rounded border border-gray-300 p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
+import { createPortal } from "react-dom";
+import {
+  cencelBtnClass,
+  inputClass,
+  submitBtnClass,
+} from "@/utils/classTailwind";
 
 const REGIMEN = ["Kategori 1", "Kategori 2", "Kategori Anak", "OAT MDR"];
 const FASE = ["Intensif", "Lanjutan"];
@@ -29,6 +32,8 @@ export default function TambahResepModal({
   const [pending, startTransition] = useTransition();
 
   if (!isOpen) return null;
+
+  if (typeof document === "undefined") return null;
 
   const toggle = (id: number) =>
     setSelected((prev) =>
@@ -59,7 +64,7 @@ export default function TambahResepModal({
 
   const today = new Date().toLocaleDateString("en-CA");
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
@@ -189,7 +194,7 @@ export default function TambahResepModal({
                 Belum ada obat di master.{" "}
                 <Link
                   href="/dashboard/obat"
-                  className="text-blue-600 underline"
+                  className="text-brand-600 underline"
                 >
                   Tambahkan di Master Obat
                 </Link>{" "}
@@ -230,20 +235,21 @@ export default function TambahResepModal({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={pending || obatList.length === 0}
-              className="rounded bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:bg-blue-400"
+              className={submitBtnClass}
             >
               {pending ? "Menyimpan..." : "Simpan Resep"}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

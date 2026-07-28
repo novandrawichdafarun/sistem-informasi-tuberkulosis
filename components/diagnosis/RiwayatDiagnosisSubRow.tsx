@@ -67,7 +67,7 @@ export default function RiwayatDiagnosisSubRow({ riwayat }: Props) {
                 <div className="font-medium text-gray-800">
                   {diagnosis.dasar_diagnosis || "-"}
                 </div>
-                <div className="text-xs text-gray-500 whitespace-normal break-all leading-relaxed">
+                <div className="text-xs text-gray-500 whitespace-normal wrap-break-word leading-relaxed">
                   {diagnosis.catatan_klinis || "-"}
                 </div>
               </td>

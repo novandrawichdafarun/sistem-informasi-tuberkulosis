@@ -28,6 +28,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 text-gray-900 h-full antialiased`}
     >
+      <link rel="icon" href="/logo.png" />
       <body className="min-h-full flex flex-col">
         <AuthProvider>{children}</AuthProvider>
       </body>

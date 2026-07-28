@@ -9,41 +9,8 @@ import {
   PEKERJAAN_OPTIONS,
   PENDAPATAN_OPTIONS,
 } from "@/utils/pasienOptions";
-
-const inputClass =
-  "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
-
-function SelectField({
-  label,
-  name,
-  options,
-  required = true,
-}: {
-  label: string;
-  name: string;
-  options: string[];
-  required?: boolean;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700">
-        {label} {required && "*"}
-      </label>
-      <select
-        name={name}
-        required={required}
-        className={`${inputClass} bg-white`}
-      >
-        <option value="">-- Pilih --</option>
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
+import SelectField from "../molecules/SelectField";
+import { cencelBtnClass, inputClass, submitBtnClass } from "@/utils/classTailwind";
 
 export default function TambahPasienModal() {
   const router = useRouter();
@@ -188,21 +155,25 @@ export default function TambahPasienModal() {
                       label="Kelompok Usia"
                       name="usia"
                       options={USIA_OPTIONS}
+                      inputClass={inputClass}
                     />
                     <SelectField
                       label="Pendidikan"
                       name="pendidikan"
                       options={PENDIDIKAN_OPTIONS}
+                      inputClass={inputClass}
                     />
                     <SelectField
                       label="Pekerjaan"
                       name="pekerjaan"
                       options={PEKERJAAN_OPTIONS}
+                      inputClass={inputClass}
                     />
                     <SelectField
                       label="Pendapatan"
                       name="pendapatan"
                       options={PENDAPATAN_OPTIONS}
+                      inputClass={inputClass}
                     />
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
@@ -229,14 +200,14 @@ export default function TambahPasienModal() {
                     type="button"
                     onClick={closeModal}
                     disabled={isLoading}
-                    className="text-sm font-semibold text-gray-700 hover:text-gray-900 px-4 py-2"
+                    className={cencelBtnClass}
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
+                    className={submitBtnClass}
                   >
                     {isLoading ? "Menyimpan..." : "Simpan & Daftarkan"}
                   </button>

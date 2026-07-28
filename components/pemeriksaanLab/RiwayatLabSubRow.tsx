@@ -82,14 +82,14 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
                 <div>
                   <span
                     className={`inline-flex px-2 py-1 rounded text-xs font-semibold ${
-                      lab.hasil_tes.toLowerCase().includes("positif")
+                      lab.hasil_tes === "P"
                         ? "bg-red-100 text-red-700"
-                        : lab.hasil_tes.toLowerCase().includes("negatif")
+                        : lab.hasil_tes === "N"
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-700"
                     }`}
                   >
-                    {lab.hasil_tes}
+                    {lab.hasil_tes === "P" ? "Positif" : "Negatif"}
                   </span>
                 </div>
                 <div>

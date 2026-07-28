@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import { editEpisodeAction } from "@/actions/episodePengobatan";
 import { EpisodePengobatanData } from "@/types/episodePengobatan";
+import { cencelBtnClass, editBtnClass } from "@/utils/classTailwind";
 
 interface EditEpisodeModalProps {
   episode: EpisodePengobatanData;
@@ -34,7 +35,7 @@ export default function EditEpisodeModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Edit Data Episode
         </h3>
@@ -55,7 +56,7 @@ export default function EditEpisodeModal({
               name="tipe_pasien"
               required
               defaultValue={episode.tipe_pasien}
-              className="w-full rounded border p-2 text-sm bg-white"
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
             >
               <option value="Kasus Baru">Kasus Baru</option>
               <option value="Kambuh">Kambuh</option>
@@ -72,10 +73,9 @@ export default function EditEpisodeModal({
               name="tanggal_mulai"
               required
               defaultValue={episode.tanggal_mulai}
-              className="w-full rounded border p-2 text-sm"
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
             />
-          </div>
-          <div>
+
             <label className="block text-sm font-medium mb-1">
               Tanggal Selesai
             </label>
@@ -83,23 +83,82 @@ export default function EditEpisodeModal({
               type="date"
               name="tanggal_selesai"
               defaultValue={episode.tanggal_selesai || ""}
-              className="w-full rounded border p-2 text-sm"
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
             />
           </div>
+
+          {episode.hasil_akhir && (
+            <>
+              <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
+                <h4 className="text-sm font-semibold text-gray-600">
+                  Hasil Akhir Pengobatan
+                </h4>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">
+                  Tanggal Penetapan *
+                </label>
+                <input
+                  type="date"
+                  name="tanggal_penetapan"
+                  required
+                  defaultValue={episode.hasil_akhir.tanggal_penetapan}
+                  className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">
+                  Status Akhir *
+                </label>
+                <select
+                  name="status_akhir"
+                  required
+                  defaultValue={episode.hasil_akhir.status_akhir}
+                  className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none bg-white"
+                >
+                  <option value="">-- Pilih Status Akhir --</option>
+                  <option value="Sembuh">Sembuh</option>
+                  <option value="Pengobatan Lengkap">Pengobatan Lengkap</option>
+                  <option value="Gagal">Gagal</option>
+                  <option value="Putus Berobat (Loss to Follow-up)">
+                    Putus Berobat (Loss to Follow-up)
+                  </option>
+                  <option value="Meninggal">Meninggal</option>
+                  <option value="Pindah">Pindah</option>
+                  <option value="Tidak Dievaluasi">Tidak Dievaluasi</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">
+                  Catatan Akhir (Opsional)
+                </label>
+                <textarea
+                  name="catatan_akhir"
+                  rows={3}
+                  defaultValue={episode.hasil_akhir.catatan_akhir || ""}
+                  placeholder="Tambahkan catatan jika diperlukan..."
+                  className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none resize-none"
+                />
+              </div>
+            </>
+          )}
 
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="bg-gray-100 px-4 py-2 text-sm rounded"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="bg-brand-600 text-white px-4 py-2 text-sm rounded"
+              className={editBtnClass}
             >
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </button>

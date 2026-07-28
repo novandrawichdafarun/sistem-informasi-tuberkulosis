@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { createPemeriksaanAction } from "@/actions/pemeriksaanKlinis";
+import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
 
 interface TambahPemeriksaanModalProps {
   id_episode: number;
@@ -156,16 +157,16 @@ export default function TambahPemeriksaanModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="bg-gray-100 px-4 py-2 text-sm font-medium rounded text-gray-700"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="bg-emerald-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-emerald-700"
+              className={submitBtnClass}
             >
-              {isPending ? "Menyimpan..." : "Simpan Pemeriksaan"}
+              {isPending ? "Menyimpan..." : "Simpan Data Klinis"}
             </button>
           </div>
         </form>

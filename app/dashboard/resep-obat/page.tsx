@@ -12,11 +12,14 @@ export default async function ResepObatPage() {
 
   const daftar = resepRes.success && resepRes.data ? resepRes.data : [];
   const obatList = obatRes.success && obatRes.data ? obatRes.data : [];
+  const obatActive = obatList.filter((obat) => obat.is_active === true);
 
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Resep &amp; Jadwal Obat</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Resep &amp; Jadwal Obat
+        </h1>
         <p className="text-sm text-gray-500">
           Buat resep pengobatan dan jadwal minum obat harian pasien. Jadwal yang
           dibuat akan tampil di aplikasi pasien &amp; menjadi dasar perhitungan
@@ -44,7 +47,10 @@ export default async function ResepObatPage() {
             <tbody className="divide-y divide-gray-200">
               {daftar.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-gray-400">
+                  <td
+                    colSpan={4}
+                    className="px-6 py-10 text-center text-gray-400"
+                  >
                     Belum ada data pasien.
                   </td>
                 </tr>
@@ -53,7 +59,7 @@ export default async function ResepObatPage() {
                   <ResepRowView
                     key={item.id_pasien}
                     item={item}
-                    obatList={obatList}
+                    obatList={obatActive}
                   />
                 ))
               )}

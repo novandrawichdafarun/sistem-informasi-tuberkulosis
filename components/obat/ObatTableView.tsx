@@ -47,7 +47,7 @@ export default function ObatTableView({ data }: Props) {
                   </div>
                 </td>
                 <td className="px-4 py-3 max-w-65">
-                  <div className="text-xs text-gray-500 whitespace-normal break-all leading-relaxed">
+                  <div className="text-xs text-gray-500 whitespace-normal wrap-break-word leading-relaxed">
                     {obat.deskripsi || "-"}
                   </div>
                 </td>
@@ -57,8 +57,8 @@ export default function ObatTableView({ data }: Props) {
                     status={obat.is_active}
                   />
                 </td>
-                <td className="px-4 py-3 text-center">
-                  <div className="flex gap-2 items-center justify-center">
+                <td className="px-4 py-3 items-center justify-center">
+                  <div className="flex gap-2">
                     <EditObatModal data={obat} />
                     <DeleteObatButton
                       id_obat={obat.id_obat}

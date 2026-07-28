@@ -4,7 +4,6 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
-  PillIcon,
   TrendIcon,
   MenuIcon,
   CloseIcon,
@@ -14,6 +13,7 @@ import {
   DiagnosisIcon,
   PemeriksaanLabIcon,
   PemeriksaanKlinisIcon,
+  ResepObatIcon,
 } from "../asset/icons";
 import Brand from "../molecules/Brand";
 import RoleBadge from "../molecules/RoleBadge";
@@ -41,7 +41,11 @@ const NAV: NavItem[] = [
     icon: PemeriksaanLabIcon,
   },
   { label: "Diagnosis", href: "/dashboard/diagnosis", icon: DiagnosisIcon },
-  { label: "Resep & Jadwal", href: "/dashboard/resep-obat", icon: PillIcon },
+  {
+    label: "Resep & Jadwal",
+    href: "/dashboard/resep-obat",
+    icon: ResepObatIcon,
+  },
 ];
 
 export default function AdminSidebar({

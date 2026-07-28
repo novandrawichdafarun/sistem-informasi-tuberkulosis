@@ -5,6 +5,7 @@ import { ObatData } from "@/types/obat";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { EditIcon } from "../asset/icons";
+import { cencelBtnClass, editBtnClass } from "@/utils/classTailwind";
 
 interface EditObatModalProps {
   data: ObatData;
@@ -48,7 +49,7 @@ export default function EditObatModal({ data }: EditObatModalProps) {
       <button
         onClick={() => setIsOpen(true)}
         title="Edit Obat"
-        className="inline-flex p-2 items-center bg-yellow-100 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition shadow-sm"
+        className="inline-flex p-2 items- justify-center bg-yellow-100 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition shadow-sm"
       >
         <EditIcon className="w-4 h-4" />
       </button>
@@ -128,18 +129,6 @@ export default function EditObatModal({ data }: EditObatModalProps) {
 
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    Deskripsi
-                  </label>
-                  <input
-                    type="text"
-                    name="deskripsi"
-                    placeholder="..."
-                    defaultValue={data.deskripsi || ""}
-                    className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
-                  />
-                </div>
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-gray-700">
                     Dosis
                   </label>
                   <input
@@ -150,6 +139,19 @@ export default function EditObatModal({ data }: EditObatModalProps) {
                     className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
                   />
                 </div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Deskripsi
+                  </label>
+                  <textarea
+                    name="deskripsi"
+                    rows={2}
+                    placeholder="Masukkan Deskripsi Obat"
+                    defaultValue={data.deskripsi || ""}
+                    className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
+                  ></textarea>
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-5 mt-2 border-t border-gray-100">
@@ -158,14 +160,14 @@ export default function EditObatModal({ data }: EditObatModalProps) {
                   type="button"
                   onClick={closeModal}
                   disabled={isLoading}
-                  className="bg-gray-100 px-4 py-2 text-sm font-medium rounded text-gray-700 hover:bg-gray-200"
+                  className={cencelBtnClass}
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-blue-700 disabled:bg-blue-400"
+                  className={editBtnClass}
                 >
                   {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>

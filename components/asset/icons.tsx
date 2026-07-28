@@ -15,6 +15,7 @@ import {
   Microscope,
   Minus,
   Pill,
+  ReceiptText,
   Scale,
   Send,
   SquareActivity,
@@ -116,6 +117,12 @@ export function PillBottleIcon({ className }: IconProps) {
 
 export function UserIcon({ className }: IconProps) {
   return <User className={iconClassName(className)} strokeWidth={1.75} />;
+}
+
+export function ResepObatIcon({ className }: IconProps) {
+  return (
+    <ReceiptText className={iconClassName(className)} strokeWidth={1.75} />
+  );
 }
 
 export function PemeriksaanKlinisIcon({ className }: IconProps) {

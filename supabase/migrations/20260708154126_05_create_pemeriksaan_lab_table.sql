@@ -14,7 +14,7 @@ CREATE TABLE pemeriksaan_lab (
   status_resistensi VARCHAR(50) NOT NULL, -- Resisten / Sensitif / Indeterminate (Terutama untuk Rifampisin pada TCM atau obat lain)
 
   -- Hasil Tes Umum (Untuk Rontgen, Mantoux, IGRA)
-  hasil_tes VARCHAR(100) NOT NULL, -- Hasil umum: Positif / Negatif / Normal / Kesan TB Paru Aktif
+  hasil_tes CHAR(1) CHECK (hasil_tes IN ('P', 'N')) NOT NULL, -- Hasil umum: Positif / Negatif 
 
   -- Hasil Tes Mikroskopis (BTA)
   hasil_bta VARCHAR(100), -- Khusus tes BTA: Negatif / Scanty (tulis jumlahnya) / 1+ / 2+ / 3+
