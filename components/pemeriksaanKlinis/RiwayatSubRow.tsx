@@ -5,6 +5,7 @@ import { hitungBMI } from "@/utils/number";
 import { useState, useTransition } from "react";
 import EditPemeriksaanModal from "./EditPemeriksaanModal";
 import DeletePemeriksaanButton from "./DeletePemeriksaanButton";
+import { EditIcon } from "../asset/icons";
 
 export default function RiwayatSubRow({
   periksa,
@@ -59,20 +60,23 @@ export default function RiwayatSubRow({
       <td className="px-4 py-3 text-gray-600 max-w-65 whitespace-normal break-all leading-relaxed">
         {periksa.keluhan || "-"}
       </td>
-      <td className="px-4 py-3 text-center space-x-2">
+      <td className="px-4 py-3">
         {isEditable ? (
-          <>
+          <div className="flex justify-center items-center gap-2">
             <button
               onClick={() => setIsEditOpen(true)}
               disabled={isPending}
-              className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2"
+              title="Edit Pemeriksaan Klinis"
+              className="inline-flex p-2 items-center bg-yellow-100 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition shadow-sm"
             >
-              Edit
+              <EditIcon className="w-4 h-4" />
             </button>
             <DeletePemeriksaanButton periksa={periksa} />
-          </>
+          </div>
         ) : (
-          <span className="text-xs text-gray-400 italic">Arsip (Selesai)</span>
+          <span className="flex justify-center text-xs text-gray-400 italic">
+            Arsip (Selesai)
+          </span>
         )}
 
         <EditPemeriksaanModal

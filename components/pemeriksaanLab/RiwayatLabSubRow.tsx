@@ -5,6 +5,7 @@ import { PemeriksaanLabData } from "@/types/pemeriksaanLab";
 import { useState } from "react";
 import DeleteLabButton from "./DeleteLabButton";
 import EditLabModal from "./EditLabModal";
+import { EditIcon } from "../asset/icons";
 
 interface Props {
   riwayat: PemeriksaanLabData[];
@@ -98,14 +99,17 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
                   </span>
                 </div>
               </td>
-              <td className="px-4 py-3 text-center space-x-2">
-                <button
-                  onClick={() => setLabToEdit(lab)}
-                  className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                >
-                  Edit
-                </button>
-                <DeleteLabButton id_tes={lab.id_tes} />
+              <td className="px-4 py-3">
+                <div className="flex justify-center items-center gap-2">
+                  <button
+                    onClick={() => setLabToEdit(lab)}
+                    title="Edit Pemeriksaan Lab"
+                    className="inline-flex p-2 items-center bg-yellow-100 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition shadow-sm"
+                  >
+                    <EditIcon className="w-4 h-4" />
+                  </button>
+                  <DeleteLabButton id_tes={lab.id_tes} />
+                </div>
               </td>
             </tr>
           ))}

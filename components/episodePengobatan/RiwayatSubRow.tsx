@@ -4,6 +4,7 @@ import { EpisodePengobatanData } from "@/types/episodePengobatan";
 import { useState, useTransition } from "react";
 import EditEpisodeModal from "./EditEpisodeModal";
 import DeleteEpisodeButton from "./DeleteEpisodeButton";
+import { EditIcon } from "../asset/icons";
 
 export default function RiwayatSubRow({
   episode,
@@ -25,17 +26,20 @@ export default function RiwayatSubRow({
           {episode.status_episode}
         </span>
       </td>
-      <td className="px-4 py-3 text-center space-x-2">
-        {episode.status_episode !== "aktif" && (
-          <button
-            onClick={() => setIsEditOpen(true)}
-            disabled={isPending}
-            className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2"
-          >
-            Edit
-          </button>
-        )}
-        <DeleteEpisodeButton episode={episode} />
+      <td className="px-4 py-3">
+        <div className="flex justify-center items-center gap-2">
+          {episode.status_episode !== "aktif" && (
+            <button
+              onClick={() => setIsEditOpen(true)}
+              disabled={isPending}
+              title="Edit Episode"
+              className="inline-flex p-2 items-center bg-yellow-100 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition shadow-sm"
+            >
+              <EditIcon className="w-4 h-4" />
+            </button>
+          )}
+          <DeleteEpisodeButton episode={episode} />
+        </div>
 
         <EditEpisodeModal
           episode={episode}

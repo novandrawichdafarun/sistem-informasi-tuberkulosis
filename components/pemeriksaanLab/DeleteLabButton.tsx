@@ -2,30 +2,53 @@
 "use client";
 
 import { deletePemeriksaanLabAction } from "@/actions/pemeriksaanLab";
-import { useTransition } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { DeleteIcon } from "../asset/icons";
+import ConfirmDeleteModal from "../molecules/ConfirmDeleteModal";
 
 export default function DeleteLabButton({ id_tes }: { id_tes: number }) {
-  const [isDeleting, startTransition] = useTransition();
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = () => {
-    if (
-      window.confirm(
-        "Yakin ingin menghapus data pemeriksaan lab ini? Tindakan ini tidak dapat dibatalkan.",
-      )
-    ) {
-      startTransition(async () => {
-        await deletePemeriksaanLabAction(id_tes);
-      });
+  const handleConfirm = async () => {
+    setIsDeleting(true);
+    setError(null);
+    const res = await deletePemeriksaanLabAction(id_tes);
+    if (res && !res.success) {
+      setError(res.error ?? "Gagal menghapus pemeriksaan lab.");
+      setIsDeleting(false);
+      return;
     }
+    setIsDeleting(false);
+    setIsOpen(false);
+    router.refresh();
   };
 
   return (
-    <button
-      onClick={handleDelete}
-      disabled={isDeleting}
-      className="text-red-600 hover:text-red-900 text-xs font-medium disabled:text-red-300 disabled:cursor-not-allowed transition-colors"
-    >
-      {isDeleting ? "Menghapus..." : "Hapus"}
-    </button>
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        title="Hapus Pemeriksaan Lab"
+        className="inline-flex p-2 items-center bg-red-100 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition shadow-sm"
+      >
+        <DeleteIcon className="w-4 h-4" />
+      </button>
+
+      <ConfirmDeleteModal
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          setError(null);
+        }}
+        onConfirm={handleConfirm}
+        isDeleting={isDeleting}
+        title="Hapus Pemeriksaan Lab"
+        message="Yakin ingin menghapus data pemeriksaan lab ini? Tindakan ini tidak dapat dibatalkan."
+        errorMessage={error}
+      />
+    </>
   );
 }

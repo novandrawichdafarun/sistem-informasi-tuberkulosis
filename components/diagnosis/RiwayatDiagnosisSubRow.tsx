@@ -4,6 +4,7 @@ import { DiagnosisData } from "@/types/diagnosis";
 import { useState } from "react";
 import DeleteDiagnosisButton from "./DeleteDiagnosisButton";
 import EditDiagnosisModal from "./EditDiagnosisModal";
+import { EditIcon } from "../asset/icons";
 
 interface Props {
   riwayat: DiagnosisData[];
@@ -70,14 +71,19 @@ export default function RiwayatDiagnosisSubRow({ riwayat }: Props) {
                   {diagnosis.catatan_klinis || "-"}
                 </div>
               </td>
-              <td className="px-4 py-3 text-center space-x-2">
-                <button
-                  onClick={() => setToEdit(diagnosis)}
-                  className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                >
-                  Edit
-                </button>
-                <DeleteDiagnosisButton id_diagnosis={diagnosis.id_diagnosis} />
+              <td className="px-4 py-3">
+                <div className="flex justify-center items-center gap-2">
+                  <button
+                    onClick={() => setToEdit(diagnosis)}
+                    title="Edit Diagnosis"
+                    className="inline-flex p-2 items-center bg-yellow-100 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition shadow-sm"
+                  >
+                    <EditIcon className="w-4 h-4" />
+                  </button>
+                  <DeleteDiagnosisButton
+                    id_diagnosis={diagnosis.id_diagnosis}
+                  />
+                </div>
               </td>
             </tr>
           ))}

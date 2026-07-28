@@ -66,7 +66,7 @@ export default function BarChart({
               y={H - 8}
               fontSize="11"
               fill="#64748b"
-              textAnchor="middle"
+              textAnchor={i === n - 1 ? "end" : "middle"}
             >
               {p.label}
             </text>

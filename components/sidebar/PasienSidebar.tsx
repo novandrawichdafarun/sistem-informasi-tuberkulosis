@@ -8,7 +8,6 @@ import {
   TrendIcon,
   PulseIcon,
   ScaleIcon,
-  ChatIcon,
   MenuIcon,
   CloseIcon,
 } from "../asset/icons";
@@ -31,7 +30,6 @@ const NAV: NavItem[] = [
   },
   { label: "Tanda Vital", href: "/dashboard/tanda-vital", icon: PulseIcon },
   { label: "Berat Badan", href: "/dashboard/berat-badan", icon: ScaleIcon },
-  { label: "Chat Nakes", href: "/dashboard/chat", icon: ChatIcon },
 ];
 
 const STORAGE_KEY = "pantautb:pasien-sidebar-open";

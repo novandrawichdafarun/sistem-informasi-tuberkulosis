@@ -58,7 +58,7 @@ export default function ObatTableView({ data }: Props) {
                   />
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <div className="flex gap-3 items-center">
+                  <div className="flex gap-2 items-center justify-center">
                     <EditObatModal data={obat} />
                     <DeleteObatButton
                       id_obat={obat.id_obat}

@@ -4,6 +4,7 @@ import { updateObatAction } from "@/actions/obat";
 import { ObatData } from "@/types/obat";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { EditIcon } from "../asset/icons";
 
 interface EditObatModalProps {
   data: ObatData;
@@ -46,9 +47,10 @@ export default function EditObatModal({ data }: EditObatModalProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="items-center justify-center rounded-md bg-yellow-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+        title="Edit Obat"
+        className="inline-flex p-2 items-center bg-yellow-100 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition shadow-sm"
       >
-        Edit
+        <EditIcon className="w-4 h-4" />
       </button>
 
       {isOpen && (

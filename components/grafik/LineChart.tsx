@@ -194,7 +194,7 @@ export default function LineChart({
                 fontSize="11"
                 fill={hover === i ? "#0f172a" : "#64748b"}
                 fontWeight={hover === i ? 600 : 400}
-                textAnchor="middle"
+                textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"}
               >
                 {lab}
               </text>
