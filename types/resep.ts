@@ -6,6 +6,13 @@ export interface DetailObatData {
   obat: { nama_obat: string; dosis: string | null } | null;
 }
 
+export interface JadwalMinumObatData {
+  id_jadwal: number;
+  id_detail_obat: number;
+  tanggal_jadwal: string;
+  jam_jadwal: string;
+}
+
 export interface ResepData {
   id_resep: number;
   id_episode: number;
@@ -15,6 +22,7 @@ export interface ResepData {
   tanggal_mulai_obat: string | null;
   durasi_hari: number | null;
   detail_obat: DetailObatData[];
+  jadwal_minum_obat: JadwalMinumObatData[];
   jumlahJadwal: number;
   jumlahDiminum: number;
   statusEpisode: string;
@@ -29,14 +37,20 @@ export interface PasienResepOverview {
   resepList: ResepData[];
 }
 
+export interface CreateResepObatItem {
+  id_obat: number;
+  jumlah_per_minum: number;
+  frekuensi_minum: string;
+  aturan_pakai?: string;
+  tanggal_mulai_obat: string;
+  tanggal_selesai_obat: string;
+  jam_jadwal: string[];
+  jumlah_total_diberikan: number;
+}
+
 export interface CreateResepPayload {
   id_episode: number;
   kategori_regimen: string;
   fase_pengobatan: string;
-  tanggal_mulai_obat: string;
-  durasi_hari: number;
-  jam_jadwal: string;
-  obat_ids: number[];
-  jumlah_per_minum: number;
-  aturan_pakai?: string;
+  obat_items: CreateResepObatItem[];
 }

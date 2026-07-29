@@ -121,12 +121,12 @@ export default function PatientOverview({
                   gridTemplateColumns: `repeat(${week.length}, minmax(0, 1fr))`,
                 }}
               >
-                {week.map((d) => {
+                {week.map((d, i) => {
                   const s = STATUS_STYLES[cellKey(d)];
                   const Icon = s.icon;
                   return (
                     <div
-                      key={d.tanggal}
+                      key={`${d.tanggal}-${i}`}
                       className="flex flex-col items-center gap-1.5"
                       title={`${d.tanggal} · ${s.label}`}
                     >

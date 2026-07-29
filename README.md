@@ -1,8 +1,8 @@
-# 🏥 Sistem Informasi Tuberkulosis (SITB)
+<p align="center"><img src="./public/logo.png" width="400" alt="NU-TBCARE Logo"></p>
 
-![SITB Logo](public/logo.png)
+# 🏥 About NU-TBCARE
 
-Sistem Informasi Tuberkulosis (SITB) adalah aplikasi web berbasis Next.js (App Router) yang dirancang untuk membantu pencatatan, pemantauan, dan pengelolaan data pasien tuberkulosis secara terintegrasi dengan Supabase Cloud sebagai penyedia database relasional PostgreSQL.
+NU-TBCARE adalah aplikasi web berbasis Next.js (App Router) yang dirancang untuk membantu pencatatan, pemantauan, dan pengelolaan data pasien tuberkulosis secara terintegrasi.
 
 ---
 

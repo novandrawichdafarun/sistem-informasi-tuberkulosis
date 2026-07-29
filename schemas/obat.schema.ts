@@ -1,7 +1,6 @@
+import { nameRegex } from "@/utils/regex";
 import { optionalString } from "@/utils/string";
 import z from "zod";
-
-const nameRegex = /^[a-zA-Z\s.'-,]+$/;
 
 const baseObatSchema = {
   nama_obat: z

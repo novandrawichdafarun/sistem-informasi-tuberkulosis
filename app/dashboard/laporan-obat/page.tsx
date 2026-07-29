@@ -3,11 +3,7 @@ import {
   getTodayMedicationAction,
   getAdherenceAction,
 } from "@/actions/pasienPortal";
-import {
-  formatTanggalID,
-  formatJam,
-  formatWaktuID,
-} from "@/utils/date";
+import { formatTanggalID, formatJam, formatWaktuID } from "@/utils/date";
 
 export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
 
@@ -73,9 +69,9 @@ export default async function LaporanObatPage() {
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-slate-100">
-            {days.map((d) => (
+            {days.map((d, i) => (
               <li
-                key={d.tanggal}
+                key={`${d.tanggal}-${i}`}
                 className="flex items-center justify-between py-3"
               >
                 <div>

@@ -61,7 +61,7 @@ export default function TambahObatModal() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium mb-1 text-gray-700">
                     Nama Obat *
                   </label>
@@ -116,12 +116,12 @@ export default function TambahObatModal() {
 
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    Dosis
+                    Dosis/mg
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     name="dosis"
-                    placeholder="Contoh: 300mg, 150mg/75mg/400mg/275mg"
+                    placeholder="Contoh: 300, 150/75/400/275"
                     className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
                   />
                 </div>

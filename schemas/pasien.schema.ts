@@ -1,9 +1,5 @@
+import { nameRegex, phoneRegex } from "@/utils/regex";
 import z from "zod";
-
-// Regex No Telp Indonesia (08.., 628.., +628..)
-const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,11}$/;
-// Regex Nama (huruf, spasi, titik, koma, tanda petik, strip)
-const nameRegex = /^[a-zA-Z\s.'-,]+$/;
 
 export const createPasienSchema = z.object({
   email: z.email("Format email tidak valid").trim().toLowerCase(),

@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import ResepCard from "./ResepCard";
+import TambahResepModal from "./TambahResepModal";
 import { PasienResepOverview } from "@/types/resep";
 import { ObatData } from "@/types/obat";
-import TambahResepModal from "./TambahResepModal";
-import DeleteResepButton from "./DeleteResepButton";
 
 export default function ResepRowView({
   item,
@@ -23,7 +23,9 @@ export default function ResepRowView({
   return (
     <>
       <tr
-        className={`transition-colors ${isExpanded ? "bg-blue-50/30" : "hover:bg-gray-50"}`}
+        className={`transition-colors ${
+          isExpanded ? "bg-blue-50/30" : "hover:bg-gray-50"
+        }`}
       >
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="font-medium text-gray-900">{usia || "-"}</div>
@@ -48,7 +50,7 @@ export default function ResepRowView({
             {resepList.length} resep
           </span>
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-right text-xs space-x-2">
+        <td className="px-6 py-4 whitespace-nowrap text-center text-xs space-x-2">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             disabled={!hasResep}
@@ -85,77 +87,10 @@ export default function ResepRowView({
             colSpan={4}
             className="bg-slate-50 border-b border-gray-200 p-0 shadow-inner"
           >
-            <div className="p-4 pl-10 border-l-4 border-blue-400 space-y-3">
-              {resepList.map((r) => {
-                const persen =
-                  r.jumlahJadwal > 0
-                    ? Math.round((r.jumlahDiminum / r.jumlahJadwal) * 100)
-                    : 0;
-                return (
-                  <div
-                    key={r.id_resep}
-                    className="rounded-lg border border-gray-200 bg-white p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-gray-800">
-                          {r.kategori_regimen || "-"}{" "}
-                          <span className="text-xs font-normal text-gray-400">
-                            · Fase {r.fase_pengobatan || "-"}
-                          </span>
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Mulai {r.tanggal_mulai_obat || "-"} ·{" "}
-                          {r.durasi_hari || 0} hari
-                          {r.statusEpisode !== "aktif" && (
-                            <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
-                              episode selesai
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                      <DeleteResepButton id_resep={r.id_resep} />
-                    </div>
-
-                    {/* Obat */}
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {r.detail_obat.length === 0 ? (
-                        <span className="text-xs text-gray-400">
-                          Tidak ada obat
-                        </span>
-                      ) : (
-                        r.detail_obat.map((d) => (
-                          <span
-                            key={d.id_detail_obat}
-                            className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-700"
-                          >
-                            {d.obat?.nama_obat ?? "Obat"}
-                            {d.obat?.dosis ? ` ${d.obat.dosis}` : ""}
-                          </span>
-                        ))
-                      )}
-                    </div>
-
-                    {/* Kepatuhan */}
-                    <div className="mt-3 border-t border-gray-100 pt-2">
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>
-                          Kepatuhan: {r.jumlahDiminum}/{r.jumlahJadwal} dosis
-                        </span>
-                        <span className="font-semibold text-gray-700">
-                          {persen}%
-                        </span>
-                      </div>
-                      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
-                        <div
-                          className="h-full rounded-full bg-emerald-500"
-                          style={{ width: `${persen}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="p-4 pl-10 border-l-4 border-brand-400 space-y-3">
+              {resepList.map((r) => (
+                <ResepCard key={r.id_resep} resep={r} />
+              ))}
             </div>
           </td>
         </tr>

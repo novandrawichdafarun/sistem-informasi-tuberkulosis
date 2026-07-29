@@ -1,9 +1,7 @@
 import { optionalNumber } from "@/utils/number";
+import { dateRegex, tensiRegex } from "@/utils/regex";
 import { optionalString } from "@/utils/string";
 import z from "zod";
-
-const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-const tensiRegex = /^\d{2,3}\/\d{2,3}$/; // Contoh valid: 120/80
 
 const basePemeriksaanSchema = {
   tanggal_periksa: z

@@ -73,9 +73,9 @@ export default async function RiwayatKepatuhanPage() {
         ) : (
           <>
             <div className="mt-4 grid grid-cols-7 gap-2 sm:grid-cols-10">
-              {summary.days.map((d) => (
+              {summary.days.map((d, i) => (
                 <div
-                  key={d.tanggal}
+                  key={`${d.tanggal}-${i}`}
                   title={`${formatTanggalID(d.tanggal)} · ${
                     d.status ?? "belum lapor"
                   } · jadwal ${formatJam(d.jam_jadwal)}`}

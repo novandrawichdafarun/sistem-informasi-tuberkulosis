@@ -1,7 +1,6 @@
+import { dateRegex } from "@/utils/regex";
 import { optionalString } from "@/utils/string";
 import z from "zod";
-
-const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
 export const bukaEpisodeSchema = z.object({
   id_pasien: z.coerce.number().positive("ID Pasien tidak valid"),

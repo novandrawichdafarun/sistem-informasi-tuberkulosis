@@ -41,7 +41,7 @@ export default async function ResepObatPage() {
                 <th className="px-6 py-3">Usia / L-P</th>
                 <th className="px-6 py-3">Nama Pasien</th>
                 <th className="px-6 py-3">Episode / Resep</th>
-                <th className="px-6 py-3 text-right">Aksi</th>
+                <th className="px-6 py-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">

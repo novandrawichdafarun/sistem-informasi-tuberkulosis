@@ -8,7 +8,7 @@ import {
   ResepData,
 } from "@/types/resep";
 import { verifySuperAdminAccess } from "@/utils/access";
-import { addDays, todayISO } from "@/utils/date";
+import { addDays, diffDaysInclusive, todayISO } from "@/utils/date";
 
 export const getDaftarResep = async (
   supabase: SupabaseClient,
@@ -36,7 +36,10 @@ export const getDaftarResep = async (
               id_detail_obat, jumlah_obat_per_minum, frekuensi_minum,
               aturan_pakai, obat ( nama_obat, dosis )
             ),
-            jadwal_minum_obat ( id_jadwal, medication_log ( status ) )
+            jadwal_minum_obat (
+              id_jadwal, id_detail_obat, tanggal_jadwal, jam_jadwal,
+              medication_log ( status )
+            )
           )
         )
       `,
@@ -58,11 +61,16 @@ export const getDaftarResep = async (
       const resepList: ResepData[] = [];
       episodes.forEach((ep) => {
         (ep.resep_pengobatan || []).forEach((r) => {
-          type JadwalLog = {
+          type JadwalMinumObatRow = {
+            id_jadwal: number;
+            id_detail_obat: number;
+            tanggal_jadwal: string;
+            jam_jadwal: string;
             medication_log: { status: string }[] | { status: string } | null;
           };
-          const jadwal = (r.jadwal_minum_obat ?? []) as JadwalLog[];
-          const jumlahDiminum = jadwal.filter((j) => {
+          const jadwalRows = (r.jadwal_minum_obat ??
+            []) as JadwalMinumObatRow[];
+          const jumlahDiminum = jadwalRows.filter((j) => {
             const log = Array.isArray(j.medication_log)
               ? j.medication_log[0]
               : j.medication_log;
@@ -78,7 +86,13 @@ export const getDaftarResep = async (
             tanggal_mulai_obat: r.tanggal_mulai_obat,
             durasi_hari: r.durasi_hari,
             detail_obat: (r.detail_obat as DetailObatData[]) || [],
-            jumlahJadwal: jadwal.length,
+            jadwal_minum_obat: jadwalRows.map((j) => ({
+              id_jadwal: j.id_jadwal,
+              id_detail_obat: j.id_detail_obat,
+              tanggal_jadwal: j.tanggal_jadwal,
+              jam_jadwal: j.jam_jadwal,
+            })),
+            jumlahJadwal: jadwalRows.length,
             jumlahDiminum,
             statusEpisode: ep.status_episode,
           });
@@ -123,7 +137,17 @@ export const createResepWithJadwal = async (
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    // 1) Resep
+    const semuaMulai = payload.obat_items
+      .map((item) => item.tanggal_mulai_obat)
+      .sort();
+    const semuaSelesai = payload.obat_items
+      .map((item) => item.tanggal_selesai_obat)
+      .sort();
+
+    const tanggalMulaiObat = semuaMulai[0];
+    const tanggalAkhirObat = semuaSelesai[semuaSelesai.length - 1];
+    const durasiTotal = diffDaysInclusive(tanggalMulaiObat, tanggalAkhirObat);
+
     const { data: resep, error: resepError } = await supabase
       .from("resep_pengobatan")
       .insert({
@@ -131,8 +155,8 @@ export const createResepWithJadwal = async (
         tanggal_resep: todayISO(),
         kategori_regimen: payload.kategori_regimen,
         fase_pengobatan: payload.fase_pengobatan,
-        tanggal_mulai_obat: payload.tanggal_mulai_obat,
-        durasi_hari: payload.durasi_hari,
+        tanggal_mulai_obat: tanggalMulaiObat,
+        durasi_hari: durasiTotal,
       })
       .select("id_resep")
       .single();
@@ -144,16 +168,13 @@ export const createResepWithJadwal = async (
     const cleanupResep = async () =>
       supabase.from("resep_pengobatan").delete().eq("id_resep", resep.id_resep);
 
-    // 2) Detail obat
-    const detailRows = payload.obat_ids.map((id_obat) => ({
+    const detailRows = payload.obat_items.map((item) => ({
       id_resep: resep.id_resep,
-      id_obat,
-      jumlah_obat_per_minum: payload.jumlah_per_minum,
-      frekuensi_minum: "1x sehari",
-      aturan_pakai: payload.aturan_pakai || null,
-      jumlah_total_diberikan: Math.round(
-        payload.durasi_hari * payload.jumlah_per_minum,
-      ),
+      id_obat: item.id_obat,
+      jumlah_obat_per_minum: item.jumlah_per_minum,
+      frekuensi_minum: item.frekuensi_minum,
+      aturan_pakai: item.aturan_pakai || null,
+      jumlah_total_diberikan: item.jumlah_total_diberikan,
     }));
 
     const { data: details, error: detailError } = await supabase
@@ -169,15 +190,24 @@ export const createResepWithJadwal = async (
       );
     }
 
-    // 3) Jadwal harian (1x/hari) selama durasi
-    const firstDetailId = details[0].id_detail_obat;
-    const jadwalRows = Array.from({ length: payload.durasi_hari }, (_, d) => ({
-      id_resep: resep.id_resep,
-      id_detail_obat: firstDetailId,
-      tanggal_jadwal: addDays(payload.tanggal_mulai_obat, d),
-      jam_jadwal: payload.jam_jadwal,
-      status_pengingat: "terjadwal",
-    }));
+    const jadwalRows = payload.obat_items.flatMap((item, index) => {
+      const detailId = details[index].id_detail_obat;
+      const days = diffDaysInclusive(
+        item.tanggal_mulai_obat,
+        item.tanggal_selesai_obat,
+      );
+
+      return Array.from({ length: days }, (_, dayIndex) => {
+        const tanggal_jadwal = addDays(item.tanggal_mulai_obat, dayIndex);
+        return item.jam_jadwal.map((jam) => ({
+          id_resep: resep.id_resep,
+          id_detail_obat: detailId,
+          tanggal_jadwal,
+          jam_jadwal: jam,
+          status_pengingat: "terjadwal",
+        }));
+      }).flat();
+    });
 
     const { error: jadwalError } = await supabase
       .from("jadwal_minum_obat")
@@ -197,7 +227,7 @@ export const createResepWithJadwal = async (
 
     return {
       success: true,
-      message: `Resep dibuat dengan ${payload.durasi_hari} jadwal minum obat.`,
+      message: `Resep dibuat dengan ${payload.obat_items.length} obat dan ${jadwalRows.length} jadwal minum.`,
     };
   } catch (error) {
     return handleServiceError(error);
@@ -217,7 +247,6 @@ export const deleteResep = async (
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    // Hapus berurutan: log → jadwal → detail → resep (aman tanpa andalkan cascade).
     const { data: jadwal } = await supabase
       .from("jadwal_minum_obat")
       .select("id_jadwal")
