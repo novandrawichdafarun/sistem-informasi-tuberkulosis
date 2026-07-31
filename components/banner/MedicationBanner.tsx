@@ -4,11 +4,7 @@ import { useState } from "react";
 import { PillIcon, CheckIcon } from "../asset/icons";
 import ModalLaporObat from "@/components/Laporan/ModalLaporObat";
 import { JadwalObatHariIni } from "@/types/laporan";
-
-function formatJam(jam?: string | null) {
-  if (!jam) return "09:00";
-  return jam.slice(0, 5);
-}
+import { formatJam } from "@/utils/date";
 
 export default function MedicationBanner({
   jadwalList,
