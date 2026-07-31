@@ -56,7 +56,7 @@ export default function TambahResepModal({
           aturan_pakai: "",
           tanggal_mulai_obat: today,
           tanggal_selesai_obat: defaultEnd,
-          jam_jadwal: "07:00",
+          jam_jadwal: "09:00",
         },
       };
     });

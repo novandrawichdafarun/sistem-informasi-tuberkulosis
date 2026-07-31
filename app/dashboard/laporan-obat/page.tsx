@@ -1,19 +1,18 @@
 import MedicationBanner from "@/components/banner/MedicationBanner";
-import {
-  getTodayMedicationAction,
-  getAdherenceAction,
-} from "@/actions/pasienPortal";
+import { getJadwalByPasienIdAction } from "@/actions/laporan";
+import { getAdherenceAction } from "@/actions/pasienPortal";
 import { formatTanggalID, formatJam, formatWaktuID } from "@/utils/date";
 
 export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
 
 export default async function LaporanObatPage() {
-  const [medRes, adherenceRes] = await Promise.all([
-    getTodayMedicationAction(),
+  const [jadwalRes, adherenceRes] = await Promise.all([
+    getJadwalByPasienIdAction(),
     getAdherenceAction(14),
   ]);
 
-  const medication = medRes.success ? (medRes.data ?? null) : null;
+  const jadwalHariIni =
+    jadwalRes.success && jadwalRes.data ? jadwalRes.data : [];
   const days =
     adherenceRes.success && adherenceRes.data
       ? [...adherenceRes.data.days].reverse()
@@ -31,32 +30,8 @@ export default async function LaporanObatPage() {
         </p>
       </div>
 
-      <MedicationBanner medication={medication} />
+      <MedicationBanner jadwalList={jadwalHariIni} />
 
-      {/* Detail obat hari ini */}
-      {medication && medication.obat.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="text-base font-semibold text-brand-950">
-            Obat untuk {formatTanggalID(medication.tanggal_jadwal)} · pukul{" "}
-            {formatJam(medication.jam_jadwal)}
-          </h2>
-          <ul className="mt-4 divide-y divide-slate-100">
-            {medication.obat.map((o, i) => (
-              <li
-                key={`${o.nama_obat}-${i}`}
-                className="flex items-center justify-between py-3"
-              >
-                <span className="font-medium text-slate-800">
-                  {o.nama_obat}
-                </span>
-                <span className="text-sm text-slate-500">{o.dosis}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Riwayat laporan 14 hari */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <h2 className="text-base font-semibold text-brand-950">
           Riwayat 14 Hari Terakhir

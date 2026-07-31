@@ -10,6 +10,7 @@ import {
 } from "@/actions/pasienPortal";
 import { getStatistikAdminAction } from "@/actions/statistik";
 import { AdherenceSummary } from "@/types/pasienPortal";
+import { getJadwalByPasienIdAction } from "@/actions/laporan";
 
 const EMPTY_SUMMARY: AdherenceSummary = {
   total: 0,
@@ -27,14 +28,15 @@ export default async function DashboardPage() {
   const role = session?.user?.role;
 
   if (role === "pasien") {
-    const [profileRes, medRes, adherenceRes] = await Promise.all([
+    const [profileRes, jadwalRes, adherenceRes] = await Promise.all([
       getPasienProfileAction(),
-      getTodayMedicationAction(),
+      getJadwalByPasienIdAction(),
       getAdherenceAction(7),
     ]);
 
     const profile = profileRes.success ? (profileRes.data ?? null) : null;
-    const medication = medRes.success ? (medRes.data ?? null) : null;
+    const jadwalHariIni =
+      jadwalRes.success && jadwalRes.data ? jadwalRes.data : [];
     const summary =
       adherenceRes.success && adherenceRes.data
         ? adherenceRes.data
@@ -51,12 +53,13 @@ export default async function DashboardPage() {
             {profile?.domisili ? ` · ${profile.domisili}` : ""}
           </p>
         </div>
-
-        <MedicationBanner medication={medication} />
-        <PatientOverview
-          summary={summary}
-          fase={profile?.episodeAktif?.tipe_pasien}
-        />
+        <div className="space-y-4">
+          <MedicationBanner jadwalList={jadwalHariIni} />
+          <PatientOverview
+            summary={summary}
+            fase={profile?.episodeAktif?.tipe_pasien}
+          />
+        </div>
       </>
     );
   } else if (role === "super_admin") {

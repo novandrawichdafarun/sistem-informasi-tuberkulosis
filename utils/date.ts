@@ -83,7 +83,7 @@ export function formatTanggalSingkat(value?: string | null): string {
 
 export function formatJam(jam?: string | null): string {
   if (!jam) return "-";
-  return jam.slice(0, 5); // "07:00:00" -> "07:00"
+  return jam.slice(0, 5); // "09:00:00" -> "09:00"
 }
 
 export function formatWaktuID(value?: string | null): string {
@@ -129,3 +129,21 @@ export const parseDailyFrequency = (value: string) => {
   const match = dailyFrequencyRegex.exec(value.trim().toLowerCase());
   return match ? Number(match[1]) : null;
 };
+
+export function isReportLate(
+  tanggalMinum: string,
+  waktuMinum: string,
+  toleranceHours: number = 1,
+): boolean {
+  const scheduleDateTimeString = `${tanggalMinum}T${waktuMinum}`;
+  const scheduledTime = new Date(scheduleDateTimeString);
+
+  const toleranceMilliseconds = toleranceHours * 60 * 60 * 1000;
+
+  const maxValidTime = new Date(
+    scheduledTime.getTime() + toleranceMilliseconds,
+  );
+  const currentTime = new Date();
+
+  return currentTime > maxValidTime;
+}

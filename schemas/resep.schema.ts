@@ -1,6 +1,5 @@
 import { parseDailyFrequency } from "@/utils/date";
 import { dateRegex, timeRegex } from "@/utils/regex";
-import { optionalString } from "@/utils/string";
 import z from "zod";
 
 const obatItemSchema = z
@@ -15,7 +14,11 @@ const obatItemSchema = z
       .trim()
       .min(1, "Frekuensi minum wajib diisi")
       .max(50),
-    aturan_pakai: optionalString(100),
+    aturan_pakai: z
+      .string()
+      .trim()
+      .min(1, "Aturan pakai tidak boleh kosong")
+      .max(100, "Aturan pakai maksimal 100 karakter"),
     tanggal_mulai_obat: z
       .string()
       .regex(dateRegex, "Format tanggal harus YYYY-MM-DD"),

@@ -5,7 +5,7 @@ import { inputClass } from "@/utils/classTailwind";
 import { getDailyFrequencyCount } from "@/utils/date";
 import { FREKUENSI } from "@/utils/obat";
 
-const DEFAULT_JAM = "07:00";
+const DEFAULT_JAM = "09:00";
 
 type Props = {
   obat: ObatData;
@@ -87,23 +87,25 @@ export default function ObatItemForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600">
-                Jumlah / Minum
+                Jumlah / Minum *
               </label>
               <input
                 type="number"
                 min={0.25}
                 step={0.25}
                 value={row.jumlah_per_minum}
+                required
                 onChange={(e) => onChange("jumlah_per_minum", e.target.value)}
                 className={inputClass}
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600">
-                Frekuensi Minum
+                Frekuensi Minum *
               </label>
               <select
                 value={row.frekuensi_minum}
+                required
                 onChange={(e) => onChange("frekuensi_minum", e.target.value)}
                 className={inputClass}
               >
@@ -119,22 +121,24 @@ export default function ObatItemForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600">
-                Mulai Obat
+                Mulai Obat *
               </label>
               <input
                 type="date"
                 value={row.tanggal_mulai_obat}
+                required
                 onChange={(e) => onChange("tanggal_mulai_obat", e.target.value)}
                 className={inputClass}
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600">
-                Selesai Obat
+                Selesai Obat *
               </label>
               <input
                 type="date"
                 value={row.tanggal_selesai_obat}
+                required
                 onChange={(e) =>
                   onChange("tanggal_selesai_obat", e.target.value)
                 }
@@ -145,7 +149,7 @@ export default function ObatItemForm({
 
           <div className="grid gap-3">
             <label className="block text-xs font-medium text-gray-600">
-              Jam Jadwal ({jamCount}x sehari)
+              Jam Jadwal ({jamCount}x sehari) *
             </label>
 
             {jamInputs.map((jam, index) => (
@@ -153,24 +157,26 @@ export default function ObatItemForm({
                 key={index}
                 type="time"
                 value={jam}
+                required
                 onChange={(e) => updateJam(index, e.target.value)}
                 className={inputClass}
               />
             ))}
 
             <p className="text-[11px] text-slate-500">
-              Gunakan {jamCount} kolom jam. Default jam pertama adalah 07:00.
+              Gunakan {jamCount} kolom jam. Default jam pertama adalah 09:00.
             </p>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-gray-600">
-              Aturan Pakai
+              Aturan Pakai *
             </label>
             <input
               type="text"
               value={row.aturan_pakai}
               placeholder="Contoh: Sesudah makan pagi"
+              required
               onChange={(e) => onChange("aturan_pakai", e.target.value)}
               className={inputClass}
             />
