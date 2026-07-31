@@ -1,22 +1,22 @@
-import { getVitalSignsAction } from "@/actions/pasienPortal";
 import { formatTanggalID } from "@/utils/date";
 import { hitungBMI } from "@/utils/number";
 import WeightChart, {
   buildWeightPoints,
 } from "@/components/grafik/WeightChart";
+import { getPemeriksaanKlinisByUserAction } from "@/actions/pemeriksaanKlinis";
 
 export const metadata = { title: "Berat Badan | NU-TBCare" };
 
 export default async function BeratBadanPage() {
-  const vitalRes = await getVitalSignsAction();
-  const vitals = vitalRes.success && vitalRes.data ? vitalRes.data : [];
+  const vitalRes = await getPemeriksaanKlinisByUserAction();
+  const klinis = vitalRes.success && vitalRes.data ? vitalRes.data : [];
 
-  const points = buildWeightPoints(vitals);
+  const points = buildWeightPoints(klinis);
 
   const beratAwal = points.length ? points[0].berat : null;
   const beratTerakhir = points.length ? points[points.length - 1].berat : null;
   const tinggi =
-    vitals.find((v) => v.tinggi_badan != null)?.tinggi_badan ?? null;
+    klinis.find((v) => v.tinggi_badan != null)?.tinggi_badan ?? null;
   const bmiResult = hitungBMI(beratTerakhir, tinggi);
   const selisih =
     beratAwal != null && beratTerakhir != null

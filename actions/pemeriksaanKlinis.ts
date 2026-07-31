@@ -8,12 +8,19 @@ import {
   createPemeriksaanKlinis,
   deletePemeriksaanKlinis,
   getDaftarPemeriksaan,
+  getPemeriksaanKlinisByUser,
   updatePemeriksaanKlinis,
 } from "@/services/pemeriksaanKlinis.service";
 import { ActionResponse } from "@/types/action";
-import { PasienPemeriksaanOverview } from "@/types/pemeriksaanKlinis";
+import {
+  PasienPemeriksaanOverview,
+  PemeriksaanKlinisData,
+} from "@/types/pemeriksaanKlinis";
 import { handleActionError } from "@/utils/error";
-import { requireSuperAdminSession } from "@/utils/session";
+import {
+  requirePasienSession,
+  requireSuperAdminSession,
+} from "@/utils/session";
 import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
 import { revalidatePath } from "next/cache";
@@ -26,6 +33,18 @@ export async function getDaftarPemeriksaanAction(): Promise<
     const supabase = await getSupabaseServer();
 
     return await getDaftarPemeriksaan(supabase, superAdminId);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function getPemeriksaanKlinisByUserAction(): Promise<
+  ActionResponse<PemeriksaanKlinisData[]>
+> {
+  try {
+    const userId = await requirePasienSession();
+    const supabase = await getSupabaseServer();
+    return await getPemeriksaanKlinisByUser(supabase, userId);
   } catch (error) {
     return handleActionError(error);
   }

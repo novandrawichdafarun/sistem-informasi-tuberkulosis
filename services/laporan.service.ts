@@ -1,13 +1,15 @@
 import { ActionResponse } from "@/types/action";
 import {
   JadwalObatHariIni,
+  KepatuhanHarian,
   LaporanObatPayload,
+  RingkasanKepatuhan,
   StatusLaporanFinal,
 } from "@/types/laporan";
 import { verifyPasienAccess } from "@/utils/access";
-import { isReportLate, todayISO } from "@/utils/date";
+import { isoDaysAgo, isReportLate, todayISO } from "@/utils/date";
 import { handleServiceError } from "@/utils/error";
-import { getPasienIdByUser } from "@/utils/Pasien";
+import { getPasienIdByUser, getResepIdsByPasien } from "@/utils/Pasien";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export async function getJadwalByPasienId(
@@ -88,6 +90,128 @@ export async function getJadwalByPasienId(
     return handleServiceError(error, "Gagal mengambil jadwal minum obat");
   }
 }
+
+export async function hitungKepatuhan(
+  supabase: SupabaseClient,
+  episodeIds: number[],
+): Promise<RingkasanKepatuhan> {
+  const empty: RingkasanKepatuhan = {
+    total: 0,
+    diminum: 0,
+    terlewat: 0,
+    belum: 0,
+    persentase: 0,
+    days: [],
+  };
+  if (episodeIds.length === 0) return empty;
+
+  const { data: resep } = await supabase
+    .from("resep_pengobatan")
+    .select("id_resep")
+    .in("id_episode", episodeIds);
+  const resepIds = (resep ?? []).map((r) => r.id_resep as number);
+  if (resepIds.length === 0) return empty;
+
+  const { data: jadwal } = await supabase
+    .from("jadwal_minum_obat")
+    .select(
+      "tanggal_jadwal, jam_jadwal, medication_log ( status, reported_at )",
+    )
+    .in("id_resep", resepIds)
+    .gte("tanggal_jadwal", isoDaysAgo(29))
+    .lte("tanggal_jadwal", todayISO())
+    .order("tanggal_jadwal", { ascending: true });
+
+  const days: KepatuhanHarian[] = (jadwal ?? []).map((j) => {
+    const logArr =
+      (j.medication_log as { status: string; reported_at: string }[]) ?? [];
+    const log = Array.isArray(logArr) ? logArr[0] : logArr;
+    return {
+      tanggal: j.tanggal_jadwal,
+      jam_jadwal: j.jam_jadwal,
+      status: (log?.status as StatusLaporanFinal) ?? null,
+      reported_at: log?.reported_at ?? null,
+    };
+  });
+
+  const diminum = days.filter((d) => d.status === "diminum").length;
+  const terlewat = days.filter((d) => d.status === "terlewat").length;
+  const total = days.length;
+  return {
+    total,
+    diminum,
+    terlewat,
+    belum: total - diminum - terlewat,
+    persentase: total > 0 ? Math.round((diminum / total) * 100) : 0,
+    days,
+  };
+}
+
+export const getKepatuhanByUser = async (
+  supabase: SupabaseClient,
+  id_user_pasien: string,
+  days = 30,
+): Promise<ActionResponse<RingkasanKepatuhan>> => {
+  const empty: RingkasanKepatuhan = {
+    total: 0,
+    diminum: 0,
+    terlewat: 0,
+    belum: 0,
+    persentase: 0,
+    days: [],
+  };
+
+  try {
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
+    if (!id_pasien) return { success: true, data: empty };
+
+    const resepIds = await getResepIdsByPasien(supabase, id_pasien);
+    if (resepIds.length === 0) return { success: true, data: empty };
+
+    const { data: jadwal } = await supabase
+      .from("jadwal_minum_obat")
+      .select(
+        "id_jadwal, tanggal_jadwal, jam_jadwal, medication_log ( status, reported_at )",
+      )
+      .in("id_resep", resepIds)
+      .gte("tanggal_jadwal", isoDaysAgo(days - 1))
+      .lte("tanggal_jadwal", todayISO())
+      .order("tanggal_jadwal", { ascending: true });
+
+    const daysArr: KepatuhanHarian[] = (jadwal ?? []).map((j) => {
+      const logArr =
+        (j.medication_log as { status: string; reported_at: string }[]) ?? [];
+      const log = Array.isArray(logArr) ? logArr[0] : logArr;
+      return {
+        tanggal: j.tanggal_jadwal,
+        jam_jadwal: j.jam_jadwal,
+        status: (log?.status as StatusLaporanFinal) ?? null,
+        reported_at: log?.reported_at ?? null,
+      };
+    });
+
+    const diminum = daysArr.filter((d) => d.status === "diminum").length;
+    const terlewat = daysArr.filter((d) => d.status === "terlewat").length;
+    const total = daysArr.length;
+    const belum = total - diminum - terlewat;
+    const persentase = total > 0 ? Math.round((diminum / total) * 100) : 0;
+
+    return {
+      success: true,
+      data: { total, diminum, terlewat, belum, persentase, days: daysArr },
+    };
+  } catch (error) {
+    return handleServiceError(error);
+  }
+};
 
 export async function laporMinumObat(
   supabase: SupabaseClient,

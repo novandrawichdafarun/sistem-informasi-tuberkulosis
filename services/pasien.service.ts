@@ -2,12 +2,18 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import {
   CreatePasienPayload,
+  EpisodeRingkas,
   PasienData,
+  PasienDetail,
+  PasienProfile,
   UpdatePasienPayload,
 } from "@/types/pasien";
 import { ActionResponse } from "@/types/action";
-import { verifySuperAdminAccess } from "@/utils/access";
+import { verifyPasienAccess, verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
+import { PemeriksaanKlinisData } from "@/types/pemeriksaanKlinis";
+import { PemeriksaanLabData } from "@/types/pemeriksaanLab";
+import { hitungKepatuhan } from "./laporan.service";
 
 export const getDaftarPasien = async (
   supabase: SupabaseClient,
@@ -44,6 +50,149 @@ export const getDaftarPasien = async (
       error,
       "Terjadi kesalahan internal saat mengambil data.",
     );
+  }
+};
+
+export const getPasienDetail = async (
+  supabase: SupabaseClient,
+  id_pasien: number,
+  id_super_admin: string,
+): Promise<ActionResponse<PasienDetail>> => {
+  try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    // Profil + akun
+    const { data: profil, error: profilError } = await supabase
+      .from("pasien")
+      .select(
+        `id_pasien, id_user, nama_lengkap, usia, jenis_kelamin, domisili,
+         no_telp, pendidikan, pekerjaan, pendapatan, created_at, users ( email )`,
+      )
+      .eq("id_pasien", id_pasien)
+      .single();
+
+    if (profilError || !profil) {
+      return handleServiceError(
+        profilError?.message,
+        "Pasien tidak ditemukan.",
+      );
+    }
+
+    // Episodes
+    const { data: episodes } = await supabase
+      .from("episode_pengobatan")
+      .select(
+        "id_episode, tanggal_mulai, tanggal_selesai, tipe_pasien, status_episode",
+      )
+      .eq("id_pasien", id_pasien)
+      .order("tanggal_mulai", { ascending: false });
+
+    const episodeIds = (episodes ?? []).map((e) => e.id_episode as number);
+
+    // klinis & Lab
+    let klinis: PemeriksaanKlinisData[] = [];
+    let lab: PemeriksaanLabData[] = [];
+    if (episodeIds.length > 0) {
+      const [vRes, lRes] = await Promise.all([
+        supabase
+          .from("pemeriksaan_klinis")
+          .select(
+            `id_periksa, id_episode, tanggal_periksa, keluhan, tensi, suhu,
+             pernapasan, nadi, saturasi_o2, tinggi_badan, berat_badan, created_at`,
+          )
+          .in("id_episode", episodeIds)
+          .order("tanggal_periksa", { ascending: false }),
+        supabase
+          .from("pemeriksaan_lab")
+          .select(
+            `id_tes, id_episode, jenis_tes, tanggal_tes, hasil_tes,
+             periode_pemeriksaan, berkas_pendukung_url, created_at`,
+          )
+          .in("id_episode", episodeIds)
+          .order("tanggal_tes", { ascending: false }),
+      ]);
+      klinis = (vRes.data as PemeriksaanKlinisData[]) ?? [];
+      lab = (lRes.data as PemeriksaanLabData[]) ?? [];
+    }
+
+    // Kepatuhan 30 hari
+    const kepatuhan = await hitungKepatuhan(supabase, episodeIds);
+
+    return {
+      success: true,
+      data: {
+        profil: profil as unknown as PasienData,
+        episodes: (episodes as EpisodeRingkas[]) ?? [],
+        klinis,
+        lab,
+        kepatuhan,
+      },
+    };
+  } catch (error) {
+    return handleServiceError(error);
+  }
+};
+
+export const getPasienProfileByUser = async (
+  supabase: SupabaseClient,
+  id_user_pasien: string,
+): Promise<ActionResponse<PasienProfile>> => {
+  try {
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const { data, error: profileError } = await supabase
+      .from("pasien")
+      .select(
+        `
+        id_pasien, id_user, nama_lengkap, usia, jenis_kelamin, domisili,
+        no_telp, pendidikan, pekerjaan, pendapatan,
+        episode_pengobatan ( id_episode, tanggal_mulai, tipe_pasien, status_episode )
+      `,
+      )
+      .eq("id_user", id_user_pasien)
+      .single();
+
+    if (profileError || !data) {
+      return handleServiceError(error, "Profil pasien tidak ditemukan.");
+    }
+
+    const episodes =
+      (data.episode_pengobatan as PasienProfile["episodeAktif"][]) ?? [];
+    const episodeAktif =
+      episodes
+        .filter((e) => e && e.status_episode === "aktif")
+        .sort((a, b) =>
+          (b!.tanggal_mulai ?? "").localeCompare(a!.tanggal_mulai ?? ""),
+        )[0] ?? null;
+
+    const profile: PasienProfile = {
+      id_pasien: data.id_pasien,
+      id_user: data.id_user,
+      nama_lengkap: data.nama_lengkap,
+      usia: data.usia,
+      jenis_kelamin: data.jenis_kelamin,
+      domisili: data.domisili,
+      no_telp: data.no_telp,
+      pendidikan: data.pendidikan,
+      pekerjaan: data.pekerjaan,
+      pendapatan: data.pendapatan,
+      episodeAktif,
+    };
+
+    return { success: true, data: profile };
+  } catch (error) {
+    return handleServiceError(error);
   }
 };
 

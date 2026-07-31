@@ -4,12 +4,17 @@ import {
   createPasien,
   deletePasien,
   getDaftarPasien,
+  getPasienDetail,
+  getPasienProfileByUser,
   updatePasien,
 } from "@/services/pasien.service";
-import { PasienData } from "@/types/pasien";
+import { PasienData, PasienDetail, PasienProfile } from "@/types/pasien";
 import { revalidatePath } from "next/cache";
 import { ActionResponse } from "@/types/action";
-import { requireSuperAdminSession } from "@/utils/session";
+import {
+  requirePasienSession,
+  requireSuperAdminSession,
+} from "@/utils/session";
 import {
   createPasienSchema,
   updatePasienSchema,
@@ -25,6 +30,30 @@ export async function getDaftarPasienAction(): Promise<
     const superAdminId = await requireSuperAdminSession();
     const supabase = await getSupabaseServer();
     return await getDaftarPasien(supabase, superAdminId);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function getPasienDetailAction(
+  id_pasien: number,
+): Promise<ActionResponse<PasienDetail>> {
+  try {
+    const superAdminId = await requireSuperAdminSession();
+    const supabase = await getSupabaseServer();
+    return await getPasienDetail(supabase, id_pasien, superAdminId);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function getPasienProfileAction(): Promise<
+  ActionResponse<PasienProfile>
+> {
+  try {
+    const userId = await requirePasienSession();
+    const supabase = await getSupabaseServer();
+    return await getPasienProfileByUser(supabase, userId);
   } catch (error) {
     return handleActionError(error);
   }

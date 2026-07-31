@@ -1,7 +1,7 @@
-import { getVitalSignsAction } from "@/actions/pasienPortal";
 import { formatTanggalID } from "@/utils/date";
-import VitalCharts from "@/components/grafik/VitalCharts";
+import KlinisCharts from "@/components/grafik/VitalCharts";
 import VitalCard from "@/components/card/VitalCard";
+import { getPemeriksaanKlinisByUserAction } from "@/actions/pemeriksaanKlinis";
 
 export const metadata = { title: "Tanda Vital | NU-TBCare" };
 
@@ -11,7 +11,7 @@ function nilai(v: number | string | null | undefined, unit = "") {
 }
 
 export default async function TandaVitalPage() {
-  const res = await getVitalSignsAction();
+  const res = await getPemeriksaanKlinisByUserAction();
   const data = res.success && res.data ? res.data : [];
   const terbaru = data[0];
 
@@ -64,7 +64,7 @@ export default async function TandaVitalPage() {
           )}
 
           {/* Grafik tren tanda vital */}
-          <VitalCharts vitals={data} />
+          <KlinisCharts klinis={data} />
 
           {/* Tabel riwayat */}
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">

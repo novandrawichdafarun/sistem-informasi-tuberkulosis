@@ -5,8 +5,9 @@ import {
   PemeriksaanKlinisData,
   UpdatePemeriksaanPayload,
 } from "@/types/pemeriksaanKlinis";
-import { verifySuperAdminAccess } from "@/utils/access";
+import { verifyPasienAccess, verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
+import { getPasienIdByUser } from "@/utils/Pasien";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const getDaftarPemeriksaan = async (
@@ -78,6 +79,79 @@ export const getDaftarPemeriksaan = async (
     );
 
     return { success: true, data: formattedData };
+  } catch (error) {
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
+  }
+};
+
+export const getPemeriksaanKlinisByUser = async (
+  supabase: SupabaseClient,
+  id_user_pasien: string,
+): Promise<ActionResponse<PemeriksaanKlinisData[]>> => {
+  try {
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
+
+    const { data, error: dataError } = await supabase
+      .from("episode_pengobatan")
+      .select(
+        `
+        id_pasien,
+        pemeriksaan_klinis (
+          id_periksa, id_episode, tanggal_periksa, keluhan, tensi, suhu,
+          pernapasan, nadi, saturasi_o2, tinggi_badan, berat_badan, created_at
+        )
+        `,
+      )
+      .eq("id_pasien", id_pasien)
+      .order("tanggal_periksa", { ascending: false });
+
+    if (dataError)
+      return handleServiceError(
+        dataError?.message,
+        "Gagal memuat tanda vital.",
+      );
+
+    // Flatkan struktur: extract pemeriksaan_klinis dari setiap episode
+    const klinisList: PemeriksaanKlinisData[] = (data ?? []).flatMap(
+      (episode) =>
+        (episode.pemeriksaan_klinis ?? []).map(
+          (klinis) =>
+            ({
+              id_periksa: klinis.id_periksa,
+              id_episode: klinis.id_episode,
+              tanggal_periksa: klinis.tanggal_periksa,
+              keluhan: klinis.keluhan,
+              tensi: klinis.tensi,
+              suhu: klinis.suhu,
+              pernapasan: klinis.pernapasan,
+              nadi: klinis.nadi,
+              saturasi_o2: klinis.saturasi_o2,
+              tinggi_badan: klinis.tinggi_badan,
+              berat_badan: klinis.berat_badan,
+              created_at: klinis.created_at,
+            }) as PemeriksaanKlinisData,
+        ),
+    );
+
+    // Sort by tanggal_periksa descending
+    klinisList.sort(
+      (a, b) =>
+        new Date(b.tanggal_periksa).getTime() -
+        new Date(a.tanggal_periksa).getTime(),
+    );
+
+    return { success: true, data: klinisList };
   } catch (error) {
     return handleServiceError(
       error,

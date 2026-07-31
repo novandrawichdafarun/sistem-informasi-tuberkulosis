@@ -27,3 +27,19 @@ export interface JadwalObatHariIni {
     catatan_kepatuhan: string | null;
   } | null;
 }
+
+export interface KepatuhanHarian {
+  tanggal: string; // YYYY-MM-DD
+  jam_jadwal: string;
+  status: StatusLaporanFinal | null; // null = belum dilaporkan
+  reported_at: string | null;
+}
+
+export interface RingkasanKepatuhan {
+  total: number;
+  diminum: number;
+  terlewat: number;
+  belum: number;
+  persentase: number;
+  days: KepatuhanHarian[];
+}

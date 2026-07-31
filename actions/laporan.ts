@@ -3,10 +3,11 @@
 import { laporanObatSchema } from "@/schemas/laporan.schema";
 import {
   getJadwalByPasienId,
+  getKepatuhanByUser,
   laporMinumObat,
 } from "@/services/laporan.service";
 import { ActionResponse } from "@/types/action";
-import { JadwalObatHariIni } from "@/types/laporan";
+import { JadwalObatHariIni, RingkasanKepatuhan } from "@/types/laporan";
 import { handleActionError } from "@/utils/error";
 import { requirePasienSession } from "@/utils/session";
 import { getSupabaseServer } from "@/utils/supabase/server";
@@ -25,6 +26,18 @@ export async function getJadwalByPasienIdAction(): Promise<
   }
 }
 
+export async function getKepatuhanAction(
+  days = 30,
+): Promise<ActionResponse<RingkasanKepatuhan>> {
+  try {
+    const userId = await requirePasienSession();
+    const supabase = await getSupabaseServer();
+    return await getKepatuhanByUser(supabase, userId, days);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
 export async function submitLaporanObatAction(
   formData: FormData,
 ): Promise<ActionResponse> {
@@ -38,7 +51,11 @@ export async function submitLaporanObatAction(
 
     const result = await laporMinumObat(supabase, data, pasienId);
 
-    if (result.success) revalidatePath("/dashboard/laporan-obat");
+    if (result.success) {
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/laporan-obat");
+      revalidatePath("/dashboard/riwayat-kepatuhan");
+    }
 
     return result;
   } catch (error) {

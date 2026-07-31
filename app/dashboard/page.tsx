@@ -3,16 +3,15 @@ import { authOptions } from "../api/auth/[...nextauth]/route";
 import MedicationBanner from "@/components/banner/MedicationBanner";
 import PatientOverview from "@/components/dashboard/PatientOverview";
 import AdminOverview from "@/components/dashboard/AdminOverview";
-import {
-  getAdherenceAction,
-  getPasienProfileAction,
-  getTodayMedicationAction,
-} from "@/actions/pasienPortal";
+import { getPasienProfileAction } from "@/actions/pasien";
 import { getStatistikAdminAction } from "@/actions/statistik";
-import { AdherenceSummary } from "@/types/pasienPortal";
-import { getJadwalByPasienIdAction } from "@/actions/laporan";
+import {
+  getJadwalByPasienIdAction,
+  getKepatuhanAction,
+} from "@/actions/laporan";
+import { RingkasanKepatuhan } from "@/types/laporan";
 
-const EMPTY_SUMMARY: AdherenceSummary = {
+const EMPTY_SUMMARY: RingkasanKepatuhan = {
   total: 0,
   diminum: 0,
   terlewat: 0,
@@ -28,18 +27,18 @@ export default async function DashboardPage() {
   const role = session?.user?.role;
 
   if (role === "pasien") {
-    const [profileRes, jadwalRes, adherenceRes] = await Promise.all([
+    const [profileRes, jadwalRes, kepatuhanRes] = await Promise.all([
       getPasienProfileAction(),
       getJadwalByPasienIdAction(),
-      getAdherenceAction(7),
+      getKepatuhanAction(7),
     ]);
 
     const profile = profileRes.success ? (profileRes.data ?? null) : null;
     const jadwalHariIni =
       jadwalRes.success && jadwalRes.data ? jadwalRes.data : [];
     const summary =
-      adherenceRes.success && adherenceRes.data
-        ? adherenceRes.data
+      kepatuhanRes.success && kepatuhanRes.data
+        ? kepatuhanRes.data
         : EMPTY_SUMMARY;
 
     return (

@@ -1,14 +1,17 @@
 import MedicationBanner from "@/components/banner/MedicationBanner";
-import { getJadwalByPasienIdAction } from "@/actions/laporan";
-import { getAdherenceAction } from "@/actions/pasienPortal";
+import {
+  getJadwalByPasienIdAction,
+  getKepatuhanAction,
+} from "@/actions/laporan";
 import { formatTanggalID, formatJam, formatWaktuID } from "@/utils/date";
+import StatusMinum from "@/components/Laporan/StatusMinum";
 
 export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
 
 export default async function LaporanObatPage() {
   const [jadwalRes, adherenceRes] = await Promise.all([
     getJadwalByPasienIdAction(),
-    getAdherenceAction(14),
+    getKepatuhanAction(14),
   ]);
 
   const jadwalHariIni =
@@ -60,32 +63,12 @@ export default async function LaporanObatPage() {
                       : ""}
                   </p>
                 </div>
-                <StatusPill status={d.status} />
+                <StatusMinum status={d.status} />
               </li>
             ))}
           </ul>
         )}
       </div>
     </div>
-  );
-}
-
-function StatusPill({ status }: { status: "diminum" | "terlewat" | null }) {
-  if (status === "diminum")
-    return (
-      <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-        Diminum
-      </span>
-    );
-  if (status === "terlewat")
-    return (
-      <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-        Terlewat
-      </span>
-    );
-  return (
-    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-      Belum lapor
-    </span>
   );
 }
