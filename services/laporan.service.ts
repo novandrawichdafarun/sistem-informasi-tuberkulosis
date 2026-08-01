@@ -2,8 +2,10 @@ import { ActionResponse } from "@/types/action";
 import {
   JadwalObatHariIni,
   KepatuhanHarian,
+  LaporanMakanPayload,
   LaporanObatPayload,
   RingkasanKepatuhan,
+  RiwayatLaporanMakan,
   StatusLaporanFinal,
 } from "@/types/laporan";
 import { verifyPasienAccess } from "@/utils/access";
@@ -209,7 +211,10 @@ export const getKepatuhanByUser = async (
       data: { total, diminum, terlewat, belum, persentase, days: daysArr },
     };
   } catch (error) {
-    return handleServiceError(error);
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
   }
 };
 
@@ -273,6 +278,111 @@ export async function laporMinumObat(
 
     return { success: true, message: "Minum obat berhasil dilaporkan" };
   } catch (error) {
-    return handleServiceError(error, "Gagal melaporkan minum obat");
+    return handleServiceError(
+      error,
+      "Terjadi Kesalahan internal gagal melapor",
+    );
+  }
+}
+
+export async function laporMakan(
+  supabase: SupabaseClient,
+  payload: LaporanMakanPayload,
+  id_user_pasien: string,
+): Promise<ActionResponse> {
+  try {
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const hariIni = todayISO();
+    const startOfDay = new Date(`${hariIni}T00:00:00`).toISOString();
+    const endOfDay = new Date(`${hariIni}T23:59:59.999`).toISOString();
+
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
+
+    const { count, error: countError } = await supabase
+      .from("laporan_makan")
+      .select("id_laporan", { count: "exact", head: true })
+      .eq("id_pasien", id_pasien)
+      .gte("waktu_makan", startOfDay)
+      .lte("waktu_makan", endOfDay);
+
+    if (countError)
+      return handleServiceError(
+        countError?.message,
+        "Gagal memverifikasi data harian",
+      );
+
+    if (count !== null && count >= 3)
+      return {
+        success: false,
+        error:
+          "Anda sudah mencapai batas maksimal pelaporan makan hari ini (3 kali).",
+      };
+
+    const waktuSekarang = new Date().toISOString();
+
+    const { error: insertError } = await supabase.from("laporan_makan").insert({
+      id_pasien: id_pasien,
+      waktu_makan: waktuSekarang,
+      karbo: payload.karbo,
+      protein: payload.protein,
+      serat: payload.serat,
+      catatan: payload.catatan || null,
+    });
+
+    if (insertError)
+      return handleServiceError(
+        insertError?.message,
+        "Gagal menyimpan laporan makan",
+      );
+
+    return { success: true, message: "Data Laporan makan berhasil disimpan" };
+  } catch (error) {
+    return handleServiceError(
+      error,
+      "Terjadi Kesalahan internal gagal melapor",
+    );
+  }
+}
+
+export async function getRiwayatMakanByUser(
+  supabase: SupabaseClient,
+  id_user_pasien: string,
+): Promise<ActionResponse<RiwayatLaporanMakan[]>> {
+  try {
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
+
+    const { data, error: dataError } = await supabase
+      .from("laporan_makan")
+      .select("id_laporan, waktu_makan, karbo, protein, serat, catatan")
+      .eq("id_pasien", id_pasien)
+      .order("waktu_makan", { ascending: false });
+
+    if (dataError)
+      return handleServiceError(
+        dataError?.message,
+        "Gagal mengambil riwayat laporan makan",
+      );
+
+    return { success: true, data };
+  } catch (error) {
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
   }
 }

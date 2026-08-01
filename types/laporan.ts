@@ -9,6 +9,22 @@ export interface LaporanObatPayload {
   reported_by: ReporterRole;
 }
 
+export interface LaporanMakanPayload {
+  karbo: string;
+  protein: string;
+  serat: string;
+  catatan?: string;
+}
+
+export interface RiwayatLaporanMakan {
+  id_laporan: number;
+  waktu_makan: string;
+  karbo: string;
+  protein: string;
+  serat: string;
+  catatan?: string;
+}
+
 export interface JadwalObatHariIni {
   id_jadwal: number;
   tanggal_jadwal: string;

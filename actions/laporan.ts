@@ -1,13 +1,22 @@
 "use server";
 
-import { laporanObatSchema } from "@/schemas/laporan.schema";
+import {
+  laporanMakanSchema,
+  laporanObatSchema,
+} from "@/schemas/laporan.schema";
 import {
   getJadwalByPasienId,
   getKepatuhanByUser,
+  getRiwayatMakanByUser,
+  laporMakan,
   laporMinumObat,
 } from "@/services/laporan.service";
 import { ActionResponse } from "@/types/action";
-import { JadwalObatHariIni, RingkasanKepatuhan } from "@/types/laporan";
+import {
+  JadwalObatHariIni,
+  RingkasanKepatuhan,
+  RiwayatLaporanMakan,
+} from "@/types/laporan";
 import { handleActionError } from "@/utils/error";
 import { requirePasienSession } from "@/utils/session";
 import { getSupabaseServer } from "@/utils/supabase/server";
@@ -38,6 +47,18 @@ export async function getKepatuhanAction(
   }
 }
 
+export async function getRiwayatMakanAction(): Promise<
+  ActionResponse<RiwayatLaporanMakan[]>
+> {
+  try {
+    const userId = await requirePasienSession();
+    const supabase = await getSupabaseServer();
+    return await getRiwayatMakanByUser(supabase, userId);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
 export async function submitLaporanObatAction(
   formData: FormData,
 ): Promise<ActionResponse> {
@@ -52,7 +73,30 @@ export async function submitLaporanObatAction(
     const result = await laporMinumObat(supabase, data, pasienId);
 
     if (result.success) {
-      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/laporan-obat");
+      revalidatePath("/dashboard/riwayat-kepatuhan");
+    }
+
+    return result;
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function submitLaporanMakanAction(
+  formData: FormData,
+): Promise<ActionResponse> {
+  try {
+    const pasienId = await requirePasienSession();
+    const supabase = await getSupabaseServer();
+
+    const { data, error } = validateFormData(formData, laporanMakanSchema);
+    if (error || !data)
+      return { success: false, error: error || "Validasi gagal." };
+
+    const result = await laporMakan(supabase, data, pasienId);
+
+    if (result.success) {
       revalidatePath("/dashboard/laporan-obat");
       revalidatePath("/dashboard/riwayat-kepatuhan");
     }

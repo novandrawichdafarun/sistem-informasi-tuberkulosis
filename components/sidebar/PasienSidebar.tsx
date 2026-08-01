@@ -10,6 +10,7 @@ import {
   ScaleIcon,
   MenuIcon,
   CloseIcon,
+  MealIcon,
 } from "../asset/icons";
 import RoleBadge from "../molecules/RoleBadge";
 import LogoutButton from "../buttons/LogoutButton";
@@ -22,6 +23,11 @@ const NAV: NavItem[] = [
     label: "Laporan Obat Harian",
     href: "/dashboard/laporan-obat",
     icon: PillIcon,
+  },
+  {
+    label: "Laporan Makan Harian",
+    href: "/dashboard/laporan-makan",
+    icon: MealIcon,
   },
   {
     label: "Riwayat Kepatuhan",

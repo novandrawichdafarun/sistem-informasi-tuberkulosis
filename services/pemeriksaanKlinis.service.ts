@@ -114,7 +114,7 @@ export const getPemeriksaanKlinisByUser = async (
         `,
       )
       .eq("id_pasien", id_pasien)
-      .order("tanggal_periksa", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (dataError)
       return handleServiceError(

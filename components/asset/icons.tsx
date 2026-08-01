@@ -24,6 +24,7 @@ import {
   TrendingUp,
   User,
   Users,
+  Utensils,
   X,
 } from "lucide-react";
 
@@ -39,6 +40,10 @@ export function HomeIcon({ className }: IconProps) {
 
 export function PillIcon({ className }: IconProps) {
   return <Pill className={iconClassName(className)} strokeWidth={1.75} />;
+}
+
+export function MealIcon({ className }: IconProps) {
+  return <Utensils className={iconClassName(className)} strokeWidth={1.75} />;
 }
 
 export function BellIcon({ className }: IconProps) {

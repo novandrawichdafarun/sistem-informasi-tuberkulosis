@@ -115,7 +115,7 @@ export const getPemeriksaanLabByUser = async (
         `,
       )
       .eq("id_pasien", id_pasien)
-      .order("tanggal_tes", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (dataError)
       return handleServiceError(dataError?.message, "Gagal memuat hasil lab.");

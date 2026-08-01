@@ -1,3 +1,4 @@
+import { nameRegex } from "@/utils/regex";
 import { optionalString } from "@/utils/string";
 import z from "zod";
 
@@ -23,3 +24,28 @@ export const laporanObatSchema = z
       path: ["catatan_kepatuhan"],
     },
   );
+
+export const laporanMakanSchema = z.object({
+  karbo: z
+    .string()
+    .trim()
+    .min(1, "Sumber karbohidrat wajib diisi")
+    .max(50, "Karbo maksimal 50 karakter")
+    .regex(nameRegex, "Makanan hanya boleh berisi huruf dan tanda baca umum"),
+
+  protein: z
+    .string()
+    .trim()
+    .min(1, "Sumber protein wajib diisi")
+    .max(50, "Protein maksimal 50 karakter")
+    .regex(nameRegex, "Makanan hanya boleh berisi huruf dan tanda baca umum"),
+
+  serat: z
+    .string()
+    .trim()
+    .min(1, "Sumber serat wajib diisi")
+    .max(50, "Serat maksimal 50 karakter")
+    .regex(nameRegex, "Makanan hanya boleh berisi huruf dan tanda baca umum"),
+
+  catatan: optionalString(255),
+});

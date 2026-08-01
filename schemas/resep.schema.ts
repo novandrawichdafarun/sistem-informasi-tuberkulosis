@@ -81,12 +81,12 @@ export const createResepSchema = z.object({
     .string()
     .trim()
     .min(1, "Kategori regimen wajib dipilih")
-    .max(50),
+    .max(50, "Kategori maksimal 50 karakter"),
   fase_pengobatan: z
     .string()
     .trim()
     .min(1, "Fase pengobatan wajib dipilih")
-    .max(50),
+    .max(50, "Fase Pengobatan maksimal 50 karakter"),
   obat_items: z
     .preprocess((value) => {
       if (typeof value === "string") {
