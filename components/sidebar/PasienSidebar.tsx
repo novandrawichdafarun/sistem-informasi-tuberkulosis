@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
   PillIcon,
   TrendIcon,
-  PulseIcon,
-  ScaleIcon,
   MenuIcon,
   CloseIcon,
+  PemeriksaanKlinisIcon,
+  PemeriksaanLabIcon,
+  ClipboardIcon,
 } from "../asset/icons";
-import RoleBadge from "../molecules/RoleBadge";
 import LogoutButton from "../buttons/LogoutButton";
 import Brand from "../molecules/Brand";
 import NavLinks, { isActive, type NavItem } from "../navigation/NavLinks";
@@ -28,11 +28,25 @@ const NAV: NavItem[] = [
     href: "/dashboard/riwayat-kepatuhan",
     icon: TrendIcon,
   },
-  { label: "Tanda Vital", href: "/dashboard/tanda-vital", icon: PulseIcon },
-  { label: "Berat Badan", href: "/dashboard/berat-badan", icon: ScaleIcon },
+  {
+    label: "Laporan Makanan",
+    href: "/dashboard/laporan-makan",
+    icon: ClipboardIcon,
+  },
+  {
+    label: "Pemeriksaan Klinis",
+    href: "/dashboard/pemeriksaan-klinis",
+    icon: PemeriksaanKlinisIcon,
+  },
+  {
+    label: "Pemeriksaan Medis",
+    href: "/dashboard/pemeriksaan-lab",
+    icon: PemeriksaanLabIcon,
+  },
 ];
 
 const STORAGE_KEY = "pantautb:pasien-sidebar-open";
+const DESKTOP_KEY = "pantautb:pasien-sidebar-desktop";
 
 export default function PasienSidebar({
   user,
@@ -60,6 +74,29 @@ export default function PasienSidebar({
     }
   };
 
+  // Sidebar desktop: default tampil, preferensi tersimpan.
+  // Baca localStorage setelah mount agar tidak terjadi hydration mismatch.
+  const [desktopOpen, setDesktopOpen] = useState(true);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(DESKTOP_KEY) === "0") setDesktopOpen(false);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const toggleDesktop = () => {
+    setDesktopOpen((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(DESKTOP_KEY, next ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
+
   const activeLabel =
     [...NAV].reverse().find((n) => isActive(pathname, n.href))?.label ??
     "Beranda";
@@ -67,9 +104,12 @@ export default function PasienSidebar({
 
   return (
     <div className="min-h-screen bg-slate-100 lg:flex">
-      <aside className="hidden w-72 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex lg:sticky lg:top-0 lg:h-screen">
+      <aside
+        className={`hidden w-72 shrink-0 flex-col border-r border-slate-200 bg-white lg:sticky lg:top-0 lg:h-screen ${
+          desktopOpen ? "lg:flex" : "lg:hidden"
+        }`}
+      >
         <Brand />
-        <RoleBadge label={user.roleLabel} />
         <NavLinks pathname={pathname} nav={NAV} />
         <LogoutButton />
       </aside>
@@ -100,7 +140,6 @@ export default function PasienSidebar({
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
-        <RoleBadge label={user.roleLabel} />
         <NavLinks
           pathname={pathname}
           nav={NAV}
@@ -113,11 +152,22 @@ export default function PasienSidebar({
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
+              {/* Toggle sidebar mobile */}
               <button
                 type="button"
                 onClick={() => toggle(true)}
                 aria-label="Buka menu"
                 className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-brand-700 lg:hidden"
+              >
+                <MenuIcon className="h-5 w-5" />
+              </button>
+              {/* Toggle sidebar desktop (sembunyikan / tampilkan) */}
+              <button
+                type="button"
+                onClick={toggleDesktop}
+                aria-label={desktopOpen ? "Sembunyikan menu" : "Tampilkan menu"}
+                title={desktopOpen ? "Sembunyikan menu" : "Tampilkan menu"}
+                className="hidden rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-brand-700 lg:inline-flex"
               >
                 <MenuIcon className="h-5 w-5" />
               </button>

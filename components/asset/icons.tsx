@@ -16,6 +16,7 @@ import {
   Minus,
   Pill,
   Scale,
+  Search,
   Send,
   SquareActivity,
   Stethoscope,
@@ -54,6 +55,10 @@ export function PulseIcon({ className }: IconProps) {
 
 export function ScaleIcon({ className }: IconProps) {
   return <Scale className={iconClassName(className)} strokeWidth={1.75} />;
+}
+
+export function SearchIcon({ className }: IconProps) {
+  return <Search className={iconClassName(className)} strokeWidth={1.75} />;
 }
 
 export function ChatIcon({ className }: IconProps) {

@@ -1,6 +1,6 @@
 import { getDaftarResepAction } from "@/actions/resep";
 import { getDaftarObatAction } from "@/actions/obat";
-import ResepRowView from "@/components/resep/ResepRowView";
+import ResepTableView from "@/components/resep/ResepTableView";
 
 export const metadata = { title: "Resep & Jadwal Obat | NU-TBCare" };
 
@@ -30,37 +30,7 @@ export default async function ResepObatPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-sm text-gray-500">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3">Usia / L-P</th>
-                <th className="px-6 py-3">Nama Pasien</th>
-                <th className="px-6 py-3">Episode / Resep</th>
-                <th className="px-6 py-3 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {daftar.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-gray-400">
-                    Belum ada data pasien.
-                  </td>
-                </tr>
-              ) : (
-                daftar.map((item) => (
-                  <ResepRowView
-                    key={item.id_pasien}
-                    item={item}
-                    obatList={obatList}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <ResepTableView data={daftar} obatList={obatList} />
     </div>
   );
 }

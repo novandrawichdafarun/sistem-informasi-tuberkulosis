@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { ObatData } from "@/types/obat";
+import TableSearchInput from "@/components/molecules/TableSearchInput";
 import EditObatModal from "./EditObatModal";
 import DeleteObatButton from "./DeleteObatButton";
 import ToggleStatusObat from "./ToggleStatusObat";
@@ -10,10 +12,28 @@ interface Props {
 }
 
 export default function ObatTableView({ data }: Props) {
+  const [query, setQuery] = useState("");
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return data;
+    return data.filter(
+      (o) =>
+        o.nama_obat.toLowerCase().includes(q) ||
+        (o.kategori_obat || "").toLowerCase().includes(q) ||
+        (o.jenis_obat || "").toLowerCase().includes(q),
+    );
+  }, [data, query]);
+
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm whitespace-nowrap">
+    <div className="space-y-4">
+      <TableSearchInput
+        value={query}
+        onChange={setQuery}
+        placeholder="Cari nama / kategori obat..."
+      />
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-gray-50 border-b border-gray-200 text-gray-600">
             <tr>
               <th className="px-4 py-3 font-semibold">Nama Obat</th>
@@ -25,7 +45,7 @@ export default function ObatTableView({ data }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {data.map((obat) => (
+            {filtered.map((obat) => (
               <tr
                 key={obat.id_obat}
                 className="hover:bg-gray-50 transition-colors group"
@@ -69,15 +89,18 @@ export default function ObatTableView({ data }: Props) {
               </tr>
             ))}
 
-            {data.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-6 text-center text-gray-500">
-                  Belum ada data obat
+                  {data.length === 0
+                    ? "Belum ada data obat"
+                    : "Obat tidak ditemukan."}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

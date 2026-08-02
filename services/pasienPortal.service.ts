@@ -331,8 +331,9 @@ export const getLabResultsByUser = async (
     const { data, error } = await supabase
       .from("pemeriksaan_lab")
       .select(
-        `id_tes, id_episode, jenis_tes, tanggal_tes, hasil_tes,
-         periode_pemeriksaan, berkas_pendukung_url, created_at`,
+        `id_tes, id_episode, jenis_tes, tanggal_tes, periode_pemeriksaan,
+         jenis_sample, kualitas_sample, dna_bakteri_tb, status_resistensi,
+         hasil_tes, hasil_bta, berkas_pendukung_url, created_at`,
       )
       .in("id_episode", episodeIds)
       .order("tanggal_tes", { ascending: false });

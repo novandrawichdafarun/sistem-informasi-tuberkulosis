@@ -8,7 +8,6 @@ export default function Brand() {
         <p className="font-bold text-brand-800">
           NU-TB<span className="text-brand-500">CARE</span>
         </p>
-        <p className="text-xs text-slate-500">Panel Tenaga Kesehatan</p>
       </div>
     </div>
   );

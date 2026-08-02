@@ -1,11 +1,26 @@
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../api/auth/[...nextauth]/route";
 import { getDaftarPemeriksaanLabAction } from "@/actions/pemeriksaanLab";
-import PemeriksaanLabRowView from "@/components/pemeriksaanLab/PemeriksaanLabRowView";
+import PemeriksaanLabTableView from "@/components/pemeriksaanLab/PemeriksaanLabTableView";
+import PemeriksaanMedisView from "@/components/pasien/PemeriksaanMedisView";
 
-export const metadata = {
-  title: "Manajemen Pemeriksaan Lab | NU-TBCARE",
-};
+export async function generateMetadata() {
+  const session = await getServerSession(authOptions);
+  return {
+    title:
+      session?.user?.role === "pasien"
+        ? "Pemeriksaan Medis | NU-TBCare"
+        : "Manajemen Pemeriksaan Lab | NU-TBCARE",
+  };
+}
 
 export default async function PemeriksaanLabPage() {
+  const session = await getServerSession(authOptions);
+
+  if (session?.user?.role === "pasien") {
+    return <PemeriksaanMedisView />;
+  }
+
   const result = await getDaftarPemeriksaanLabAction();
   const daftarPasien = result.success && result.data ? result.data : [];
 
@@ -26,37 +41,7 @@ export default async function PemeriksaanLabPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse whitespace-nowrap text-left text-sm text-gray-500">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4">Nama Pasien & Jenis Kelamin</th>
-                <th className="px-6 py-4">Usia & Domisili</th>
-                <th className="px-6 py-4">Status Episode</th>
-                <th className="px-6 py-4">Total Pemeriksaan</th>
-                <th className="px-6 py-4 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {daftarPasien.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-10 text-center text-gray-400"
-                  >
-                    Belum ada data pasien atau pemeriksaan lab.
-                  </td>
-                </tr>
-              ) : (
-                daftarPasien.map((pasien) => (
-                  <PemeriksaanLabRowView key={pasien.id_pasien} data={pasien} />
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <PemeriksaanLabTableView data={daftarPasien} />
     </div>
   );
 }
