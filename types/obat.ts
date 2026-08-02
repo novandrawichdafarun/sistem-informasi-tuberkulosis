@@ -21,3 +21,12 @@ export interface CreateObatPayload {
 export interface UpdateObatPayload extends CreateObatPayload {
   id_obat: number;
 }
+
+export type ObatFormValues = {
+  jumlah_per_minum: string;
+  frekuensi_minum: string;
+  aturan_pakai: string;
+  tanggal_mulai_obat: string;
+  tanggal_selesai_obat: string;
+  jam_jadwal: string;
+};

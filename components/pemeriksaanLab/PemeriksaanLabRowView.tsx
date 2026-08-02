@@ -61,7 +61,7 @@ export default function PemeriksaanLabRowView({ data }: Props) {
         {/* Kolom 4: Total Pemeriksaan */}
         <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
           <div className="font-semibold text-gray-700">
-            {riwayat_pemeriksaan_lab.length} Pemeriksaan Klinis
+            {riwayat_pemeriksaan_lab.length} Pemeriksaan Lab
           </div>
         </td>
 

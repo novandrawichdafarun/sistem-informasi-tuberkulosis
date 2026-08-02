@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createResepAction } from "@/actions/resep";
-import { ObatData } from "@/types/obat";
-
-const inputClass =
-  "mt-1 block w-full rounded border border-gray-300 p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
-
-const REGIMEN = ["Kategori 1", "Kategori 2", "Kategori Anak", "OAT MDR"];
-const FASE = ["Intensif", "Lanjutan"];
+import { ObatData, ObatFormValues } from "@/types/obat";
+import { createPortal } from "react-dom";
+import {
+  cencelBtnClass,
+  inputClass,
+  submitBtnClass,
+} from "@/utils/classTailwind";
+import { getDayCount } from "@/utils/date";
+import { FASE, REGIMEN } from "@/utils/obat";
+import ObatItemForm from "./ObatItemForm";
 
 export default function TambahResepModal({
   id_episode,
@@ -24,26 +27,94 @@ export default function TambahResepModal({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const [selected, setSelected] = useState<number[]>([]);
+  const [obatForm, setObatForm] = useState<Record<number, ObatFormValues>>({});
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [today] = useState(() => new Date().toISOString().slice(0, 10));
+  const [defaultEnd] = useState(() =>
+    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+  );
 
   if (!isOpen) return null;
+  if (typeof document === "undefined") return null;
 
-  const toggle = (id: number) =>
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
+  const selectedIds = Object.keys(obatForm).map(Number);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const toggleObat = (id: number) =>
+    setObatForm((prev) => {
+      if (prev[id]) {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      }
+
+      return {
+        ...prev,
+        [id]: {
+          jumlah_per_minum: "1",
+          frekuensi_minum: "1x sehari",
+          aturan_pakai: "",
+          tanggal_mulai_obat: today,
+          tanggal_selesai_obat: defaultEnd,
+          jam_jadwal: "09:00",
+        },
+      };
+    });
+
+  const updateItem = (
+    id: number,
+    field: keyof ObatFormValues,
+    value: string | string[],
+  ) =>
+    setObatForm((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [field]: value,
+      },
+    }));
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    if (selected.length === 0) {
+
+    if (selectedIds.length === 0) {
       setError("Pilih minimal satu obat.");
       return;
     }
+
+    const obatItems = selectedIds.map((id) => {
+      const data = obatForm[id];
+      const jamJadwal = Array.isArray(data.jam_jadwal)
+        ? data.jam_jadwal
+        : data.jam_jadwal
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+
+      const quantity = Number(data.jumlah_per_minum);
+      const days = getDayCount(
+        data.tanggal_mulai_obat,
+        data.tanggal_selesai_obat,
+      );
+      const times = jamJadwal.length;
+
+      return {
+        id_obat: id,
+        jumlah_per_minum: quantity,
+        frekuensi_minum: data.frekuensi_minum,
+        aturan_pakai: data.aturan_pakai.trim() || undefined,
+        tanggal_mulai_obat: data.tanggal_mulai_obat,
+        tanggal_selesai_obat: data.tanggal_selesai_obat,
+        jam_jadwal: jamJadwal,
+        jumlah_total_diberikan: Math.round(
+          quantity * days * Math.max(times, 1),
+        ),
+      };
+    });
+
     const formData = new FormData(e.currentTarget);
-    formData.set("obat_ids", selected.join(","));
+    formData.set("obat_items", JSON.stringify(obatItems));
 
     startTransition(async () => {
       const res = await createResepAction(formData);
@@ -51,15 +122,14 @@ export default function TambahResepModal({
         setError(res.error);
         return;
       }
-      setSelected([]);
+      setError(null);
+      setObatForm({});
       onClose();
       router.refresh();
     });
   };
 
-  const today = new Date().toLocaleDateString("en-CA");
-
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
@@ -114,112 +184,39 @@ export default function TambahResepModal({
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Tanggal Mulai Obat *
-              </label>
-              <input
-                type="date"
-                name="tanggal_mulai_obat"
-                required
-                defaultValue={today}
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Durasi (hari) *
-              </label>
-              <input
-                type="number"
-                name="durasi_hari"
-                required
-                min={1}
-                max={365}
-                defaultValue={180}
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Jam Minum *
-              </label>
-              <input
-                type="time"
-                name="jam_jadwal"
-                required
-                defaultValue="07:00"
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Jumlah / Minum *
-              </label>
-              <input
-                type="number"
-                name="jumlah_per_minum"
-                required
-                min={0.25}
-                step={0.25}
-                defaultValue={1}
-                className={inputClass}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Aturan Pakai
-              </label>
-              <input
-                type="text"
-                name="aturan_pakai"
-                placeholder="cth: Sesudah makan pagi"
-                className={inputClass}
-              />
-            </div>
           </div>
 
-          {/* Pilih obat */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Obat (pilih satu atau lebih) *
             </label>
+
             {obatList.length === 0 ? (
               <div className="rounded border border-dashed border-gray-300 p-4 text-center text-sm text-gray-500">
                 Belum ada obat di master.{" "}
                 <Link
                   href="/dashboard/obat"
-                  className="text-blue-600 underline"
+                  className="text-brand-600 underline"
                 >
                   Tambahkan di Master Obat
                 </Link>{" "}
                 dulu.
               </div>
             ) : (
-              <div className="max-h-44 overflow-y-auto rounded border border-gray-200 divide-y divide-gray-100">
+              <div className="space-y-3 rounded border border-gray-200 p-3">
                 {obatList.map((o) => (
-                  <label
+                  <ObatItemForm
                     key={o.id_obat}
-                    className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(o.id_obat)}
-                      onChange={() => toggle(o.id_obat)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600"
-                    />
-                    <span className="font-medium text-gray-800">
-                      {o.nama_obat}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {o.dosis || ""} {o.jenis_obat ? `· ${o.jenis_obat}` : ""}
-                    </span>
-                    {!o.is_active && (
-                      <span className="ml-auto text-[10px] text-amber-600">
-                        nonaktif
-                      </span>
-                    )}
-                  </label>
+                    obat={o}
+                    selected={selectedIds.includes(o.id_obat)}
+                    values={obatForm[o.id_obat] ?? {}}
+                    today={today}
+                    defaultEnd={defaultEnd}
+                    onToggle={() => toggleObat(o.id_obat)}
+                    onChange={(field, value) =>
+                      updateItem(o.id_obat, field, value)
+                    }
+                  />
                 ))}
               </div>
             )}
@@ -230,20 +227,21 @@ export default function TambahResepModal({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
-              disabled={pending || obatList.length === 0}
-              className="rounded bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:bg-blue-400"
+              disabled={pending || selectedIds.length === 0}
+              className={submitBtnClass}
             >
               {pending ? "Menyimpan..." : "Simpan Resep"}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

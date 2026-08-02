@@ -1,14 +1,14 @@
 import LineChart from "@/components/grafik/LineChart";
-import { PemeriksaanKlinisData } from "@/types/pasienPortal";
+import { PemeriksaanKlinisData } from "@/types/pemeriksaanKlinis";
 import { formatTanggalID } from "@/utils/date";
 
 export type WeightPoint = { label: string; berat: number; tanggal: string };
 
 // Titik berat badan BULANAN: 1 pengukuran (terbaru) per bulan.
 export function buildWeightPoints(
-  vitals: PemeriksaanKlinisData[],
+  klinis: PemeriksaanKlinisData[],
 ): WeightPoint[] {
-  const asc = [...vitals]
+  const asc = [...klinis]
     .filter((v) => v.berat_badan != null)
     .sort(
       (a, b) =>

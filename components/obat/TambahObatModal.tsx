@@ -1,6 +1,7 @@
 "use client";
 
 import { createObatAction } from "@/actions/obat";
+import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -40,7 +41,7 @@ export default function TambahObatModal() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+        className="items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors"
       >
         + Tambah Obat
       </button>
@@ -60,7 +61,7 @@ export default function TambahObatModal() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium mb-1 text-gray-700">
                     Nama Obat *
                   </label>
@@ -115,25 +116,26 @@ export default function TambahObatModal() {
 
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    Deskripsi
+                    Dosis/mg
                   </label>
                   <input
-                    type="text"
-                    name="deskripsi"
-                    placeholder="..."
+                    type="number"
+                    name="dosis"
+                    placeholder="Contoh: 300, 150/75/400/275"
                     className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
                   />
                 </div>
+
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    Dosis
+                    Deskripsi
                   </label>
-                  <input
-                    type="text"
-                    name="dosis"
-                    placeholder="Contoh: 300mg, 150mg/75mg/400mg/275mg"
+                  <textarea
+                    name="deskripsi"
+                    rows={2}
+                    placeholder="Masukkan Deskripsi Obat"
                     className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
-                  />
+                  ></textarea>
                 </div>
               </div>
 
@@ -143,14 +145,14 @@ export default function TambahObatModal() {
                   type="button"
                   onClick={closeModal}
                   disabled={isLoading}
-                  className="bg-gray-100 px-4 py-2 text-sm font-medium rounded text-gray-700 hover:bg-gray-200"
+                  className={cencelBtnClass}
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-blue-700 disabled:bg-blue-400"
+                  className={submitBtnClass}
                 >
                   {isLoading ? "Menyimpan..." : "Simpan Data"}
                 </button>

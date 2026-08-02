@@ -57,7 +57,7 @@ export default function RiwayatSubRow({
         <div>Suhu: {`${periksa.suhu}°C` || "-"}</div>
         <div>Nadi: {`${periksa.nadi}/menit` || "-"}</div>
       </td>
-      <td className="px-4 py-3 text-gray-600 max-w-65 whitespace-normal break-all leading-relaxed">
+      <td className="px-4 py-3 text-gray-600 max-w-65 whitespace-normal wrap-break-word leading-relaxed">
         {periksa.keluhan || "-"}
       </td>
       <td className="px-4 py-3">

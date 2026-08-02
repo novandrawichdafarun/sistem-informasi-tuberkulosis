@@ -3,15 +3,15 @@ import { authOptions } from "../api/auth/[...nextauth]/route";
 import MedicationBanner from "@/components/banner/MedicationBanner";
 import PatientOverview from "@/components/dashboard/PatientOverview";
 import AdminOverview from "@/components/dashboard/AdminOverview";
-import {
-  getAdherenceAction,
-  getPasienProfileAction,
-  getTodayMedicationAction,
-} from "@/actions/pasienPortal";
+import { getPasienProfileAction } from "@/actions/pasien";
 import { getStatistikAdminAction } from "@/actions/statistik";
-import { AdherenceSummary } from "@/types/pasienPortal";
+import {
+  getJadwalByPasienIdAction,
+  getKepatuhanAction,
+} from "@/actions/laporan";
+import { RingkasanKepatuhan } from "@/types/laporan";
 
-const EMPTY_SUMMARY: AdherenceSummary = {
+const EMPTY_SUMMARY: RingkasanKepatuhan = {
   total: 0,
   diminum: 0,
   terlewat: 0,
@@ -20,22 +20,25 @@ const EMPTY_SUMMARY: AdherenceSummary = {
   days: [],
 };
 
+export const metadata = { title: "Beranda | NU-TBCare" };
+
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const role = session?.user?.role;
 
   if (role === "pasien") {
-    const [profileRes, medRes, adherenceRes] = await Promise.all([
+    const [profileRes, jadwalRes, kepatuhanRes] = await Promise.all([
       getPasienProfileAction(),
-      getTodayMedicationAction(),
-      getAdherenceAction(7),
+      getJadwalByPasienIdAction(),
+      getKepatuhanAction(7),
     ]);
 
     const profile = profileRes.success ? (profileRes.data ?? null) : null;
-    const medication = medRes.success ? (medRes.data ?? null) : null;
+    const jadwalHariIni =
+      jadwalRes.success && jadwalRes.data ? jadwalRes.data : [];
     const summary =
-      adherenceRes.success && adherenceRes.data
-        ? adherenceRes.data
+      kepatuhanRes.success && kepatuhanRes.data
+        ? kepatuhanRes.data
         : EMPTY_SUMMARY;
 
     return (
@@ -49,12 +52,13 @@ export default async function DashboardPage() {
             {profile?.domisili ? ` · ${profile.domisili}` : ""}
           </p>
         </div>
-
-        <MedicationBanner medication={medication} />
-        <PatientOverview
-          summary={summary}
-          fase={profile?.episodeAktif?.tipe_pasien}
-        />
+        <div className="space-y-4">
+          <MedicationBanner jadwalList={jadwalHariIni} />
+          <PatientOverview
+            summary={summary}
+            fase={profile?.episodeAktif?.tipe_pasien}
+          />
+        </div>
       </>
     );
   } else if (role === "super_admin") {

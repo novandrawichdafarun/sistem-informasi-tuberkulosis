@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { getPasienDetailAction } from "@/actions/pasienDetail";
+import { getPasienDetailAction } from "@/actions/pasien";
 import { formatTanggalID } from "@/utils/date";
-import VitalCharts from "@/components/grafik/VitalCharts";
+import KlinisCharts from "@/components/grafik/VitalCharts";
 import WeightChart, {
   buildWeightPoints,
 } from "@/components/grafik/WeightChart";
@@ -45,9 +45,9 @@ export default async function PasienDetailPage({
     );
   }
 
-  const { profil, episodes, vitals, lab, adherence } = res.data;
+  const { profil, episodes, klinis, lab, kepatuhan } = res.data;
   const episodeAktif = episodes.find((e) => e.status_episode === "aktif");
-  const weightPoints = buildWeightPoints(vitals);
+  const weightPoints = buildWeightPoints(klinis);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 py-8">
@@ -99,29 +99,29 @@ export default async function PasienDetailPage({
 
       {/* Riwayat kepatuhan */}
       <Section title="Riwayat Kepatuhan (30 hari)">
-        {adherence.total === 0 ? (
+        {kepatuhan.total === 0 ? (
           <p className="rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
             Belum ada jadwal/laporan minum obat.
           </p>
         ) : (
           <div className="flex flex-col items-center gap-6 sm:flex-row">
-            <Donut percent={adherence.persentase} />
+            <Donut percent={kepatuhan.persentase} />
             <div className="grid flex-1 grid-cols-3 gap-3 text-center">
               <div className="rounded-xl bg-brand-50 p-4">
                 <p className="text-2xl font-bold text-brand-700">
-                  {adherence.diminum}
+                  {kepatuhan.diminum}
                 </p>
                 <p className="text-xs text-slate-500">Diminum</p>
               </div>
               <div className="rounded-xl bg-red-50 p-4">
                 <p className="text-2xl font-bold text-red-600">
-                  {adherence.terlewat}
+                  {kepatuhan.terlewat}
                 </p>
                 <p className="text-xs text-slate-500">Terlewat</p>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="text-2xl font-bold text-slate-500">
-                  {adherence.belum}
+                  {kepatuhan.belum}
                 </p>
                 <p className="text-xs text-slate-500">Belum lapor</p>
               </div>
@@ -131,7 +131,7 @@ export default async function PasienDetailPage({
       </Section>
 
       {/* Tanda vital */}
-      {vitals.length === 0 ? (
+      {klinis.length === 0 ? (
         <Section title="Tanda Vital">
           <p className="rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
             Belum ada data pemeriksaan klinis.
@@ -142,7 +142,7 @@ export default async function PasienDetailPage({
           <h2 className="mb-3 text-base font-semibold text-brand-950">
             Tanda Vital
           </h2>
-          <VitalCharts vitals={vitals} />
+          <KlinisCharts klinis={klinis} />
         </div>
       )}
 

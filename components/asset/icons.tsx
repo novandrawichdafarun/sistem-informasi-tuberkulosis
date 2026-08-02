@@ -15,6 +15,7 @@ import {
   Microscope,
   Minus,
   Pill,
+  ReceiptText,
   Scale,
   Search,
   Send,
@@ -24,6 +25,7 @@ import {
   TrendingUp,
   User,
   Users,
+  Utensils,
   X,
 } from "lucide-react";
 
@@ -39,6 +41,10 @@ export function HomeIcon({ className }: IconProps) {
 
 export function PillIcon({ className }: IconProps) {
   return <Pill className={iconClassName(className)} strokeWidth={1.75} />;
+}
+
+export function MealIcon({ className }: IconProps) {
+  return <Utensils className={iconClassName(className)} strokeWidth={1.75} />;
 }
 
 export function BellIcon({ className }: IconProps) {
@@ -121,6 +127,12 @@ export function PillBottleIcon({ className }: IconProps) {
 
 export function UserIcon({ className }: IconProps) {
   return <User className={iconClassName(className)} strokeWidth={1.75} />;
+}
+
+export function ResepObatIcon({ className }: IconProps) {
+  return (
+    <ReceiptText className={iconClassName(className)} strokeWidth={1.75} />
+  );
 }
 
 export function PemeriksaanKlinisIcon({ className }: IconProps) {

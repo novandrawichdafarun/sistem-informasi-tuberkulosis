@@ -119,10 +119,10 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
                 <table className="w-full text-left text-sm text-gray-600">
                   <thead className="bg-gray-100 text-xs font-semibold text-gray-700">
                     <tr>
-                      <th className="px-4 py-2 border-b">Tipe Kasus</th>
-                      <th className="px-4 py-2 border-b">Tanggal Mulai</th>
-                      <th className="px-4 py-2 border-b">Tanggal Selesai</th>
-                      <th className="px-4 py-2 border-b">Status</th>
+                      <th className="px-4 py-2 border-b">Detail Episode</th>
+                      <th className="px-4 py-2 border-b">Status Pengobatan</th>
+                      <th className="px-4 py-2 border-b">Hasil Akhir</th>
+                      <th className="px-4 py-2 border-b text-center">Status</th>
                       <th className="px-4 py-2 border-b text-center">Aksi</th>
                     </tr>
                   </thead>
@@ -147,7 +147,6 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
       {episodeAktif && (
         <TutupEpisodeModal
           id_episode={episodeAktif.id_episode}
-          tipePasienSekarang={episodeAktif.tipe_pasien}
           isOpen={isModalTutupOpen}
           onClose={() => setIsModalTutupOpen(false)}
         />

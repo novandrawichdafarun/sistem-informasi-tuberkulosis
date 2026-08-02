@@ -1,6 +1,7 @@
 "use client";
 
 import { bukaEpisodeAction } from "@/actions/episodePengobatan";
+import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
 import { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
@@ -63,7 +64,19 @@ export default function BukaEpisoodeModal({
               name="tanggal_mulai"
               defaultValue={todayDate}
               required
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:border-brand-500 focus:outline-none"
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tanggal Selesai *
+            </label>
+            <input
+              type="date"
+              name="tanggal_selesai"
+              required
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
             />
           </div>
 
@@ -77,7 +90,7 @@ export default function BukaEpisoodeModal({
               list="list-tipe-pasien"
               required
               placeholder="Pilih atau ketik tipe pasien..."
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
             />
             <datalist id="list-tipe-pasien">
               <option value="Kasus Baru" />
@@ -92,14 +105,14 @@ export default function BukaEpisoodeModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="rounded bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+              className={submitBtnClass}
             >
               {isPending ? "Menyimpan..." : "Buka Episode"}
             </button>

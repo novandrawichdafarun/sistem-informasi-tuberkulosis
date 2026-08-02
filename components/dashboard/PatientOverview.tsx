@@ -6,9 +6,9 @@ import {
   CloseIcon,
   MinusIcon,
 } from "../asset/icons";
-import { AdherenceDay, AdherenceSummary } from "@/types/pasienPortal";
-import AdherenceDonut from "../grafik/AdherenceDonut";
+import KepatuhanDonut from "../grafik/KepatuhanDonut";
 import { dayNumber } from "@/utils/date";
+import { KepatuhanHarian, RingkasanKepatuhan } from "@/types/laporan";
 
 type CellKey = "diminum" | "terlewat" | "belum";
 
@@ -37,7 +37,7 @@ const STATUS_STYLES: Record<
   },
 };
 
-function cellKey(day: AdherenceDay): CellKey {
+function cellKey(day: KepatuhanHarian): CellKey {
   if (day.status === "diminum") return "diminum";
   if (day.status === "terlewat") return "terlewat";
   return "belum";
@@ -64,7 +64,7 @@ export default function PatientOverview({
   summary,
   fase,
 }: {
-  summary: AdherenceSummary;
+  summary: RingkasanKepatuhan;
   fase?: string | null;
 }) {
   const week = summary.days.slice(-7);
@@ -73,12 +73,12 @@ export default function PatientOverview({
 
   return (
     <div className="space-y-6">
-      {/* Adherence + weekly tracker */}
+      {/* Keaptuhan + weekly tracker */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Adherence card */}
+        {/* Keaptuhan card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex justify-center">
-            <AdherenceDonut percent={summary.persentase} />
+            <KepatuhanDonut percent={summary.persentase} />
           </div>
           <div className="mt-6 space-y-2 border-t border-slate-100 pt-4 text-sm">
             <div className="flex items-center justify-between">
@@ -121,12 +121,12 @@ export default function PatientOverview({
                   gridTemplateColumns: `repeat(${week.length}, minmax(0, 1fr))`,
                 }}
               >
-                {week.map((d) => {
+                {week.map((d, i) => {
                   const s = STATUS_STYLES[cellKey(d)];
                   const Icon = s.icon;
                   return (
                     <div
-                      key={d.tanggal}
+                      key={`${d.tanggal}-${i}`}
                       className="flex flex-col items-center gap-1.5"
                       title={`${d.tanggal} · ${s.label}`}
                     >

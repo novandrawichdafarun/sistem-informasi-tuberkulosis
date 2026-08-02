@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { updatePemeriksaanLabAction } from "@/actions/pemeriksaanLab";
 import { PemeriksaanLabData } from "@/types/pemeriksaanLab";
+import { cencelBtnClass, editBtnClass } from "@/utils/classTailwind";
 
 interface EditLabModalProps {
   data: PemeriksaanLabData;
@@ -166,14 +167,15 @@ export default function EditLabModal({
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Hasil Tes Umum *
               </label>
-              <input
-                type="text"
+              <select
                 name="hasil_tes"
                 required
-                placeholder="Positif / Negatif"
                 defaultValue={data.hasil_tes}
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
+              >
+                <option value="P">Positif</option>
+                <option value="N">Negatif</option>
+              </select>
             </div>
 
             <div>
@@ -195,14 +197,14 @@ export default function EditLabModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="bg-gray-100 px-4 py-2 text-sm font-medium rounded text-gray-700 hover:bg-gray-200"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-blue-700 disabled:bg-blue-400"
+              className={editBtnClass}
             >
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { cencelBtnClass, deleteBtnClass } from "@/utils/classTailwind";
 import { DeleteIcon } from "../asset/icons";
 
 // Modal konfirmasi hapus reusable — menggantikan window.confirm/alert
@@ -56,7 +57,7 @@ export default function ConfirmDeleteModal({
             type="button"
             onClick={onClose}
             disabled={isDeleting}
-            className="text-sm font-semibold text-gray-700 hover:text-gray-900 px-4 py-2 disabled:opacity-50"
+            className={cencelBtnClass}
           >
             Batal
           </button>
@@ -64,7 +65,7 @@ export default function ConfirmDeleteModal({
             type="button"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="rounded-md bg-red-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:bg-red-400"
+            className={deleteBtnClass}
           >
             {isDeleting ? "Menghapus..." : confirmLabel}
           </button>

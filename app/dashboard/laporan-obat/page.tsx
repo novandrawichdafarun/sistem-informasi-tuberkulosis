@@ -1,23 +1,21 @@
 import MedicationBanner from "@/components/banner/MedicationBanner";
 import {
-  getTodayMedicationAction,
-  getAdherenceAction,
-} from "@/actions/pasienPortal";
-import {
-  formatTanggalID,
-  formatJam,
-  formatWaktuID,
-} from "@/utils/date";
+  getJadwalByPasienIdAction,
+  getKepatuhanAction,
+} from "@/actions/laporan";
+import { formatTanggalID, formatJam, formatWaktuID } from "@/utils/date";
+import StatusMinum from "@/components/Laporan/StatusMinum";
 
 export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
 
 export default async function LaporanObatPage() {
-  const [medRes, adherenceRes] = await Promise.all([
-    getTodayMedicationAction(),
-    getAdherenceAction(14),
+  const [jadwalRes, adherenceRes] = await Promise.all([
+    getJadwalByPasienIdAction(),
+    getKepatuhanAction(14),
   ]);
 
-  const medication = medRes.success ? (medRes.data ?? null) : null;
+  const jadwalHariIni =
+    jadwalRes.success && jadwalRes.data ? jadwalRes.data : [];
   const days =
     adherenceRes.success && adherenceRes.data
       ? [...adherenceRes.data.days].reverse()
@@ -35,32 +33,8 @@ export default async function LaporanObatPage() {
         </p>
       </div>
 
-      <MedicationBanner medication={medication} />
+      <MedicationBanner jadwalList={jadwalHariIni} />
 
-      {/* Detail obat hari ini */}
-      {medication && medication.obat.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="text-base font-semibold text-brand-950">
-            Obat untuk {formatTanggalID(medication.tanggal_jadwal)} · pukul{" "}
-            {formatJam(medication.jam_jadwal)}
-          </h2>
-          <ul className="mt-4 divide-y divide-slate-100">
-            {medication.obat.map((o, i) => (
-              <li
-                key={`${o.nama_obat}-${i}`}
-                className="flex items-center justify-between py-3"
-              >
-                <span className="font-medium text-slate-800">
-                  {o.nama_obat}
-                </span>
-                <span className="text-sm text-slate-500">{o.dosis}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Riwayat laporan 14 hari */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <h2 className="text-base font-semibold text-brand-950">
           Riwayat 14 Hari Terakhir
@@ -73,9 +47,9 @@ export default async function LaporanObatPage() {
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-slate-100">
-            {days.map((d) => (
+            {days.map((d, i) => (
               <li
-                key={d.tanggal}
+                key={`${d.tanggal}-${i}`}
                 className="flex items-center justify-between py-3"
               >
                 <div>
@@ -89,32 +63,12 @@ export default async function LaporanObatPage() {
                       : ""}
                   </p>
                 </div>
-                <StatusPill status={d.status} />
+                <StatusMinum status={d.status} />
               </li>
             ))}
           </ul>
         )}
       </div>
     </div>
-  );
-}
-
-function StatusPill({ status }: { status: "diminum" | "terlewat" | null }) {
-  if (status === "diminum")
-    return (
-      <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-        Diminum
-      </span>
-    );
-  if (status === "terlewat")
-    return (
-      <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-        Terlewat
-      </span>
-    );
-  return (
-    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-      Belum lapor
-    </span>
   );
 }

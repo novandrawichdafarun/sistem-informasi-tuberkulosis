@@ -5,8 +5,9 @@ import {
   PemeriksaanLabData,
   UpdatePemeriksaanLabPayload,
 } from "@/types/pemeriksaanLab";
-import { verifySuperAdminAccess } from "@/utils/access";
+import { verifyPasienAccess, verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
+import { getPasienIdByUser } from "@/utils/Pasien";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const getDaftarPemeriksaanLab = async (
@@ -79,6 +80,69 @@ export const getDaftarPemeriksaanLab = async (
     });
 
     return { success: true, data: formattedData };
+  } catch (error) {
+    return handleServiceError(
+      error,
+      "Terjadi kesalahan internal saat mengambil data.",
+    );
+  }
+};
+
+export const getPemeriksaanLabByUser = async (
+  supabase: SupabaseClient,
+  id_user_pasien: string,
+): Promise<ActionResponse<PemeriksaanLabData[]>> => {
+  try {
+    const { pasien, error } = await verifyPasienAccess(
+      supabase,
+      id_user_pasien,
+    );
+
+    if (error || !pasien)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
+
+    const { data, error: dataError } = await supabase
+      .from("episode_pengobatan")
+      .select(
+        `
+        id_pasien,
+        pemeriksaan_lab (
+          id_tes, id_episode, jenis_tes, tanggal_tes, hasil_tes,
+          periode_pemeriksaan, berkas_pendukung_url, created_at
+        )
+        `,
+      )
+      .eq("id_pasien", id_pasien)
+      .order("created_at", { ascending: false });
+
+    if (dataError)
+      return handleServiceError(dataError?.message, "Gagal memuat hasil lab.");
+
+    // Flatkan struktur: extract pemeriksaan_klinis dari setiap episode
+    const labList: PemeriksaanLabData[] = (data ?? []).flatMap((episode) =>
+      (episode.pemeriksaan_lab ?? []).map(
+        (lab) =>
+          ({
+            id_tes: lab.id_tes,
+            id_episode: lab.id_episode,
+            jenis_tes: lab.jenis_tes,
+            tanggal_tes: lab.tanggal_tes,
+            hasil_tes: lab.hasil_tes,
+            periode_pemeriksaan: lab.periode_pemeriksaan,
+            berkas_pendukung_url: lab.berkas_pendukung_url,
+            created_at: lab.created_at,
+          }) as PemeriksaanLabData,
+      ),
+    );
+
+    labList.sort(
+      (a, b) =>
+        new Date(b.tanggal_tes).getTime() - new Date(a.tanggal_tes).getTime(),
+    );
+
+    return { success: true, data: labList };
   } catch (error) {
     return handleServiceError(
       error,

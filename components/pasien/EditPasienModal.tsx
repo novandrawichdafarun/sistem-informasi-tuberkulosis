@@ -11,44 +11,8 @@ import {
   PENDAPATAN_OPTIONS,
 } from "@/utils/pasienOptions";
 import { EditIcon } from "../asset/icons";
-
-const inputClass =
-  "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
-
-function SelectField({
-  label,
-  name,
-  options,
-  defaultValue,
-  required = true,
-}: {
-  label: string;
-  name: string;
-  options: string[];
-  defaultValue?: string | null;
-  required?: boolean;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700">
-        {label} {required && "*"}
-      </label>
-      <select
-        name={name}
-        required={required}
-        defaultValue={defaultValue ?? ""}
-        className={`${inputClass} bg-white`}
-      >
-        <option value="">-- Pilih --</option>
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
+import SelectField from "../molecules/SelectField";
+import { cencelBtnClass, editBtnClass, inputClass } from "@/utils/classTailwind";
 
 export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
   const router = useRouter();
@@ -201,24 +165,28 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                       name="usia"
                       options={USIA_OPTIONS}
                       defaultValue={pasien.usia}
+                      inputClass={inputClass}
                     />
                     <SelectField
                       label="Pendidikan"
                       name="pendidikan"
                       options={PENDIDIKAN_OPTIONS}
                       defaultValue={pasien.pendidikan}
+                      inputClass={inputClass}
                     />
                     <SelectField
                       label="Pekerjaan"
                       name="pekerjaan"
                       options={PEKERJAAN_OPTIONS}
                       defaultValue={pasien.pekerjaan}
+                      inputClass={inputClass}
                     />
                     <SelectField
                       label="Pendapatan"
                       name="pendapatan"
                       options={PENDAPATAN_OPTIONS}
                       defaultValue={pasien.pendapatan}
+                      inputClass={inputClass}
                     />
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
@@ -251,14 +219,14 @@ export default function EditPasienModal({ pasien }: { pasien: PasienData }) {
                     type="button"
                     onClick={closeModal}
                     disabled={isLoading}
-                    className="text-sm font-semibold text-gray-700 hover:text-gray-900 px-4 py-2"
+                    className={cencelBtnClass}
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="rounded-md bg-yellow-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
+                    className={editBtnClass}
                   >
                     {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
                   </button>

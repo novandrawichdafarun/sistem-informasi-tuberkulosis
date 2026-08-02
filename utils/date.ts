@@ -1,3 +1,5 @@
+import { dailyFrequencyRegex } from "./regex";
+
 const BULAN_ID = [
   "Jan",
   "Feb",
@@ -81,7 +83,7 @@ export function formatTanggalSingkat(value?: string | null): string {
 
 export function formatJam(jam?: string | null): string {
   if (!jam) return "-";
-  return jam.slice(0, 5); // "07:00:00" -> "07:00"
+  return jam.slice(0, 5); // "09:00:00" -> "09:00"
 }
 
 export function formatWaktuID(value?: string | null): string {
@@ -98,4 +100,50 @@ export function formatWaktuID(value?: string | null): string {
 
 export function dayNumber(tanggal: string) {
   return tanggal.slice(8, 10); // "2026-07-25" -> "25"
+}
+
+export const diffDaysInclusive = (from: string, to: string) => {
+  const start = new Date(from);
+  const end = new Date(to);
+  return Math.max(
+    1,
+    Math.round((end.valueOf() - start.valueOf()) / (1000 * 60 * 60 * 24)) + 1,
+  );
+};
+
+export const getDayCount = (start: string, end: string) => {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const diff = Math.round(
+    (endDate.valueOf() - startDate.valueOf()) / (1000 * 60 * 60 * 24),
+  );
+  return Math.max(1, diff + 1);
+};
+
+export const getDailyFrequencyCount = (value: string) => {
+  const match = /^(\d+)x sehari$/i.exec(value.trim());
+  return match ? Number(match[1]) : 1;
+};
+
+export const parseDailyFrequency = (value: string) => {
+  const match = dailyFrequencyRegex.exec(value.trim().toLowerCase());
+  return match ? Number(match[1]) : null;
+};
+
+export function isReportLate(
+  tanggalMinum: string,
+  waktuMinum: string,
+  toleranceHours: number = 1,
+): boolean {
+  const scheduleDateTimeString = `${tanggalMinum}T${waktuMinum}`;
+  const scheduledTime = new Date(scheduleDateTimeString);
+
+  const toleranceMilliseconds = toleranceHours * 60 * 60 * 1000;
+
+  const maxValidTime = new Date(
+    scheduledTime.getTime() + toleranceMilliseconds,
+  );
+  const currentTime = new Date();
+
+  return currentTime > maxValidTime;
 }

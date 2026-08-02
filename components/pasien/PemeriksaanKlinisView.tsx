@@ -76,7 +76,7 @@ export default async function PemeriksaanKlinisView() {
           )}
 
           {/* Grafik tren tanda vital */}
-          <VitalCharts vitals={data} />
+          <VitalCharts klinis={data} />
 
           {/* Tabel riwayat tanda vital */}
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">

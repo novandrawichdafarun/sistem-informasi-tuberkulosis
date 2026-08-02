@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { createPemeriksaanLabAction } from "@/actions/pemeriksaanLab";
+import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
 
 interface TambahLabModalProps {
   id_episode: number;
@@ -159,13 +160,14 @@ export default function TambahLabModal({
               <label className="block text-sm font-medium mb-1 text-gray-700">
                 Hasil Tes Umum *
               </label>
-              <input
-                type="text"
+              <select
                 name="hasil_tes"
                 required
-                placeholder="Positif / Negatif"
                 className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
-              />
+              >
+                <option value="P">Positif</option>
+                <option value="N">Negatif</option>
+              </select>
             </div>
 
             <div>
@@ -187,16 +189,16 @@ export default function TambahLabModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="bg-gray-100 px-4 py-2 text-sm font-medium rounded text-gray-700 hover:bg-gray-200"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-blue-700 disabled:bg-blue-400"
+              className={submitBtnClass}
             >
-              {isPending ? "Menyimpan..." : "Simpan Lab"}
+              {isPending ? "Menyimpan..." : "Simpa Data Lab"}
             </button>
           </div>
         </form>

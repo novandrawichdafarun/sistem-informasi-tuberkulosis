@@ -63,21 +63,21 @@ export default function ObatTableView({ data }: Props) {
                 </td>
                 <td className="px-4 py-3">
                   <div className="font-medium text-gray-700">
-                    {obat.dosis || "-"}
+                    {`${obat.dosis} mg` || "-"}
                   </div>
                 </td>
                 <td className="px-4 py-3 max-w-65">
-                  <div className="text-xs text-gray-500 whitespace-normal break-all leading-relaxed">
+                  <div className="text-xs text-gray-500 whitespace-normal wrap-break-word leading-relaxed">
                     {obat.deskripsi || "-"}
                   </div>
                 </td>
-                <td className="px-4 py-3 items-center text-center">
+                <td className="px-4 py-3 items-center text-center justify-center align-middle">
                   <ToggleStatusObat
                     id_obat={obat.id_obat}
                     status={obat.is_active}
                   />
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="px-4 py-3">
                   <div className="flex gap-2 items-center justify-center">
                     <EditObatModal data={obat} />
                     <DeleteObatButton

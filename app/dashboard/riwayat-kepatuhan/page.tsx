@@ -1,20 +1,20 @@
-import { getAdherenceAction } from "@/actions/pasienPortal";
 import { formatTanggalID, formatJam } from "@/utils/date";
-import { AdherenceDay } from "@/types/pasienPortal";
 import Donut from "@/components/grafik/Donut";
 import Legend from "@/components/molecules/Legend";
 import StatCard from "@/components/card/StatCard";
+import { KepatuhanHarian } from "@/types/laporan";
+import { getKepatuhanAction } from "@/actions/laporan";
 
 export const metadata = { title: "Riwayat Kepatuhan | NU-TBCare" };
 
-function cellClass(d: AdherenceDay) {
+function cellClass(d: KepatuhanHarian) {
   if (d.status === "diminum") return "bg-brand-600 text-white";
   if (d.status === "terlewat") return "bg-red-100 text-red-600";
   return "bg-slate-100 text-slate-400";
 }
 
 export default async function RiwayatKepatuhanPage() {
-  const res = await getAdherenceAction(30);
+  const res = await getKepatuhanAction(30);
   const summary =
     res.success && res.data
       ? res.data
@@ -73,9 +73,9 @@ export default async function RiwayatKepatuhanPage() {
         ) : (
           <>
             <div className="mt-4 grid grid-cols-7 gap-2 sm:grid-cols-10">
-              {summary.days.map((d) => (
+              {summary.days.map((d, i) => (
                 <div
-                  key={d.tanggal}
+                  key={`${d.tanggal}-${i}`}
                   title={`${formatTanggalID(d.tanggal)} · ${
                     d.status ?? "belum lapor"
                   } · jadwal ${formatJam(d.jam_jadwal)}`}

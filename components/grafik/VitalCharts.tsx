@@ -1,16 +1,16 @@
 import LineChart from "@/components/grafik/LineChart";
-import { PemeriksaanKlinisData } from "@/types/pasienPortal";
 import { formatTanggalID } from "@/utils/date";
 import { parseTensi } from "@/utils/Pasien";
 import ChartCard from "../card/ChartCard";
+import { PemeriksaanKlinisData } from "@/types/pemeriksaanKlinis";
 
-export default function VitalCharts({
-  vitals,
+export default function KlinisCharts({
+  klinis,
 }: {
-  vitals: PemeriksaanKlinisData[];
+  klinis: PemeriksaanKlinisData[];
 }) {
   // Representasi BULANAN: ambil 1 pemeriksaan (terbaru) per bulan.
-  const asc = [...vitals].sort(
+  const asc = [...klinis].sort(
     (a, b) =>
       new Date(a.tanggal_periksa).getTime() -
       new Date(b.tanggal_periksa).getTime(),

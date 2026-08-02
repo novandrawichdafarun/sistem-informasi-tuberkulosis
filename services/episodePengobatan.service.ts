@@ -3,6 +3,7 @@ import {
   BukaEpisodePayload,
   EditEpisodePayload,
   EpisodePengobatanData,
+  HasilAkhirData,
   PasienEpisodeOverview,
   TutupEpisodePayload,
 } from "@/types/episodePengobatan";
@@ -29,7 +30,11 @@ export const getDaftarPasienDanEpisode = async (
         id_pasien, nama_lengkap, usia, domisili, jenis_kelamin,
         episode_pengobatan (
           id_episode, id_pasien, tanggal_mulai, tanggal_selesai,
-          tipe_pasien, status_episode, created_at
+          tipe_pasien, status_episode, created_at,
+          hasil_akhir (
+            id_hasil, id_episode, tanggal_penetapan,
+            status_akhir, catatan_akhir, created_at
+          )
         )
       `,
       )
@@ -42,17 +47,27 @@ export const getDaftarPasienDanEpisode = async (
     const formattedData: PasienEpisodeOverview[] = (pasienData || []).map(
       (pasien) => {
         const rawEpisodes = pasien.episode_pengobatan as
-          | EpisodePengobatanData[]
+          | (EpisodePengobatanData & {
+              hasil_akhir?: HasilAkhirData[] | null;
+            })[]
           | undefined;
+
+        const normalizedEpisodes: EpisodePengobatanData[] = (
+          rawEpisodes || []
+        ).map((episode) => ({
+          ...episode,
+          hasil_akhir: Array.isArray(episode.hasil_akhir)
+            ? (episode.hasil_akhir[0] ?? null)
+            : (episode.hasil_akhir ?? null),
+        }));
+
         const episodeAktif =
-          rawEpisodes?.find((ep) => ep.status_episode === "aktif") || null;
-        const riwayat = rawEpisodes
-          ? [...rawEpisodes].sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-            )
-          : [];
+          normalizedEpisodes.find((ep) => ep.status_episode === "aktif") ||
+          null;
+        const riwayat = [...normalizedEpisodes].sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
 
         return {
           id_pasien: pasien.id_pasien,
@@ -129,7 +144,10 @@ export const bukaEpisode = async (
       .single();
 
     if (active)
-      return { success: false, error: "Pasien masih memiliki episode aktif." };
+      return {
+        success: false,
+        error: "Pasien masih memiliki episode pengobatan aktif.",
+      };
 
     const { error: episodeError } = await supabase
       .from("episode_pengobatan")
@@ -142,7 +160,7 @@ export const bukaEpisode = async (
       return handleServiceError(episodeError, "Episode gagal dibuka.");
     }
 
-    return { success: true, message: "Episode berhasil dibuka." };
+    return { success: true, message: "Episode pengobatan berhasil dibuka." };
   } catch (error) {
     return handleServiceError(
       error,
@@ -180,16 +198,39 @@ export const tutupEpisode = async (
       .from("episode_pengobatan")
       .update({
         status_episode: "selesai",
-        tanggal_selesai: payload.tanggal_selesai,
-        tipe_pasien: payload.tipe_pasien,
       })
       .eq("id_episode", payload.id_episode);
 
-    if (episodeError) {
-      return handleServiceError(episodeError, "Episode gagal diselesaikan.");
+    if (episodeError)
+      return handleServiceError(
+        episodeError,
+        "Episode pengobatan gagal diselesaikan.",
+      );
+
+    const { error: hasilAkhirError } = await supabase
+      .from("hasil_akhir")
+      .insert({
+        id_episode: payload.id_episode,
+        tanggal_penetapan: payload.tanggal_penetapan,
+        status_akhir: payload.status_akhir,
+        catatan_akhir: payload.catatan_akhir || null,
+      });
+
+    if (hasilAkhirError) {
+      await supabase
+        .from("episode_pengobatan")
+        .update({ status_episode: "aktif" })
+        .eq("id_episode", payload.id_episode); //! Role back status episode
+      return handleServiceError(
+        hasilAkhirError?.message,
+        "Hasil Akhir gagal di buat",
+      );
     }
 
-    return { success: true, message: "Episode berhasil diselesaikan." };
+    return {
+      success: true,
+      message: "Episode pengobatan berhasil diselesaikan.",
+    };
   } catch (error) {
     return handleServiceError(
       error,
@@ -223,7 +264,7 @@ export const editEpisode = async (
         "Episode pengobatan pasien tidak ada.",
       );
 
-    // Update
+    //? Update Episode
     const { error: updateError } = await supabase
       .from("episode_pengobatan")
       .update({
@@ -233,13 +274,48 @@ export const editEpisode = async (
       })
       .eq("id_episode", payload.id_episode);
 
-    if (updateError) {
+    if (updateError)
       return handleServiceError(
         updateError?.message,
-        "Gagal memperbarui data.",
+        "Gagal memperbarui episode pengobatan.",
       );
+
+    // ? Update Hasil AKhir
+    if (payload.hasil_akhir) {
+      const { data: existingHasil, error: hasilCheckError } = await supabase
+        .from("hasil_akhir")
+        .select("id_hasil")
+        .eq("id_episode", payload.id_episode)
+        .single();
+
+      if (hasilCheckError)
+        return handleServiceError(
+          hasilCheckError?.message,
+          "Gagal memeriksa data hasil akhir.",
+        );
+
+      if (existingHasil) {
+        const { error: updateHasilError } = await supabase
+          .from("hasil_akhir")
+          .update({
+            tanggal_penetapan: payload.hasil_akhir.tanggal_penetapan,
+            status_akhir: payload.hasil_akhir.status_akhir,
+            catatan_akhir: payload.hasil_akhir.catatan_akhir || null,
+          })
+          .eq("id_episode", payload.id_episode);
+
+        if (updateHasilError)
+          return handleServiceError(
+            updateHasilError?.message,
+            "Gagal memperbarui data hasil akhir.",
+          );
+      }
     }
-    return { success: true, message: "Episode berhasil diperbarui." };
+
+    return {
+      success: true,
+      message: "Episode pengobatan berhasil diperbarui.",
+    };
   } catch (error) {
     return handleServiceError(
       error,
@@ -273,16 +349,40 @@ export const hapusEpisode = async (
         "Episode pengobatan pasien tidak ada.",
       );
 
-    const { error: deleteError } = await supabase
+    const { data: existingHasil, error: hasilCheckError } = await supabase
+      .from("hasil_akhir")
+      .select("id_hasil")
+      .eq("id_episode", id_episode)
+      .maybeSingle();
+
+    if (hasilCheckError)
+      return handleServiceError(
+        hasilCheckError?.message,
+        "Gagal memeriksa data hasil akhir.",
+      );
+
+    if (existingHasil) {
+      const { error: deleteHasilError } = await supabase
+        .from("hasil_akhir")
+        .delete()
+        .eq("id_episode", id_episode);
+
+      if (deleteHasilError)
+        return handleServiceError(
+          deleteHasilError?.message,
+          "Gagal menghapus data hasil akhir",
+        );
+    }
+
+    const { error: deleteEpisodeError } = await supabase
       .from("episode_pengobatan")
       .delete()
       .eq("id_episode", id_episode);
 
-    if (deleteError) {
-      return handleServiceError(deleteError?.message, "Gagal menghapus data");
-    }
+    if (deleteEpisodeError)
+      return { success: false, error: "Gagal menghapus episode." };
 
-    return { success: true, message: "Episode berhasil dihapus." };
+    return { success: true, message: "Episode Pengobatan berhasil dihapus." };
   } catch (error) {
     return handleServiceError(
       error,

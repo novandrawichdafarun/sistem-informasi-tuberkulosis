@@ -1,4 +1,4 @@
-export default function AdherenceDonut({ percent }: { percent: number }) {
+export default function KepatuhanDonut({ percent }: { percent: number }) {
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - percent / 100);

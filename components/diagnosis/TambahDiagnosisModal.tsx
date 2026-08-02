@@ -1,6 +1,7 @@
 "use client";
 
 import { createDiagnosisAction } from "@/actions/diagnosis";
+import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
 import { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
@@ -168,14 +169,14 @@ export default function TambahDiagnosisModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="bg-gray-100 px-4 py-2 text-sm font-medium rounded text-gray-700 hover:bg-gray-200"
+              className={cencelBtnClass}
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded hover:bg-blue-700 disabled:bg-blue-400"
+              className={submitBtnClass}
             >
               {isPending ? "Menyimpan..." : "Simpan Data"}
             </button>
