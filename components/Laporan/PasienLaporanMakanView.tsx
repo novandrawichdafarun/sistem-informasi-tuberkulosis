@@ -1,10 +1,13 @@
-import { getLaporanMakanPasienAction } from "@/actions/laporanMakan";
 import { formatWaktuID } from "@/utils/date";
 import LaporanMakanForm from "./LaporanMakanForm";
+import { getRiwayatMakanAction } from "@/actions/laporan";
 
 export default async function PasienLaporanMakanView() {
-  const res = await getLaporanMakanPasienAction();
+  const res = await getRiwayatMakanAction();
   const data = res.success && res.data ? res.data : [];
+
+  const todayDate = new Date().toISOString().slice(0, 10);
+  const todaysReports = data.filter((d) => d.waktu_makan.startsWith(todayDate));
 
   return (
     <div className="space-y-6">
@@ -21,7 +24,7 @@ export default async function PasienLaporanMakanView() {
         </div>
       )}
 
-      <LaporanMakanForm />
+      <LaporanMakanForm todaysReports={todaysReports} />
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="border-b border-slate-100 px-6 py-4">

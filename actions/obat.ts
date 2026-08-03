@@ -20,9 +20,9 @@ export async function getDaftarObatAction(): Promise<
   ActionResponse<ObatData[]>
 > {
   try {
-    const superAdmin = await requireSuperAdminSession();
+    const superAdminId = await requireSuperAdminSession();
     const supabase = await getSupabaseServer();
-    return await getDaftarObat(supabase, superAdmin);
+    return await getDaftarObat(supabase, superAdminId);
   } catch (error) {
     return handleActionError(error);
   }

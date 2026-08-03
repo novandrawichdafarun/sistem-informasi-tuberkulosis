@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LaporanMakanPasienOverview } from "@/types/laporanMakan";
+import { LaporanMakanPasienOverview } from "@/types/laporan";
 import { formatWaktuID } from "@/utils/date";
 import { DetailIcon } from "../asset/icons";
 
@@ -77,7 +77,10 @@ export default function LaporanMakanRowView({
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {laporan.map((item) => (
-                        <tr key={item.id_laporan} className="hover:bg-gray-50/50">
+                        <tr
+                          key={item.id_laporan}
+                          className="hover:bg-gray-50/50"
+                        >
                           <td className="px-4 py-3 font-medium text-gray-800">
                             {formatWaktuID(item.waktu_makan)}
                           </td>

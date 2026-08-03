@@ -2,13 +2,14 @@ import { ActionResponse } from "@/types/action";
 import {
   JadwalObatHariIni,
   KepatuhanHarian,
+  LaporanMakanData,
+  LaporanMakanPasienOverview,
   LaporanMakanPayload,
   LaporanObatPayload,
   RingkasanKepatuhan,
-  RiwayatLaporanMakan,
   StatusLaporanFinal,
 } from "@/types/laporan";
-import { verifyPasienAccess } from "@/utils/access";
+import { verifyPasienAccess, verifySuperAdminAccess } from "@/utils/access";
 import { isoDaysAgo, isReportLate, todayISO } from "@/utils/date";
 import { handleServiceError } from "@/utils/error";
 import { getPasienIdByUser, getResepIdsByPasien } from "@/utils/Pasien";
@@ -354,7 +355,7 @@ export async function laporMakan(
 export async function getRiwayatMakanByUser(
   supabase: SupabaseClient,
   id_user_pasien: string,
-): Promise<ActionResponse<RiwayatLaporanMakan[]>> {
+): Promise<ActionResponse<LaporanMakanData[]>> {
   try {
     const { pasien, error } = await verifyPasienAccess(
       supabase,
@@ -368,7 +369,10 @@ export async function getRiwayatMakanByUser(
 
     const { data, error: dataError } = await supabase
       .from("laporan_makan")
-      .select("id_laporan, waktu_makan, karbo, protein, serat, catatan")
+      .select(
+        `id_laporan, id_pasien, waktu_makan, 
+        karbo, protein, serat, catatan, reported_at`,
+      )
       .eq("id_pasien", id_pasien)
       .order("waktu_makan", { ascending: false });
 
@@ -386,3 +390,66 @@ export async function getRiwayatMakanByUser(
     );
   }
 }
+
+export const getDaftarLaporanMakan = async (
+  supabase: SupabaseClient,
+  id_super_admin: string,
+): Promise<ActionResponse<LaporanMakanPasienOverview[]>> => {
+  try {
+    const { superAdmin, error } = await verifySuperAdminAccess(
+      supabase,
+      id_super_admin,
+    );
+    if (error || !superAdmin)
+      return { success: false, error: "Otoritas tidak valid." };
+
+    const { data, error: dataError } = await supabase
+      .from("laporan_makan")
+      .select(
+        `
+        id_laporan, id_pasien, waktu_makan, 
+        karbo, protein, serat, catatan, reported_at, 
+        pasien ( nama_lengkap, jenis_kelamin )
+        `,
+      )
+      .order("waktu_makan", { ascending: false });
+
+    if (dataError)
+      return handleServiceError(
+        dataError?.message,
+        "Gagal memuat laporan makan.",
+      );
+
+    type PasienRel = { nama_lengkap: string; jenis_kelamin: "L" | "P" };
+    const grup = new Map<number, LaporanMakanPasienOverview>();
+
+    for (const row of data ?? []) {
+      const { pasien, ...rest } = row as unknown as LaporanMakanData & {
+        pasien: PasienRel | PasienRel[] | null;
+      };
+      const rel = Array.isArray(pasien) ? pasien[0] : pasien;
+
+      let overview = grup.get(rest.id_pasien);
+      if (!overview) {
+        overview = {
+          id_pasien: rest.id_pasien,
+          nama_pasien: rel?.nama_lengkap ?? "-",
+          jenis_kelamin: rel?.jenis_kelamin ?? null,
+          total: 0,
+          terakhir: null,
+          laporan: [],
+        };
+        grup.set(rest.id_pasien, overview);
+      }
+
+      overview.laporan.push(rest);
+      overview.total += 1;
+      // Data sudah terurut waktu_makan desc → yang pertama = terbaru.
+      if (!overview.terakhir) overview.terakhir = rest.waktu_makan;
+    }
+
+    return { success: true, data: [...grup.values()] };
+  } catch (error) {
+    return handleServiceError(error);
+  }
+};

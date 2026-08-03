@@ -2,30 +2,39 @@
 
 import React, { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { createLaporanMakanAction } from "@/actions/laporanMakan";
+import { submitLaporanMakanAction } from "@/actions/laporan";
+import { LaporanMakanData } from "@/types/laporan";
 
-// Nilai default input datetime-local dalam waktu lokal (YYYY-MM-DDTHH:mm).
-function nowLocalInput() {
-  const d = new Date();
-  const offset = d.getTimezoneOffset() * 60000;
-  return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+interface LaporanMakanProps {
+  todaysReports: LaporanMakanData[];
 }
 
-export default function LaporanMakanForm() {
+export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [sukses, setSukses] = useState<string | null>(null);
+  const reportCount = todaysReports.length;
+  const maxReached = reportCount >= 3;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (maxReached) {
+      setError(
+        "Sudah mencapai batas pelaporan makan hari ini (3x). Anda tidak bisa melaporkan lagi.",
+      );
+      setSukses(null);
+      return;
+    }
+
     setError(null);
     setSukses(null);
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const res = await createLaporanMakanAction(formData);
+      const res = await submitLaporanMakanAction(formData);
       if (!res.success) {
         setError(res.error);
       } else {
@@ -36,8 +45,9 @@ export default function LaporanMakanForm() {
     });
   };
 
-  const inputClass =
-    "w-full rounded-lg border border-slate-300 p-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  const inputClass = `w-full rounded-lg border border-slate-300 p-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 ${
+    maxReached ? "cursor-not-allowed bg-slate-100" : ""
+  }`;
 
   return (
     <form
@@ -45,13 +55,32 @@ export default function LaporanMakanForm() {
       onSubmit={handleSubmit}
       className="rounded-2xl border border-slate-200 bg-white p-6"
     >
-      <h2 className="text-base font-semibold text-brand-950">
-        Catat Makanan Hari Ini
-      </h2>
-      <p className="mt-1 text-sm text-slate-500">
-        Isi apa yang Anda makan agar Nakes dapat memantau asupan gizi selama
-        pengobatan.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-brand-950">
+            Catat Makanan Hari Ini
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Isi apa yang Anda makan agar Nakes dapat memantau asupan gizi selama
+            pengobatan.
+          </p>
+        </div>
+
+        <div className="rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
+          {reportCount}/3
+        </div>
+      </div>
+
+      {maxReached ? (
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
+          Sudah mencapai batas pelaporan makan hari ini (3x). Anda tidak bisa
+          melaporkan lagi.
+        </div>
+      ) : (
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+          Anda masih bisa melaporkan {3 - reportCount} kali lagi hari ini.
+        </div>
+      )}
 
       {error && (
         <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
@@ -65,19 +94,6 @@ export default function LaporanMakanForm() {
       )}
 
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <label className="mb-1 block text-sm font-medium text-slate-700">
-            Waktu Makan *
-          </label>
-          <input
-            type="datetime-local"
-            name="waktu_makan"
-            required
-            defaultValue={nowLocalInput()}
-            className={inputClass}
-          />
-        </div>
-
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">
             Karbohidrat *
@@ -89,6 +105,7 @@ export default function LaporanMakanForm() {
             maxLength={50}
             placeholder="Contoh: Nasi Putih"
             className={inputClass}
+            disabled={maxReached}
           />
         </div>
 
@@ -103,6 +120,7 @@ export default function LaporanMakanForm() {
             maxLength={50}
             placeholder="Contoh: Dada Ayam"
             className={inputClass}
+            disabled={maxReached}
           />
         </div>
 
@@ -117,6 +135,7 @@ export default function LaporanMakanForm() {
             maxLength={50}
             placeholder="Contoh: Sayur Bayam"
             className={inputClass}
+            disabled={maxReached}
           />
         </div>
 
@@ -130,6 +149,7 @@ export default function LaporanMakanForm() {
             maxLength={500}
             placeholder="Contoh: porsi sedikit karena mual"
             className={inputClass}
+            disabled={maxReached}
           />
         </div>
       </div>
@@ -137,7 +157,7 @@ export default function LaporanMakanForm() {
       <div className="mt-5 flex justify-end">
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || maxReached}
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:bg-brand-400"
         >
           {isPending ? "Menyimpan..." : "Simpan Laporan"}

@@ -5,6 +5,7 @@ import {
   laporanObatSchema,
 } from "@/schemas/laporan.schema";
 import {
+  getDaftarLaporanMakan,
   getJadwalByPasienId,
   getKepatuhanByUser,
   getRiwayatMakanByUser,
@@ -14,11 +15,15 @@ import {
 import { ActionResponse } from "@/types/action";
 import {
   JadwalObatHariIni,
+  LaporanMakanData,
+  LaporanMakanPasienOverview,
   RingkasanKepatuhan,
-  RiwayatLaporanMakan,
 } from "@/types/laporan";
 import { handleActionError } from "@/utils/error";
-import { requirePasienSession } from "@/utils/session";
+import {
+  requirePasienSession,
+  requireSuperAdminSession,
+} from "@/utils/session";
 import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
 import { revalidatePath } from "next/cache";
@@ -48,12 +53,24 @@ export async function getKepatuhanAction(
 }
 
 export async function getRiwayatMakanAction(): Promise<
-  ActionResponse<RiwayatLaporanMakan[]>
+  ActionResponse<LaporanMakanData[]>
 > {
   try {
     const userId = await requirePasienSession();
     const supabase = await getSupabaseServer();
     return await getRiwayatMakanByUser(supabase, userId);
+  } catch (error) {
+    return handleActionError(error);
+  }
+}
+
+export async function getDaftarLaporanMakanAction(): Promise<
+  ActionResponse<LaporanMakanPasienOverview[]>
+> {
+  try {
+    const superAdminId = await requireSuperAdminSession();
+    const supabase = await getSupabaseServer();
+    return await getDaftarLaporanMakan(supabase, superAdminId);
   } catch (error) {
     return handleActionError(error);
   }

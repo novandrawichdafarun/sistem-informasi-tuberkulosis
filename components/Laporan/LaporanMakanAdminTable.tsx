@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { LaporanMakanPasienOverview } from "@/types/laporanMakan";
+import { LaporanMakanPasienOverview } from "@/types/laporan";
 import { SearchIcon } from "../asset/icons";
 import LaporanMakanRowView from "./LaporanMakanRowView";
 
@@ -47,7 +47,10 @@ export default function LaporanMakanAdminTable({
             <tbody className="divide-y divide-gray-200">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-gray-400">
+                  <td
+                    colSpan={4}
+                    className="px-6 py-10 text-center text-gray-400"
+                  >
                     {rows.length === 0
                       ? "Belum ada laporan makan dari pasien."
                       : "Pasien tidak ditemukan."}

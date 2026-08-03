@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../api/auth/[...nextauth]/route";
-import PasienLaporanMakanView from "@/components/laporanMakan/PasienLaporanMakanView";
-import AdminLaporanMakanView from "@/components/laporanMakan/AdminLaporanMakanView";
+import PasienLaporanMakanView from "@/components/Laporan/PasienLaporanMakanView";
+import AdminLaporanMakanView from "@/components/Laporan/AdminLaporanMakanView";
 
 export const metadata = { title: "Laporan Makanan | NU-TBCare" };
 

@@ -1,4 +1,3 @@
-import { getVitalSignsAction } from "@/actions/pasienPortal";
 import { formatTanggalID } from "@/utils/date";
 import { hitungBMI } from "@/utils/number";
 import VitalCharts from "@/components/grafik/VitalCharts";
@@ -6,6 +5,7 @@ import WeightChart, {
   buildWeightPoints,
 } from "@/components/grafik/WeightChart";
 import VitalCard from "@/components/card/VitalCard";
+import { getPemeriksaanKlinisByUserAction } from "@/actions/pemeriksaanKlinis";
 
 function nilai(v: number | string | null | undefined, unit = "") {
   if (v === null || v === undefined || v === "") return "-";
@@ -13,7 +13,7 @@ function nilai(v: number | string | null | undefined, unit = "") {
 }
 
 export default async function PemeriksaanKlinisView() {
-  const res = await getVitalSignsAction();
+  const res = await getPemeriksaanKlinisByUserAction();
   const data = res.success && res.data ? res.data : [];
   const terbaru = data[0];
 
@@ -30,7 +30,9 @@ export default async function PemeriksaanKlinisView() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-brand-950">Pemeriksaan Klinis</h1>
+        <h1 className="text-2xl font-bold text-brand-950">
+          Pemeriksaan Klinis
+        </h1>
         <p className="mt-1 text-sm text-slate-500">
           Hasil pemeriksaan tanda vital dan berat badan yang dicatat oleh Nakes
           selama pengobatan Anda.
@@ -164,7 +166,9 @@ export default async function PemeriksaanKlinisView() {
                   <p className="mt-1 text-3xl font-bold text-brand-950">
                     {bmiResult.nilai}
                   </p>
-                  <p className={`text-xs font-semibold ${bmiResult.colorClass}`}>
+                  <p
+                    className={`text-xs font-semibold ${bmiResult.colorClass}`}
+                  >
                     {bmiResult.kategori}
                   </p>
                 </>

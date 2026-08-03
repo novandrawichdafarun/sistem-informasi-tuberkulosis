@@ -1,15 +1,8 @@
-import { getLabResultsAction } from "@/actions/pasienPortal";
+import { getPemeriksaanLabByUserAction } from "@/actions/pemeriksaanLab";
 import { formatTanggalID } from "@/utils/date";
 
-function hasilBadgeClass(hasil: string) {
-  const v = hasil.toLowerCase();
-  if (v.includes("positif")) return "bg-red-100 text-red-700";
-  if (v.includes("negatif")) return "bg-green-100 text-green-700";
-  return "bg-slate-100 text-slate-600";
-}
-
 export default async function PemeriksaanMedisView() {
-  const res = await getLabResultsAction();
+  const res = await getPemeriksaanLabByUserAction();
   const data = res.success && res.data ? res.data : [];
 
   return (
@@ -38,7 +31,7 @@ export default async function PemeriksaanMedisView() {
             <table className="min-w-full divide-y divide-slate-200 text-sm">
               <thead className="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
                 <tr>
-                  <th className="px-4 py-3">Tanggal Tes</th>
+                  <th className="px-4 py-3">Periode Tes</th>
                   <th className="px-4 py-3">Jenis Tes</th>
                   <th className="px-4 py-3">Sample</th>
                   <th className="px-4 py-3">DNA / Resistensi</th>
@@ -51,24 +44,24 @@ export default async function PemeriksaanMedisView() {
                   <tr key={lab.id_tes} className="hover:bg-slate-50">
                     <td className="whitespace-nowrap px-4 py-3">
                       <div className="font-medium text-slate-800">
-                        {formatTanggalID(lab.tanggal_tes)}
+                        {lab.periode_pemeriksaan}
                       </div>
                       <div className="text-xs text-slate-400">
-                        {lab.periode_pemeriksaan || "-"}
+                        {formatTanggalID(lab.tanggal_tes)}
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 font-medium text-brand-700">
                       {lab.jenis_tes}
                     </td>
                     <td className="px-4 py-3 text-xs">
-                      <div>Jenis: {lab.jenis_sample || "-"}</div>
-                      <div>Kualitas: {lab.kualitas_sample || "-"}</div>
+                      <div>Jenis: {lab.jenis_sample}</div>
+                      <div>Kualitas: {lab.kualitas_sample}</div>
                     </td>
                     <td className="px-4 py-3 text-xs">
                       <div>
                         DNA:{" "}
                         <span className="font-medium text-slate-800">
-                          {lab.dna_bakteri_tb || "-"}
+                          {lab.dna_bakteri_tb}
                         </span>
                       </div>
                       <div>
@@ -76,23 +69,25 @@ export default async function PemeriksaanMedisView() {
                         <span
                           className={`font-semibold ${
                             lab.status_resistensi
-                              ?.toLowerCase()
+                              .toLowerCase()
                               .includes("resisten")
                               ? "text-red-600"
                               : "text-green-600"
                           }`}
                         >
-                          {lab.status_resistensi || "-"}
+                          {lab.status_resistensi}
                         </span>
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <span
-                        className={`inline-flex rounded px-2 py-1 text-xs font-semibold ${hasilBadgeClass(
-                          lab.hasil_tes,
-                        )}`}
+                        className={`inline-flex rounded px-2 py-1 text-xs font-semibold ${
+                          lab.hasil_tes === "N"
+                            ? "bg-red-100 text-red-600"
+                            : "bg-green-100 text-green-600"
+                        }`}
                       >
-                        {lab.hasil_tes}
+                        {lab.hasil_tes === "N" ? "Negatif" : "Positif"}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">

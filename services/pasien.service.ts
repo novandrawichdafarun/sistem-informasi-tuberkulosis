@@ -155,10 +155,10 @@ export const getPasienProfileByUser = async (
       .from("pasien")
       .select(
         `
-        id_pasien, id_user, nama_lengkap, usia, jenis_kelamin, domisili,
-        no_telp, pendidikan, pekerjaan, pendapatan,
-        episode_pengobatan ( id_episode, tanggal_mulai, tipe_pasien, status_episode )
-      `,
+          id_pasien, id_user, nama_lengkap, usia, jenis_kelamin, domisili,
+          no_telp, pendidikan, pekerjaan, pendapatan,
+          episode_pengobatan ( id_episode, tanggal_mulai, tipe_pasien, status_episode )
+        `,
       )
       .eq("id_user", id_user_pasien)
       .single();

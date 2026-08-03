@@ -16,13 +16,24 @@ export interface LaporanMakanPayload {
   catatan?: string;
 }
 
-export interface RiwayatLaporanMakan {
+export interface LaporanMakanData {
   id_laporan: number;
+  id_pasien: number;
   waktu_makan: string;
   karbo: string;
   protein: string;
   serat: string;
-  catatan?: string;
+  catatan: string | null;
+  reported_at: string;
+}
+
+export interface LaporanMakanPasienOverview {
+  id_pasien: number;
+  nama_pasien: string;
+  jenis_kelamin: "L" | "P" | null;
+  total: number;
+  terakhir: string | null; // waktu_makan terbaru
+  laporan: LaporanMakanData[];
 }
 
 export interface JadwalObatHariIni {

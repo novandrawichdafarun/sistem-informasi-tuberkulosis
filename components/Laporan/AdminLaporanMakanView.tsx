@@ -1,8 +1,8 @@
-import { getLaporanMakanGroupedAction } from "@/actions/laporanMakan";
+import { getDaftarLaporanMakanAction } from "@/actions/laporan";
 import LaporanMakanAdminTable from "./LaporanMakanAdminTable";
 
 export default async function AdminLaporanMakanView() {
-  const res = await getLaporanMakanGroupedAction();
+  const res = await getDaftarLaporanMakanAction();
   const data = res.success && res.data ? res.data : [];
 
   return (

@@ -9,7 +9,7 @@ import StatusMinum from "@/components/Laporan/StatusMinum";
 export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
 
 export default async function LaporanObatPage() {
-  const [jadwalRes, adherenceRes] = await Promise.all([
+  const [jadwalRes, kepatuhanRes] = await Promise.all([
     getJadwalByPasienIdAction(),
     getKepatuhanAction(14),
   ]);
@@ -17,8 +17,8 @@ export default async function LaporanObatPage() {
   const jadwalHariIni =
     jadwalRes.success && jadwalRes.data ? jadwalRes.data : [];
   const days =
-    adherenceRes.success && adherenceRes.data
-      ? [...adherenceRes.data.days].reverse()
+    kepatuhanRes.success && kepatuhanRes.data
+      ? [...kepatuhanRes.data.days].reverse()
       : [];
 
   return (

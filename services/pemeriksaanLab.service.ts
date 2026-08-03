@@ -109,8 +109,9 @@ export const getPemeriksaanLabByUser = async (
         `
         id_pasien,
         pemeriksaan_lab (
-          id_tes, id_episode, jenis_tes, tanggal_tes, hasil_tes,
-          periode_pemeriksaan, berkas_pendukung_url, created_at
+          id_tes, id_episode, jenis_tes, tanggal_tes, periode_pemeriksaan,
+          jenis_sample, kualitas_sample, dna_bakteri_tb, status_resistensi,
+          hasil_tes, hasil_bta, berkas_pendukung_url, created_at
         )
         `,
       )
@@ -129,8 +130,12 @@ export const getPemeriksaanLabByUser = async (
             id_episode: lab.id_episode,
             jenis_tes: lab.jenis_tes,
             tanggal_tes: lab.tanggal_tes,
-            hasil_tes: lab.hasil_tes,
             periode_pemeriksaan: lab.periode_pemeriksaan,
+            jenis_sample: lab.jenis_sample,
+            kualitas_sample: lab.kualitas_sample,
+            dna_bakteri_tb: lab.dna_bakteri_tb,
+            status_resistensi: lab.status_resistensi,
+            hasil_tes: lab.hasil_tes,
             berkas_pendukung_url: lab.berkas_pendukung_url,
             created_at: lab.created_at,
           }) as PemeriksaanLabData,
