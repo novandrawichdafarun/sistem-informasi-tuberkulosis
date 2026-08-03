@@ -1,5 +1,6 @@
 import { getPemeriksaanLabByUserAction } from "@/actions/pemeriksaanLab";
 import { formatTanggalID } from "@/utils/date";
+import { PemeriksaanLabIcon } from "@/components/asset/icons";
 
 export default async function PemeriksaanMedisView() {
   const res = await getPemeriksaanLabByUserAction();
@@ -7,12 +8,19 @@ export default async function PemeriksaanMedisView() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-brand-950">Pemeriksaan Medis</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Hasil pemeriksaan laboratorium yang dicatat oleh Nakes selama
-          pengobatan Anda.
-        </p>
+      <div className="flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
+          <PemeriksaanLabIcon className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-brand-950">
+            Pemeriksaan Medis
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Hasil pemeriksaan laboratorium yang dicatat oleh Nakes selama
+            pengobatan Anda.
+          </p>
+        </div>
       </div>
 
       {res.success === false && (

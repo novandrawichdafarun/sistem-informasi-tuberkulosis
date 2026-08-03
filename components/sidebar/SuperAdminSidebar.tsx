@@ -138,13 +138,13 @@ export default function AdminSidebar({
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
               {/* Toggle sidebar mobile */}
               <button
                 type="button"
                 onClick={() => setOpen(true)}
                 aria-label="Buka menu"
-                className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-brand-700 lg:hidden"
+                className="shrink-0 rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-brand-700 lg:hidden"
               >
                 <MenuIcon className="h-5 w-5" />
               </button>
@@ -154,23 +154,25 @@ export default function AdminSidebar({
                 onClick={toggleDesktop}
                 aria-label={desktopOpen ? "Sembunyikan menu" : "Tampilkan menu"}
                 title={desktopOpen ? "Sembunyikan menu" : "Tampilkan menu"}
-                className="hidden rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-brand-700 lg:inline-flex"
+                className="hidden shrink-0 rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-brand-700 lg:inline-flex"
               >
                 <MenuIcon className="h-5 w-5" />
               </button>
-              <span className="text-base font-semibold text-brand-950">
+              <span className="truncate text-base font-semibold text-brand-950">
                 {activeLabel}
               </span>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="hidden text-right leading-tight sm:block">
-                <p className="text-sm font-semibold text-brand-950">
+            <div className="flex shrink-0 items-center gap-3">
+              <div className="hidden max-w-[40vw] text-right leading-tight sm:block">
+                <p className="truncate text-sm font-semibold text-brand-950">
                   {user.name}
                 </p>
-                <p className="text-xs text-slate-500">{user.roleLabel}</p>
+                <p className="truncate text-xs text-slate-500">
+                  {user.roleLabel}
+                </p>
               </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white">
                 {initial}
               </div>
             </div>

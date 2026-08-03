@@ -1,11 +1,12 @@
 import { formatTanggalID } from "@/utils/date";
 import { hitungBMI } from "@/utils/number";
 import VitalCharts from "@/components/grafik/VitalCharts";
-import WeightChart, {
-  buildWeightPoints,
-} from "@/components/grafik/WeightChart";
+import VitalBarChart from "@/components/grafik/VitalBarChart";
+import { buildWeightPoints } from "@/components/grafik/WeightChart";
 import VitalCard from "@/components/card/VitalCard";
 import { getPemeriksaanKlinisByUserAction } from "@/actions/pemeriksaanKlinis";
+import { PemeriksaanKlinisIcon } from "@/components/asset/icons";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 function nilai(v: number | string | null | undefined, unit = "") {
   if (v === null || v === undefined || v === "") return "-";
@@ -27,16 +28,38 @@ export default async function PemeriksaanKlinisView() {
       ? beratTerakhir - beratAwal
       : null;
 
+  // Agregasi bulanan: 1 pemeriksaan (terbaru) per bulan → perubahan per bulan.
+  const ascBulan = [...data].sort(
+    (a, b) =>
+      new Date(a.tanggal_periksa).getTime() -
+      new Date(b.tanggal_periksa).getTime(),
+  );
+  const perBulan = new Map<string, (typeof data)[number]>();
+  ascBulan.forEach((v) => perBulan.set(v.tanggal_periksa.slice(0, 7), v));
+  const bulan = [...perBulan.keys()].sort().map((k) => perBulan.get(k)!);
+  const bulanLabels = bulan.map((d) =>
+    formatTanggalID(d.tanggal_periksa, { month: "short", year: "numeric" }),
+  );
+  const tinggiValues = bulan.map((d) => d.tinggi_badan ?? null);
+  const beratValues = bulan.map((d) => d.berat_badan ?? null);
+  const adaTinggi = tinggiValues.some((v) => v != null);
+  const adaBerat = beratValues.some((v) => v != null);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-brand-950">
-          Pemeriksaan Klinis
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Hasil pemeriksaan tanda vital dan berat badan yang dicatat oleh Nakes
-          selama pengobatan Anda.
-        </p>
+      <div className="flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
+          <PemeriksaanKlinisIcon className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-brand-950">
+            Pemeriksaan Klinis
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Hasil pemeriksaan tanda vital dan berat badan yang dicatat oleh
+            Nakes selama pengobatan Anda.
+          </p>
+        </div>
       </div>
 
       {res.success === false && (
@@ -77,8 +100,8 @@ export default async function PemeriksaanKlinisView() {
             </div>
           )}
 
-          {/* Grafik tren tanda vital */}
-          <VitalCharts klinis={data} />
+          {/* Grafik tren tanda vital (suhu ditampilkan sebagai grafik batang) */}
+          <VitalCharts klinis={data} suhuChart="bar" />
 
           {/* Tabel riwayat tanda vital */}
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
@@ -146,10 +169,14 @@ export default async function PemeriksaanKlinisView() {
               </p>
               {selisih != null && (
                 <p
-                  className={`text-xs ${selisih >= 0 ? "text-brand-700" : "text-red-600"}`}
+                  className={`mt-1 inline-flex items-center gap-1 text-xs ${selisih >= 0 ? "text-brand-700" : "text-red-600"}`}
                 >
-                  {selisih >= 0 ? "▲" : "▼"} {Math.abs(selisih).toFixed(1)} kg
-                  dari awal
+                  {selisih >= 0 ? (
+                    <TrendingUp className="h-3.5 w-3.5" strokeWidth={2} />
+                  ) : (
+                    <TrendingDown className="h-3.5 w-3.5" strokeWidth={2} />
+                  )}
+                  {Math.abs(selisih).toFixed(1)} kg dari awal
                 </p>
               )}
             </div>
@@ -178,21 +205,59 @@ export default async function PemeriksaanKlinisView() {
             </div>
           </div>
 
-          {/* Grafik perkembangan berat badan */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 className="text-base font-semibold text-brand-950">
-              Grafik Perkembangan Berat Badan
-            </h2>
-            {points.length === 0 ? (
-              <p className="mt-4 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
-                Belum ada data berat badan. Data akan muncul setelah Nakes
-                mencatat pemeriksaan klinis.
+          {/* Grafik tinggi & berat badan — 2 blok terpisah, per bulan */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Tinggi Badan */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="text-base font-semibold text-brand-950">
+                Tinggi Badan
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Perubahan tinggi badan per bulan.
               </p>
-            ) : (
-              <div className="mt-4 overflow-x-auto">
-                <WeightChart points={points} />
-              </div>
-            )}
+              {!adaTinggi ? (
+                <p className="mt-4 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
+                  Belum ada data tinggi badan. Data akan muncul setelah Nakes
+                  mencatat pemeriksaan klinis.
+                </p>
+              ) : (
+                <div className="mt-4 overflow-x-auto">
+                  <VitalBarChart
+                    labels={bulanLabels}
+                    values={tinggiValues}
+                    color="#3b82f6"
+                    suffix=" cm"
+                    name="Tinggi"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Berat Badan */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="text-base font-semibold text-brand-950">
+                Berat Badan
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Perubahan berat badan per bulan.
+              </p>
+              {!adaBerat ? (
+                <p className="mt-4 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
+                  Belum ada data berat badan. Data akan muncul setelah Nakes
+                  mencatat pemeriksaan klinis.
+                </p>
+              ) : (
+                <div className="mt-4 overflow-x-auto">
+                  <VitalBarChart
+                    labels={bulanLabels}
+                    values={beratValues}
+                    color="var(--brand-600)"
+                    suffix=" kg"
+                    name="Berat"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Riwayat berat badan */}

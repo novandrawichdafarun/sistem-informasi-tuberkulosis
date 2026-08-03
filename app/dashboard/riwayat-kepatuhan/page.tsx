@@ -1,101 +1,124 @@
-import { formatTanggalID, formatJam } from "@/utils/date";
 import Donut from "@/components/grafik/Donut";
-import Legend from "@/components/molecules/Legend";
-import StatCard from "@/components/card/StatCard";
+import KalenderKepatuhan from "@/components/grafik/KalenderKepatuhan";
+import InfoStat from "@/components/card/InfoStat";
 import { KepatuhanHarian } from "@/types/laporan";
 import { getKepatuhanAction } from "@/actions/laporan";
+import { isoDaysAgo, todayISO } from "@/utils/date";
+import { hitungKepatuhanObat } from "@/components/kepatuhan/hitungKepatuhan";
+import {
+  CheckIcon,
+  ClockIcon,
+  MinusIcon,
+  TrendIcon,
+} from "@/components/asset/icons";
 
 export const metadata = { title: "Riwayat Kepatuhan | NU-TBCare" };
 
-function cellClass(d: KepatuhanHarian) {
-  if (d.status === "diminum") return "bg-brand-600 text-white";
-  if (d.status === "terlewat") return "bg-red-100 text-red-600";
-  return "bg-slate-100 text-slate-400";
+/** Kategori kualitatif dari persentase kepatuhan. */
+function kategori(persen: number): { label: string; className: string } {
+  if (persen >= 80)
+    return {
+      label: "Kepatuhan Baik",
+      className: "bg-emerald-100 text-emerald-700",
+    };
+  if (persen >= 60)
+    return {
+      label: "Kepatuhan Cukup",
+      className: "bg-amber-100 text-amber-700",
+    };
+  return { label: "Perlu Ditingkatkan", className: "bg-red-100 text-red-700" };
 }
 
 export default async function RiwayatKepatuhanPage() {
-  const res = await getKepatuhanAction(30);
-  const summary =
-    res.success && res.data
-      ? res.data
-      : {
-          total: 0,
-          diminum: 0,
-          terlewat: 0,
-          belum: 0,
-          persentase: 0,
-          days: [],
-        };
+  // Ambil rentang 1 tahun agar kalender bisa digeser antar-bulan.
+  // (Action & argumen `days` sudah ada — tanpa perubahan backend.)
+  const res = await getKepatuhanAction(365);
+  const allDays: KepatuhanHarian[] = res.success && res.data ? res.data.days : [];
+
+  const today = todayISO();
+  const batas30 = isoDaysAgo(29);
+
+  // Ringkasan 30 hari terakhir — model "mulai 100%, berkurang tiap telat/tidak minum".
+  const last30 = allDays.filter((d) => d.tanggal >= batas30 && d.tanggal <= today);
+  const { persentase, diminum, terlewat, tidakMinum, dinilai } =
+    hitungKepatuhanObat(last30, today);
+  const kat = kategori(persentase);
+  const hasData = allDays.length > 0;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-brand-950">Riwayat Kepatuhan</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Ringkasan kepatuhan minum obat Anda selama 30 hari terakhir.
-        </p>
+      {/* Header */}
+      <div className="flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
+          <TrendIcon className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-brand-950">
+            Riwayat Kepatuhan
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Ringkasan kepatuhan minum obat Anda selama 30 hari terakhir.
+          </p>
+        </div>
       </div>
 
       {/* Ringkasan */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-6">
-          <Donut percent={summary.persentase} />
+        {/* Kartu donut */}
+        <div className="relative overflow-hidden rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-white p-6">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-brand-100/60 blur-2xl" />
+          <div className="relative flex flex-col items-center text-center">
+            <Donut percent={persentase} />
+            <span
+              className={`mt-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${kat.className}`}
+            >
+              {kat.label}
+            </span>
+            <p className="mt-3 text-xs text-slate-500">
+              Mulai 100%, berkurang tiap dosis telat atau tidak diminum.
+              {dinilai > 0
+                ? ` ${diminum} dari ${dinilai} dosis jatuh tempo diminum tepat waktu.`
+                : " Belum ada dosis yang jatuh tempo."}
+            </p>
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:col-span-2 lg:grid-cols-1 xl:grid-cols-3">
-          <StatCard
-            label="Diminum"
-            value={String(summary.diminum)}
+
+        {/* Kartu statistik */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:col-span-2 lg:content-start">
+          <InfoStat
+            icon={CheckIcon}
             tone="brand"
+            label="Diminum"
+            value={String(diminum)}
+            sub="tepat waktu"
           />
-          <StatCard
-            label="Terlewat"
-            value={String(summary.terlewat)}
+          <InfoStat
+            icon={ClockIcon}
             tone="red"
+            label="Telat lapor"
+            value={String(terlewat)}
+            sub="> 1 jam dari jadwal"
           />
-          <StatCard
-            label="Belum lapor"
-            value={String(summary.belum)}
+          <InfoStat
+            icon={MinusIcon}
             tone="slate"
+            label="Tidak minum"
+            value={String(tidakMinum)}
+            sub="jatuh tempo, tak dilaporkan"
           />
         </div>
       </div>
 
-      {/* Kalender 30 hari */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="text-base font-semibold text-brand-950">
-          Kalender 30 Hari
-        </h2>
-
-        {summary.days.length === 0 ? (
-          <p className="mt-4 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
+      {/* Kalender (bisa digeser antar-bulan) */}
+      {hasData ? (
+        <KalenderKepatuhan days={allDays} today={today} />
+      ) : (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+          <p className="rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
             Belum ada jadwal minum obat yang tercatat.
           </p>
-        ) : (
-          <>
-            <div className="mt-4 grid grid-cols-7 gap-2 sm:grid-cols-10">
-              {summary.days.map((d, i) => (
-                <div
-                  key={`${d.tanggal}-${i}`}
-                  title={`${formatTanggalID(d.tanggal)} · ${
-                    d.status ?? "belum lapor"
-                  } · jadwal ${formatJam(d.jam_jadwal)}`}
-                  className={`flex h-10 items-center justify-center rounded-lg text-xs font-semibold ${cellClass(
-                    d,
-                  )}`}
-                >
-                  {d.tanggal.slice(8, 10)}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-slate-100 pt-4 text-xs text-slate-500">
-              <Legend className="bg-brand-600" label="Diminum" />
-              <Legend className="bg-red-100" label="Terlewat" />
-              <Legend className="bg-slate-100" label="Belum lapor" />
-            </div>
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

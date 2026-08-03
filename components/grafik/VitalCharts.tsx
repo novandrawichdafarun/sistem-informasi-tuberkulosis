@@ -1,4 +1,5 @@
 import LineChart from "@/components/grafik/LineChart";
+import VitalBarChart from "@/components/grafik/VitalBarChart";
 import { formatTanggalID } from "@/utils/date";
 import { parseTensi } from "@/utils/Pasien";
 import ChartCard from "../card/ChartCard";
@@ -6,8 +7,10 @@ import { PemeriksaanKlinisData } from "@/types/pemeriksaanKlinis";
 
 export default function KlinisCharts({
   klinis,
+  suhuChart = "line",
 }: {
   klinis: PemeriksaanKlinisData[];
+  suhuChart?: "line" | "bar";
 }) {
   // Representasi BULANAN: ambil 1 pemeriksaan (terbaru) per bulan.
   const asc = [...klinis].sort(
@@ -52,13 +55,28 @@ export default function KlinisCharts({
           />
         </ChartCard>
         <ChartCard title="Suhu Tubuh">
-          <LineChart
-            labels={labels}
-            series={[
-              { name: "Suhu (°C)", color: "#f59e0b", values: suhu, area: true },
-            ]}
-            suffix="°"
-          />
+          {suhuChart === "bar" ? (
+            <VitalBarChart
+              labels={labels}
+              values={suhu}
+              color="#f59e0b"
+              suffix="°"
+              name="Suhu (°C)"
+            />
+          ) : (
+            <LineChart
+              labels={labels}
+              series={[
+                {
+                  name: "Suhu (°C)",
+                  color: "#f59e0b",
+                  values: suhu,
+                  area: true,
+                },
+              ]}
+              suffix="°"
+            />
+          )}
         </ChartCard>
       </div>
     </div>

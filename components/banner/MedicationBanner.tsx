@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PillIcon, CheckIcon } from "../asset/icons";
+import { PillIcon, CheckIcon, ClockIcon } from "../asset/icons";
 import ModalLaporObat from "@/components/Laporan/ModalLaporObat";
 import { JadwalObatHariIni } from "@/types/laporan";
 import { formatJam } from "@/utils/date";
@@ -56,6 +56,7 @@ export default function MedicationBanner({
           const namaObat =
             item.detail_obat?.obat?.nama_obat || "Obat tanpa nama";
           const sudahDilaporkan = Boolean(item.medication_log);
+          const telat = item.medication_log?.status === "terlewat";
 
           return (
             <div
@@ -74,10 +75,20 @@ export default function MedicationBanner({
               </div>
 
               {sudahDilaporkan ? (
-                <span className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700">
-                  <CheckIcon className="mr-1 h-4 w-4" />
-                  Sudah dilaporkan
-                </span>
+                telat ? (
+                  <span
+                    title="Lapor telat — lebih dari 1 jam dari jadwal"
+                    className="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700"
+                  >
+                    <ClockIcon className="mr-1 h-4 w-4" />
+                    Dilaporkan (telat)
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700">
+                    <CheckIcon className="mr-1 h-4 w-4" />
+                    Sudah dilaporkan
+                  </span>
+                )
               ) : (
                 <button
                   type="button"

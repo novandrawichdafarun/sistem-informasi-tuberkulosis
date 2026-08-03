@@ -2,9 +2,8 @@ import Link from "next/link";
 import { getPasienDetailAction } from "@/actions/pasien";
 import { formatTanggalID } from "@/utils/date";
 import KlinisCharts from "@/components/grafik/VitalCharts";
-import WeightChart, {
-  buildWeightPoints,
-} from "@/components/grafik/WeightChart";
+import VitalBarChart from "@/components/grafik/VitalBarChart";
+import { buildWeightPoints } from "@/components/grafik/WeightChart";
 import Section from "@/components/molecules/Section";
 import Info from "@/components/molecules/Info";
 import Donut from "@/components/grafik/Donut";
@@ -142,7 +141,7 @@ export default async function PasienDetailPage({
           <h2 className="mb-3 text-base font-semibold text-brand-950">
             Tanda Vital
           </h2>
-          <KlinisCharts klinis={klinis} />
+          <KlinisCharts klinis={klinis} suhuChart="bar" />
         </div>
       )}
 
@@ -154,7 +153,13 @@ export default async function PasienDetailPage({
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <WeightChart points={weightPoints} />
+            <VitalBarChart
+              labels={weightPoints.map((p) => p.label)}
+              values={weightPoints.map((p) => p.berat)}
+              color="var(--brand-600)"
+              suffix=" kg"
+              name="Berat"
+            />
           </div>
         )}
       </Section>

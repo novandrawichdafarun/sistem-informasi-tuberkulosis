@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useRef, useState, useTransition } from "react";
+import React, { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { submitLaporanMakanAction } from "@/actions/laporan";
 import { LaporanMakanData } from "@/types/laporan";
+import { CheckIcon, CloseIcon } from "@/components/asset/icons";
 
 interface LaporanMakanProps {
   todaysReports: LaporanMakanData[];
@@ -17,6 +18,13 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
   const [sukses, setSukses] = useState<string | null>(null);
   const reportCount = todaysReports.length;
   const maxReached = reportCount >= 3;
+
+  // Pesan sukses otomatis hilang setelah beberapa detik (tampil seperti alert).
+  useEffect(() => {
+    if (!sukses) return;
+    const t = setTimeout(() => setSukses(null), 4000);
+    return () => clearTimeout(t);
+  }, [sukses]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -88,8 +96,20 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
         </div>
       )}
       {sukses && (
-        <div className="mt-4 rounded-lg border border-brand-200 bg-brand-50 p-3 text-sm text-brand-700">
-          {sukses}
+        <div
+          role="alert"
+          className="mt-4 flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 p-3 text-sm font-medium text-brand-700"
+        >
+          <CheckIcon className="h-4 w-4 shrink-0" />
+          <span className="flex-1">{sukses}</span>
+          <button
+            type="button"
+            onClick={() => setSukses(null)}
+            aria-label="Tutup"
+            className="rounded p-0.5 text-brand-600 transition-colors hover:bg-brand-100"
+          >
+            <CloseIcon className="h-4 w-4" />
+          </button>
         </div>
       )}
 

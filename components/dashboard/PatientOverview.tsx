@@ -7,8 +7,9 @@ import {
   MinusIcon,
 } from "../asset/icons";
 import KepatuhanDonut from "../grafik/KepatuhanDonut";
-import { dayNumber } from "@/utils/date";
+import { dayNumber, todayISO } from "@/utils/date";
 import { KepatuhanHarian, RingkasanKepatuhan } from "@/types/laporan";
+import { hitungKepatuhanObat } from "@/components/kepatuhan/hitungKepatuhan";
 
 type CellKey = "diminum" | "terlewat" | "belum";
 
@@ -71,6 +72,9 @@ export default function PatientOverview({
   const diminum = week.filter((d) => d.status === "diminum").length;
   const totalTerlapor = week.filter((d) => d.status !== null).length;
 
+  // Kepatuhan: model "mulai 100%, berkurang tiap telat/tidak minum".
+  const k = hitungKepatuhanObat(summary.days, todayISO());
+
   return (
     <div className="space-y-6">
       {/* Keaptuhan + weekly tracker */}
@@ -78,13 +82,13 @@ export default function PatientOverview({
         {/* Keaptuhan card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex justify-center">
-            <KepatuhanDonut percent={summary.persentase} />
+            <KepatuhanDonut percent={k.persentase} />
           </div>
           <div className="mt-6 space-y-2 border-t border-slate-100 pt-4 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">Total dosis dilaporkan</span>
+              <span className="text-slate-500">Dosis diminum tepat waktu</span>
               <span className="font-semibold text-brand-950">
-                {summary.diminum} / {summary.total} dosis
+                {k.diminum} / {k.dinilai} dosis
               </span>
             </div>
             <div className="flex items-center justify-between">
