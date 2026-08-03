@@ -10,6 +10,11 @@ export async function verifySuperAdminAccess(
     .eq("id_user", id_super_admin)
     .eq("role", "super_admin")
     .single();
+
+  if (error || !data) {
+    return { superAdmin: null, error };
+  }
+
   return { superAdmin: data, error };
 }
 
@@ -23,5 +28,10 @@ export async function verifyPasienAccess(
     .eq("id_user", id_user_pasien)
     .eq("role", "pasien")
     .single();
+
+  if (error || !data) {
+    return { pasien: null, error };
+  }
+
   return { pasien: data, error };
 }
