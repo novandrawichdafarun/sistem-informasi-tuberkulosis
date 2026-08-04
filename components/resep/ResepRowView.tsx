@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import ResepCard from "./ResepCard";
 import TambahResepModal from "./TambahResepModal";
+import { DetailIcon, PlusIcon, CalendarIcon } from "@/components/asset/icons";
 import { PasienResepOverview } from "@/types/resep";
 import { ObatData } from "@/types/obat";
 
@@ -50,34 +51,45 @@ export default function ResepRowView({
             {resepList.length} resep
           </span>
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-center text-xs space-x-2">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            disabled={!hasResep}
-            className={`rounded px-3 py-1.5 font-semibold transition border ${
-              hasResep
-                ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
-                : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"
-            }`}
-          >
-            {isExpanded ? "Tutup ▴" : "Lihat Resep ▾"}
-          </button>
-
-          {episodeAktif ? (
+        <td className="px-6 py-4 whitespace-nowrap text-center">
+          <div className="flex justify-center items-center gap-2">
             <button
-              onClick={() => setIsTambahOpen(true)}
-              className="rounded bg-brand-600 px-3 py-1.5 font-semibold text-white hover:bg-brand-700 transition"
+              onClick={() => setIsExpanded(!isExpanded)}
+              disabled={!hasResep}
+              title={
+                hasResep
+                  ? isExpanded
+                    ? "Tutup resep"
+                    : "Lihat resep"
+                  : "Belum ada resep"
+              }
+              className={`flex p-2 items-center rounded-lg transition shadow-sm ${
+                hasResep
+                  ? "bg-blue-100 text-blue-500 hover:bg-blue-500 hover:text-white"
+                  : "bg-gray-100 text-gray-300 cursor-not-allowed"
+              }`}
             >
-              + Tambah Resep
+              <DetailIcon className="w-4 h-4" />
             </button>
-          ) : (
-            <Link
-              href="/dashboard/episode-pengobatan"
-              className="rounded border border-amber-200 bg-amber-50 px-3 py-1.5 font-semibold text-amber-700 hover:bg-amber-100 transition"
-            >
-              Buka Episode dulu →
-            </Link>
-          )}
+
+            {episodeAktif ? (
+              <button
+                onClick={() => setIsTambahOpen(true)}
+                title="Tambah resep"
+                className="flex p-2 items-center bg-brand-100 text-brand-600 rounded-lg hover:bg-brand-600 hover:text-white transition shadow-sm"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
+            ) : (
+              <Link
+                href="/dashboard/episode-pengobatan"
+                className="flex p-2 items-center bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-500 hover:text-white transition shadow-sm"
+                title="Buka episode dulu — resep hanya bisa ditambah pada episode aktif"
+              >
+                <CalendarIcon className="w-4 h-4" />
+              </Link>
+            )}
+          </div>
         </td>
       </tr>
 

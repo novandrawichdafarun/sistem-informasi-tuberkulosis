@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import RiwayatLabSubRow from "./RiwayatLabSubRow";
 import TambahLabModal from "./TambahLabModal";
+import { DetailIcon, PlusIcon, CalendarIcon } from "@/components/asset/icons";
 
 interface Props {
   data: PasienPemeriksaanLabOverview;
@@ -66,44 +67,54 @@ export default function PemeriksaanLabRowView({ data }: Props) {
         </td>
 
         {/* Kolom 5: Aksi */}
-        <td className="px-6 py-4 whitespace-nowrap text-center text-xs space-x-2">
-          {/* Tombol Buka Riwayat */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            disabled={!hasRiwayat}
-            className={`rounded px-3 py-1.5 font-semibold transition border ${
-              hasRiwayat
-                ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
-                : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"
-            }`}
-          >
-            {isExpanded ? "Tutup Data ▴" : "Lihat Data ▾"}
-          </button>
-
-          {/* Tombol Tambah Lab (Hanya muncul jika episode aktif) */}
-          {isEpisodeAktif && data.episodeAktif ? (
-            <>
-              <button
-                className="rounded bg-emerald-600 px-3 py-1.5 font-semibold text-white hover:bg-emerald-700 transition"
-                onClick={() => setIsModalTambahOpen(true)}
-              >
-                + Tambah Data Lab
-              </button>
-              <TambahLabModal
-                id_episode={data.episodeAktif.id_episode}
-                isOpen={isModalTambahOpen}
-                onClose={() => setIsModalTambahOpen(false)}
-              />
-            </>
-          ) : (
-            <Link
-              href="/dashboard/episode-pengobatan"
-              className="text-sm px-3 py-1.5 border border-amber-200 bg-amber-50 text-amber-700 rounded-md hover:bg-amber-100 transition-colors"
-              title="Pemeriksaan lab hanya bisa ditambah pada episode yang aktif"
+        <td className="px-6 py-4 whitespace-nowrap text-center">
+          <div className="flex justify-center items-center gap-2">
+            {/* Tombol Buka Riwayat */}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              disabled={!hasRiwayat}
+              title={
+                hasRiwayat
+                  ? isExpanded
+                    ? "Tutup data"
+                    : "Lihat data"
+                  : "Belum ada data"
+              }
+              className={`flex p-2 items-center rounded-lg transition shadow-sm ${
+                hasRiwayat
+                  ? "bg-blue-100 text-blue-500 hover:bg-blue-500 hover:text-white"
+                  : "bg-gray-100 text-gray-300 cursor-not-allowed"
+              }`}
             >
-              Buka Episode dulu →
-            </Link>
-          )}
+              <DetailIcon className="w-4 h-4" />
+            </button>
+
+            {/* Tombol Tambah Lab (Hanya muncul jika episode aktif) */}
+            {isEpisodeAktif && data.episodeAktif ? (
+              <>
+                <button
+                  onClick={() => setIsModalTambahOpen(true)}
+                  title="Tambah data lab"
+                  className="flex p-2 items-center bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-500 hover:text-white transition shadow-sm"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                </button>
+                <TambahLabModal
+                  id_episode={data.episodeAktif.id_episode}
+                  isOpen={isModalTambahOpen}
+                  onClose={() => setIsModalTambahOpen(false)}
+                />
+              </>
+            ) : (
+              <Link
+                href="/dashboard/episode-pengobatan"
+                className="flex p-2 items-center bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-500 hover:text-white transition shadow-sm"
+                title="Buka episode dulu — pemeriksaan lab hanya bisa ditambah pada episode aktif"
+              >
+                <CalendarIcon className="w-4 h-4" />
+              </Link>
+            )}
+          </div>
         </td>
       </tr>
 

@@ -16,7 +16,7 @@ export default function MedicationBanner({
 
   if (!jadwalList || jadwalList.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="rounded-2xl border border-brand-200 bg-white p-5">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
             <PillIcon className="h-7 w-7" />
@@ -36,7 +36,7 @@ export default function MedicationBanner({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
+    <div className="rounded-2xl border border-brand-200 bg-white p-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -47,9 +47,6 @@ export default function MedicationBanner({
               Pilih obat yang sudah Anda minum untuk melaporkannya.
             </p>
           </div>
-          <span className="inline-flex w-fit items-center self-start rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 sm:self-auto">
-            {jadwalList.length} jadwal
-          </span>
         </div>
       </div>
 

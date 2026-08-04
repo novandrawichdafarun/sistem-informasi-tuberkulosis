@@ -49,7 +49,7 @@ export default function AdminOverview(stat: AdminOverviewProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
+        <div className="rounded-2xl border border-brand-200 bg-white p-6 lg:col-span-2">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-brand-950">
               Tren Kepatuhan 6 Bulan
@@ -74,7 +74,7 @@ export default function AdminOverview(stat: AdminOverviewProps) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="rounded-2xl border border-brand-200 bg-white p-6">
           <h3 className="text-base font-semibold text-brand-950">
             Distribusi Kepatuhan
           </h3>
@@ -110,7 +110,7 @@ export default function AdminOverview(stat: AdminOverviewProps) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+      <div className="rounded-2xl border border-brand-200 bg-white p-6">
         <h3 className="text-base font-semibold text-brand-950">
           Pasien Baru Per Bulan
         </h3>

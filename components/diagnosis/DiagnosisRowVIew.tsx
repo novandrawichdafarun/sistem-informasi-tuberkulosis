@@ -4,6 +4,7 @@ import { PasienDiagnosisOverview } from "@/types/diagnosis";
 import { useState } from "react";
 import TambahDiagnosisModal from "./TambahDiagnosisModal";
 import RiwayatDiagnosisSubRow from "./RiwayatDiagnosisSubRow";
+import { DetailIcon, PlusIcon } from "@/components/asset/icons";
 
 interface Props {
   data: PasienDiagnosisOverview;
@@ -71,36 +72,46 @@ export default function DiagnosisRowView({ data }: Props) {
         </td>
 
         {/* Kolom 4: Aksi */}
-        <td className="px-6 py-4 whitespace-nowrap text-center text-xs space-x-2">
-          {/* Tombol Lihat Log */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            disabled={!hasRiwayat}
-            className={`rounded px-3 py-1.5 font-semibold transition border ${
-              hasRiwayat
-                ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
-                : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"
-            }`}
-          >
-            {isExpanded ? "Tutup Data ▴" : "Lihat Data ▾"}
-          </button>
+        <td className="px-6 py-4 whitespace-nowrap text-center">
+          <div className="flex justify-center items-center gap-2">
+            {/* Tombol Lihat Data */}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              disabled={!hasRiwayat}
+              title={
+                hasRiwayat
+                  ? isExpanded
+                    ? "Tutup data"
+                    : "Lihat data"
+                  : "Belum ada data"
+              }
+              className={`flex p-2 items-center rounded-lg transition shadow-sm ${
+                hasRiwayat
+                  ? "bg-blue-100 text-blue-500 hover:bg-blue-500 hover:text-white"
+                  : "bg-gray-100 text-gray-300 cursor-not-allowed"
+              }`}
+            >
+              <DetailIcon className="w-4 h-4" />
+            </button>
 
-          {/* Tombol Tambah Lab (Hanya muncul jika episode aktif) */}
-          {isEpisodeAktif && episodeAktif && !isDiagnosisExists && (
-            <>
-              <button
-                className="rounded bg-emerald-600 px-3 py-1.5 font-semibold text-white hover:bg-emerald-700 transition"
-                onClick={() => setIsModalTambahOpen(true)}
-              >
-                + Diagnosis
-              </button>
-              <TambahDiagnosisModal
-                id_episode={episodeAktif.id_episode}
-                isOpen={isModalTambahOpen}
-                onClose={() => setIsModalTambahOpen(false)}
-              />
-            </>
-          )}
+            {/* Tombol Tambah Diagnosis (Hanya muncul jika episode aktif & belum ada diagnosis) */}
+            {isEpisodeAktif && episodeAktif && !isDiagnosisExists && (
+              <>
+                <button
+                  onClick={() => setIsModalTambahOpen(true)}
+                  title="Tambah diagnosis"
+                  className="flex p-2 items-center bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-500 hover:text-white transition shadow-sm"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                </button>
+                <TambahDiagnosisModal
+                  id_episode={episodeAktif.id_episode}
+                  isOpen={isModalTambahOpen}
+                  onClose={() => setIsModalTambahOpen(false)}
+                />
+              </>
+            )}
+          </div>
         </td>
       </tr>
 

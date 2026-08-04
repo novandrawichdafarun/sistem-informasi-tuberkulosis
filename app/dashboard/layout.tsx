@@ -17,7 +17,6 @@ export default async function DashboardLayout({
         user={{
           name: session.user.name ?? session.user.email ?? "Pasien",
           roleLabel: "Pasien",
-          phase: "Fase Intensif",
         }}
       >
         {children}

@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Clock3,
   Edit,
+  Plus,
   Info,
   LayoutDashboard,
   Lock,
@@ -166,4 +167,8 @@ export function EditIcon({ className }: IconProps) {
 
 export function DeleteIcon({ className }: IconProps) {
   return <Trash2 className={iconClassName(className)} strokeWidth={1.75} />;
+}
+
+export function PlusIcon({ className }: IconProps) {
+  return <Plus className={iconClassName(className)} strokeWidth={1.75} />;
 }
