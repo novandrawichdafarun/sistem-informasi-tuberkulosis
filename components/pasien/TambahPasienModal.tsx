@@ -10,7 +10,11 @@ import {
   PENDAPATAN_OPTIONS,
 } from "@/utils/pasienOptions";
 import SelectField from "../molecules/SelectField";
-import { cencelBtnClass, inputClass, submitBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  inputClass,
+  submitBtnClass,
+} from "@/utils/classTailwind";
 
 export default function TambahPasienModal() {
   const router = useRouter();
@@ -117,7 +121,7 @@ export default function TambahPasienModal() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        Kata Sandi Awal *
+                        Kata Sandi *
                       </label>
                       <input
                         type="password"

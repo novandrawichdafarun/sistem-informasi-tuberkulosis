@@ -38,17 +38,19 @@ export default function MedicationBanner({
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6">
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-brand-950">
-            Obat yang harus diminum hari ini
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Pilih obat yang sudah Anda minum untuk melaporkannya.
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-brand-950">
+              Obat yang harus diminum hari ini
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Pilih obat yang sudah Anda minum untuk melaporkannya.
+            </p>
+          </div>
+          <span className="inline-flex w-fit items-center self-start rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 sm:self-auto">
+            {jadwalList.length} jadwal
+          </span>
         </div>
-        <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-          {jadwalList.length} jadwal
-        </span>
       </div>
 
       <div className="mt-4 space-y-3">
@@ -61,10 +63,12 @@ export default function MedicationBanner({
           return (
             <div
               key={item.id_jadwal}
-              className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
-              <div>
-                <p className="font-semibold text-slate-800">{namaObat}</p>
+              <div className="min-w-0 flex-1">
+                <p className="wrap-break-word font-semibold text-slate-800">
+                  {namaObat}
+                </p>
                 <p className="mt-1 text-sm text-slate-500">
                   {item.detail_obat?.jumlah_obat_per_minum ?? 0} dosis •{" "}
                   {item.detail_obat?.aturan_pakai || "-"}
@@ -78,13 +82,13 @@ export default function MedicationBanner({
                 telat ? (
                   <span
                     title="Lapor telat — lebih dari 1 jam dari jadwal"
-                    className="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700"
+                    className="inline-flex w-fit items-center self-start rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700 sm:self-auto"
                   >
                     <ClockIcon className="mr-1 h-4 w-4" />
                     Dilaporkan (telat)
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700">
+                  <span className="inline-flex w-fit items-center self-start rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700 sm:self-auto">
                     <CheckIcon className="mr-1 h-4 w-4" />
                     Sudah dilaporkan
                   </span>
@@ -93,7 +97,7 @@ export default function MedicationBanner({
                 <button
                   type="button"
                   onClick={() => setSelectedJadwal(item)}
-                  className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
+                  className="w-full rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 sm:w-auto"
                 >
                   Lapor sudah minum
                 </button>

@@ -286,6 +286,14 @@ export const updatePasien = async (
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
+    const { data: pasien } = await supabase
+      .from("pasien")
+      .select("id_user")
+      .eq("id_pasien", payload.id_pasien)
+      .single();
+
+    if (!pasien) return handleServiceError(pasien, "Pasien tidak ditmeukan");
+
     // Update Data User (Kredensial)
     const updateUserData: { email: string; password_hash?: string } = {
       email: payload.email,
@@ -377,7 +385,7 @@ export const deletePasien = async (
 
     if (deleteUserError)
       return handleServiceError(
-        deleteUserError,
+        deleteUserError?.message,
         "Data pasien terhapus, namun gagal menghapus akun login.",
       );
 

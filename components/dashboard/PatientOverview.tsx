@@ -170,7 +170,7 @@ export default function PatientOverview({
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon;
           return (

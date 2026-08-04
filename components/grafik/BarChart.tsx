@@ -57,9 +57,7 @@ export default function BarChart({
               rx="4"
               fill={fill}
             >
-              <title>
-                {p.label}: {p.value} pasien
-              </title>
+              <title>{`${p.label}: ${p.value} pasien`}</title>
             </rect>
             <text
               x={cx}

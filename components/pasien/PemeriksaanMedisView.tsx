@@ -36,7 +36,7 @@ export default async function PemeriksaanMedisView() {
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <table className="min-w-full divide-y divide-slate-200 text-sm sm:border-collapse">
               <thead className="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Periode Tes</th>

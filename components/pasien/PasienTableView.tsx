@@ -7,6 +7,7 @@ import TableSearchInput from "@/components/molecules/TableSearchInput";
 import EditPasienModal from "./EditPasienModal";
 import DeletePasienButton from "./DeletePasienButton";
 import { DetailIcon } from "@/components/asset/icons";
+import TambahPasienModal from "./TambahPasienModal";
 
 export default function PasienTableView({ data }: { data: PasienData[] }) {
   const [query, setQuery] = useState("");
@@ -22,11 +23,18 @@ export default function PasienTableView({ data }: { data: PasienData[] }) {
 
   return (
     <div className="space-y-4">
-      <TableSearchInput
-        value={query}
-        onChange={setQuery}
-        placeholder="Cari nama / domisili pasien..."
-      />
+      <div className="flex justify-between">
+        <div className="w-auto sm:flex-1">
+          <TableSearchInput
+            value={query}
+            onChange={setQuery}
+            placeholder="Cari nama / domisili pasien..."
+          />
+        </div>
+        <div className="flex justify-end w-auto">
+          <TambahPasienModal />
+        </div>
+      </div>
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-300">

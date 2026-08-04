@@ -1,6 +1,5 @@
 import { getDaftarPasienAction } from "@/actions/pasien";
 import { PasienData } from "@/types/pasien";
-import TambahPasienModal from "@/components/pasien/TambahPasienModal";
 import PasienTableView from "@/components/pasien/PasienTableView";
 
 export const metadata = {
@@ -21,9 +20,6 @@ export default async function ManajemenPasienPage() {
           <p className="mt-1 text-sm text-gray-500">
             Daftar seluruh pasien TB yang terdaftar di sistem.
           </p>
-        </div>
-        <div className="mt-4 sm:mt-0">
-          <TambahPasienModal />
         </div>
       </div>
 

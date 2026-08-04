@@ -13,7 +13,7 @@ export async function requireSuperAdminSession(): Promise<string> {
 export async function requirePasienSession(): Promise<string> {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "pasien") {
-    throw new Error("Akses ditolak: Hanya Pasien yang diizinkan.");
+    redirect("/errors/403");
   }
   return session.user.id;
 }

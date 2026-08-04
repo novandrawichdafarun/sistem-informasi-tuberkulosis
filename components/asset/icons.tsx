@@ -25,6 +25,7 @@ import {
   TrendingUp,
   User,
   Users,
+  UserShield,
   Utensils,
   X,
 } from "lucide-react";
@@ -127,6 +128,10 @@ export function PillBottleIcon({ className }: IconProps) {
 
 export function UserIcon({ className }: IconProps) {
   return <User className={iconClassName(className)} strokeWidth={1.75} />;
+}
+
+export function AdminIcon({ className }: IconProps) {
+  return <UserShield className={iconClassName(className)} strokeWidth={1.75} />;
 }
 
 export function ResepObatIcon({ className }: IconProps) {

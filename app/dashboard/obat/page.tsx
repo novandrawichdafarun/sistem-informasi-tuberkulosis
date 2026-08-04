@@ -30,10 +30,6 @@ export default async function ObatPage() {
             Daftar seluruh Kelola data master obat untuk resep pasien Anda.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0">
-          {/* Tombol Tambah Obat */}
-          <TambahObatModal />
-        </div>
       </div>
 
       <ObatTableView data={daftarObat} />

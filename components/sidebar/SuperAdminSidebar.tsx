@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
@@ -15,6 +15,7 @@ import {
   PemeriksaanLabIcon,
   PemeriksaanKlinisIcon,
   ClipboardIcon,
+  AdminIcon,
 } from "../asset/icons";
 import Brand from "../molecules/Brand";
 import LogoutButton from "../buttons/LogoutButton";
@@ -23,6 +24,7 @@ import NavLinks, { isActive, type NavItem } from "../navigation/NavLinks";
 const NAV: NavItem[] = [
   { label: "Beranda", href: "/dashboard", icon: HomeIcon },
   { label: "Statistik", href: "/dashboard/statistik", icon: TrendIcon },
+  { label: "Manajemen User", href: "/dashboard/user", icon: AdminIcon },
   { label: "Manajemen Pasien", href: "/dashboard/pasien", icon: UsersIcon },
   { label: "Master Obat", href: "/dashboard/obat", icon: PillBottleIcon },
   {
@@ -63,14 +65,15 @@ export default function AdminSidebar({
 
   // Sidebar desktop: default tampil, preferensi tersimpan.
   // Baca localStorage setelah mount agar tidak terjadi hydration mismatch.
-  const [desktopOpen, setDesktopOpen] = useState(true);
-  useEffect(() => {
+  const [desktopOpen, setDesktopOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+
     try {
-      if (localStorage.getItem(DESKTOP_KEY) === "0") setDesktopOpen(false);
+      return localStorage.getItem(DESKTOP_KEY) !== "0";
     } catch {
-      /* ignore */
+      // ignore
     }
-  }, []);
+  });
 
   const toggleDesktop = () => {
     setDesktopOpen((prev) => {
