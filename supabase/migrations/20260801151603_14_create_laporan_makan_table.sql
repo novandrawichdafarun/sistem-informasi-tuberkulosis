@@ -1,6 +1,6 @@
 CREATE TABLE laporan_makan (
   id_laporan SERIAL PRIMARY KEY,
-  id_pasien INTEGER REFERENCES pasien(id_pasien) ON DELETE CASCADE NOT NULL,
+  id_episode INTEGER REFERENCES episode_pengobatan(id_episode) ON DELETE CASCADE NOT NULL,
   waktu_makan TIMESTAMP WITH TIME ZONE NOT NULL, -- Jam berapa pasien makan
   karbo VARCHAR(50) NOT NULL,
   protein VARCHAR(50) NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE laporan_makan (
   reported_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
-CREATE INDEX idx_laporan_makan_pasien ON laporan_makan(id_pasien);
+CREATE INDEX idx_laporan_makan_episode ON laporan_makan(id_episode);
 CREATE INDEX idx_laporan_makan_waktu ON laporan_makan(waktu_makan);
 
 -- Aktifkan RLS

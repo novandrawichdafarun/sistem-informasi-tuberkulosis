@@ -24,11 +24,10 @@ export default async function DiagnosisPage() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-800">
-          Manajemen Pemeriksaan Lab
+          Manajemen Diagnosis Pasien
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Kelola data pemeriksaan laboratorium pasien secara terpusat di dalam
-          sistem.
+          Kelola data diagnosis pasien secara terpusat di dalam sistem.
         </p>
       </div>
 

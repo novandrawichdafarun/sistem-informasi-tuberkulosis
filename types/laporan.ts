@@ -10,6 +10,7 @@ export interface LaporanObatPayload {
 }
 
 export interface LaporanMakanPayload {
+  id_episode: number;
   karbo: string;
   protein: string;
   serat: string;
@@ -18,7 +19,7 @@ export interface LaporanMakanPayload {
 
 export interface LaporanMakanData {
   id_laporan: number;
-  id_pasien: number;
+  id_episode: number;
   waktu_makan: string;
   karbo: string;
   protein: string;
@@ -29,11 +30,12 @@ export interface LaporanMakanData {
 
 export interface LaporanMakanPasienOverview {
   id_pasien: number;
-  nama_pasien: string;
-  jenis_kelamin: "L" | "P" | null;
+  nama_lengkap: string;
+  jenis_kelamin: "L" | "P";
   total: number;
   terakhir: string | null; // waktu_makan terbaru
-  laporan: LaporanMakanData[];
+  episodeAktif?: { id_episode: number; status_episode: string } | null;
+  riwayat: LaporanMakanData[];
 }
 
 export interface JadwalObatHariIni {

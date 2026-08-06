@@ -15,7 +15,7 @@ export default function LaporanMakanAdminTable({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return rows;
-    return rows.filter((r) => r.nama_pasien.toLowerCase().includes(q));
+    return rows.filter((r) => r.nama_lengkap.toLowerCase().includes(q));
   }, [rows, query]);
 
   return (
@@ -39,6 +39,7 @@ export default function LaporanMakanAdminTable({
             <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3">Nama Pasien</th>
+                <th className="px-6 py-3">Status Episode</th>
                 <th className="px-6 py-3">Total Laporan</th>
                 <th className="px-6 py-3">Laporan Terakhir</th>
                 <th className="px-6 py-3 text-center">Aksi</th>
@@ -48,7 +49,7 @@ export default function LaporanMakanAdminTable({
               {filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-6 py-10 text-center text-gray-400"
                   >
                     {rows.length === 0
@@ -57,8 +58,8 @@ export default function LaporanMakanAdminTable({
                   </td>
                 </tr>
               ) : (
-                filtered.map((r) => (
-                  <LaporanMakanRowView key={r.id_pasien} data={r} />
+                filtered.map((data) => (
+                  <LaporanMakanRowView key={data.id_pasien} data={data} />
                 ))
               )}
             </tbody>

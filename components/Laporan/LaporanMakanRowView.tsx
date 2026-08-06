@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { LaporanMakanPasienOverview } from "@/types/laporan";
 import { formatWaktuID } from "@/utils/date";
-import { DetailIcon } from "../asset/icons";
+import { CalendarIcon, DetailIcon } from "../asset/icons";
+import Link from "next/link";
 
 export default function LaporanMakanRowView({
   data,
@@ -11,7 +12,15 @@ export default function LaporanMakanRowView({
   data: LaporanMakanPasienOverview;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { nama_pasien, jenis_kelamin, total, terakhir, laporan } = data;
+  const {
+    nama_lengkap,
+    jenis_kelamin,
+    total,
+    terakhir,
+    episodeAktif,
+    riwayat,
+  } = data;
+  const hasRiwayat = riwayat && riwayat.length > 0;
 
   return (
     <>
@@ -21,7 +30,7 @@ export default function LaporanMakanRowView({
         }`}
       >
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="font-medium text-gray-800">{nama_pasien}</div>
+          <div className="font-medium text-gray-800">{nama_lengkap}</div>
           <div className="text-xs text-gray-400">
             {jenis_kelamin === "L"
               ? "Laki-laki"
@@ -29,6 +38,18 @@ export default function LaporanMakanRowView({
                 ? "Perempuan"
                 : "-"}
           </div>
+        </td>
+
+        <td className="px-6 py-4 whitespace-nowrap">
+          {episodeAktif ? (
+            <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 border border-blue-100">
+              Episode Aktif
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 border border-slate-200">
+              Tidak Ada Episode
+            </span>
+          )}
         </td>
 
         <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
@@ -43,12 +64,32 @@ export default function LaporanMakanRowView({
           <div className="flex justify-center items-center gap-2">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              title={isExpanded ? "Tutup detail" : "Lihat selengkapnya"}
-              aria-label="Lihat selengkapnya"
-              className="inline-flex p-2 items-center bg-blue-100 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-white transition shadow-sm"
+              disabled={!hasRiwayat}
+              title={
+                hasRiwayat
+                  ? isExpanded
+                    ? "Tutup data"
+                    : "Lihat data"
+                  : "Belum ada data"
+              }
+              className={`flex p-2 items-center rounded-lg transition shadow-sm ${
+                hasRiwayat
+                  ? "bg-blue-100 text-blue-500 hover:bg-blue-500 hover:text-white"
+                  : "bg-gray-100 text-gray-300 cursor-not-allowed"
+              }`}
             >
               <DetailIcon className="w-4 h-4" />
             </button>
+
+            {!episodeAktif && (
+              <Link
+                href="/dashboard/episode-pengobatan"
+                className="flex p-2 items-center bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-500 hover:text-white transition shadow-sm"
+                title="Buka episode dulu — pasien dapat melaporkan jika episode sudah aktif"
+              >
+                <CalendarIcon className="w-4 h-4" />
+              </Link>
+            )}
           </div>
         </td>
       </tr>
@@ -76,7 +117,7 @@ export default function LaporanMakanRowView({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {laporan.map((item) => (
+                      {riwayat.map((item) => (
                         <tr
                           key={item.id_laporan}
                           className="hover:bg-gray-50/50"

@@ -4,7 +4,8 @@ import { PasienDiagnosisOverview } from "@/types/diagnosis";
 import { useState } from "react";
 import TambahDiagnosisModal from "./TambahDiagnosisModal";
 import RiwayatDiagnosisSubRow from "./RiwayatDiagnosisSubRow";
-import { DetailIcon, PlusIcon } from "@/components/asset/icons";
+import { CalendarIcon, DetailIcon, PlusIcon } from "@/components/asset/icons";
+import Link from "next/link";
 
 interface Props {
   data: PasienDiagnosisOverview;
@@ -93,6 +94,16 @@ export default function DiagnosisRowView({ data }: Props) {
             >
               <DetailIcon className="w-4 h-4" />
             </button>
+
+            {!episodeAktif && (
+              <Link
+                href="/dashboard/episode-pengobatan"
+                className="flex p-2 items-center bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-500 hover:text-white transition shadow-sm"
+                title="Buka episode dulu — diagnosis hanya bisa ditambah pada episode aktif"
+              >
+                <CalendarIcon className="w-4 h-4" />
+              </Link>
+            )}
 
             {/* Tombol Tambah Diagnosis (Hanya muncul jika episode aktif & belum ada diagnosis) */}
             {isEpisodeAktif && episodeAktif && !isDiagnosisExists && (

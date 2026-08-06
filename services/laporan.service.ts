@@ -296,20 +296,29 @@ export async function laporMakan(
       supabase,
       id_user_pasien,
     );
-
     if (error || !pasien)
       return { success: false, error: "Otoritas tidak valid." };
+
+    const { data: episode, error: checkError } = await supabase
+      .from("episode_pengobatan")
+      .select("id_episode")
+      .eq("id_episode", payload.id_episode)
+      .single();
+
+    if (checkError || !episode)
+      return handleServiceError(
+        checkError?.message,
+        "Episode pengobatan pasien tidak ada.",
+      );
 
     const hariIni = todayISO();
     const startOfDay = new Date(`${hariIni}T00:00:00`).toISOString();
     const endOfDay = new Date(`${hariIni}T23:59:59.999`).toISOString();
 
-    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
-
     const { count, error: countError } = await supabase
       .from("laporan_makan")
       .select("id_laporan", { count: "exact", head: true })
-      .eq("id_pasien", id_pasien)
+      .eq("id_episode", payload.id_episode)
       .gte("waktu_makan", startOfDay)
       .lte("waktu_makan", endOfDay);
 
@@ -329,7 +338,7 @@ export async function laporMakan(
     const waktuSekarang = new Date().toISOString();
 
     const { error: insertError } = await supabase.from("laporan_makan").insert({
-      id_pasien: id_pasien,
+      id_episode: payload.id_episode,
       waktu_makan: waktuSekarang,
       karbo: payload.karbo,
       protein: payload.protein,
@@ -368,13 +377,17 @@ export async function getRiwayatMakanByUser(
     const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
 
     const { data, error: dataError } = await supabase
-      .from("laporan_makan")
+      .from("episode_pengobatan")
       .select(
-        `id_laporan, id_pasien, waktu_makan, 
-        karbo, protein, serat, catatan, reported_at`,
+        `
+        id_pasien,
+        laporan_makan (
+          id_laporan, id_episode, waktu_makan,
+          karbo, protein, serat, catatan, reported_at
+        )
+        `,
       )
-      .eq("id_pasien", id_pasien)
-      .order("waktu_makan", { ascending: false });
+      .eq("id_pasien", id_pasien);
 
     if (dataError)
       return handleServiceError(
@@ -382,7 +395,25 @@ export async function getRiwayatMakanByUser(
         "Gagal mengambil riwayat laporan makan",
       );
 
-    return { success: true, data };
+    const formattedData: LaporanMakanData[] = (data ?? []).flatMap((episode) =>
+      (episode.laporan_makan ?? []).map((makan) => ({
+        id_laporan: makan.id_laporan,
+        id_episode: makan.id_episode,
+        waktu_makan: makan.waktu_makan,
+        karbo: makan.karbo,
+        protein: makan.protein,
+        serat: makan.serat,
+        catatan: makan.catatan,
+        reported_at: makan.reported_at,
+      })),
+    );
+
+    formattedData.sort(
+      (a, b) =>
+        new Date(b.waktu_makan).getTime() - new Date(a.waktu_makan).getTime(),
+    );
+
+    return { success: true, data: formattedData };
   } catch (error) {
     return handleServiceError(
       error,
@@ -404,15 +435,20 @@ export const getDaftarLaporanMakan = async (
       return { success: false, error: "Otoritas tidak valid." };
 
     const { data, error: dataError } = await supabase
-      .from("laporan_makan")
+      .from("pasien")
       .select(
         `
-        id_laporan, id_pasien, waktu_makan, 
-        karbo, protein, serat, catatan, reported_at, 
-        pasien ( nama_lengkap, jenis_kelamin )
+        id_pasien, nama_lengkap, jenis_kelamin,
+        episode_pengobatan (
+          id_episode, status_episode,
+          laporan_makan (
+            id_laporan, id_episode, waktu_makan,
+            karbo, protein, serat, catatan, reported_at
+          )
+        )
         `,
       )
-      .order("waktu_makan", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (dataError)
       return handleServiceError(
@@ -420,35 +456,43 @@ export const getDaftarLaporanMakan = async (
         "Gagal memuat laporan makan.",
       );
 
-    type PasienRel = { nama_lengkap: string; jenis_kelamin: "L" | "P" };
-    const grup = new Map<number, LaporanMakanPasienOverview>();
+    const formattedData: LaporanMakanPasienOverview[] = (data ?? []).map(
+      (pasien) => {
+        const rawEpisodes = pasien.episode_pengobatan || [];
+        const episodeAktif =
+          rawEpisodes.find((ep) => ep.status_episode === "aktif") || null;
 
-    for (const row of data ?? []) {
-      const { pasien, ...rest } = row as unknown as LaporanMakanData & {
-        pasien: PasienRel | PasienRel[] | null;
-      };
-      const rel = Array.isArray(pasien) ? pasien[0] : pasien;
+        let riwayat: LaporanMakanData[] = [];
+        rawEpisodes.forEach((ep) => {
+          if (ep.laporan_makan) {
+            riwayat = [...riwayat, ...ep.laporan_makan];
+          }
+        });
 
-      let overview = grup.get(rest.id_pasien);
-      if (!overview) {
-        overview = {
-          id_pasien: rest.id_pasien,
-          nama_pasien: rel?.nama_lengkap ?? "-",
-          jenis_kelamin: rel?.jenis_kelamin ?? null,
-          total: 0,
-          terakhir: null,
-          laporan: [],
+        riwayat.sort(
+          (a, b) =>
+            new Date(b.waktu_makan).getTime() -
+            new Date(a.waktu_makan).getTime(),
+        );
+
+        return {
+          id_pasien: pasien.id_pasien,
+          nama_lengkap: pasien.nama_lengkap,
+          jenis_kelamin: pasien.jenis_kelamin,
+          total: riwayat.length,
+          terakhir: riwayat[0]?.waktu_makan ?? null,
+          episodeAktif: episodeAktif
+            ? {
+                id_episode: episodeAktif.id_episode,
+                status_episode: episodeAktif.status_episode,
+              }
+            : null,
+          riwayat: riwayat,
         };
-        grup.set(rest.id_pasien, overview);
-      }
+      },
+    );
 
-      overview.laporan.push(rest);
-      overview.total += 1;
-      // Data sudah terurut waktu_makan desc → yang pertama = terbaru.
-      if (!overview.terakhir) overview.terakhir = rest.waktu_makan;
-    }
-
-    return { success: true, data: [...grup.values()] };
+    return { success: true, data: formattedData };
   } catch (error) {
     return handleServiceError(error);
   }

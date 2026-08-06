@@ -26,6 +26,8 @@ export const laporanObatSchema = z
   );
 
 export const laporanMakanSchema = z.object({
+  id_episode: z.coerce.number().positive("ID Episode tidak valid"),
+
   karbo: z
     .string()
     .trim()
