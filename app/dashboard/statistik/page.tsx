@@ -53,7 +53,7 @@ export default async function StatistikPage() {
       </div>
 
       {/* Distribusi kepatuhan */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+      <div className="rounded-2xl border border-brand-200 bg-white p-6">
         <h2 className="text-base font-semibold text-brand-950">
           Distribusi Kepatuhan Pasien Aktif
         </h2>

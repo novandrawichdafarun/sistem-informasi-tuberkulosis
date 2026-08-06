@@ -27,7 +27,7 @@ export default async function AuthLayout({
 
       <div className="relative z-10 flex w-full max-w-md flex-col items-center">
         <div className="mb-8 flex flex-col items-center">
-          <Logo size="xl" badge />
+          <Logo size="xl" />
           <span className="mt-4 text-2xl font-bold tracking-tight text-brand-800">
             NU-TB<span className="text-brand-500">Care</span>
           </span>

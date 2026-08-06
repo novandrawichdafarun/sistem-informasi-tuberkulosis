@@ -80,7 +80,7 @@ export default function PatientOverview({
       {/* Keaptuhan + weekly tracker */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Keaptuhan card */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="rounded-2xl border border-brand-200 bg-white p-6">
           <div className="flex justify-center">
             <KepatuhanDonut percent={k.persentase} />
           </div>
@@ -101,7 +101,7 @@ export default function PatientOverview({
         </div>
 
         {/* Weekly tracker card */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="rounded-2xl border border-brand-200 bg-white p-6">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-brand-950">
               7 Hari Terakhir

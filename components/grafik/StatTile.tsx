@@ -15,8 +15,14 @@ export default function StatTile({
     amber: "text-amber-600",
     slate: "text-slate-700",
   } as const;
+  const borders = {
+    brand: "border-brand-200",
+    blue: "border-blue-200",
+    amber: "border-amber-200",
+    slate: "border-slate-300",
+  } as const;
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+    <div className={`rounded-2xl border ${borders[accent]} bg-white p-5`}>
       <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
         {label}
       </p>

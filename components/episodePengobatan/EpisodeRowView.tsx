@@ -5,6 +5,7 @@ import { useState } from "react";
 import BukaEpisodeModal from "./BukaEpisodeModal";
 import TutupEpisodeModal from "./TutupEpisodeModal";
 import RiwayatSubRow from "./RiwayatSubRow";
+import { DetailIcon, CheckIcon, PlusIcon } from "@/components/asset/icons";
 
 interface EpisodeRowViewProps {
   item: PasienEpisodeOverview;
@@ -73,34 +74,45 @@ export default function EpisodeRowView({ item }: EpisodeRowViewProps) {
         </td>
 
         {/* Kolom 5: Aksi */}
-        <td className="px-6 py-4 whitespace-nowrap text-center text-xs space-x-2">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            disabled={!hasRiwayat}
-            className={`rounded px-3 py-1.5 font-semibold transition border ${
-              hasRiwayat
-                ? "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
-                : "bg-gray-50 text-gray-300 border-transparent cursor-not-allowed"
-            }`}
-          >
-            {isExpanded ? "Tutup Log ▴" : "Lihat Log ▾"}
-          </button>
+        <td className="px-6 py-4 whitespace-nowrap text-center">
+          <div className="flex justify-center items-center gap-2">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              disabled={!hasRiwayat}
+              title={
+                hasRiwayat
+                  ? isExpanded
+                    ? "Tutup log"
+                    : "Lihat log"
+                  : "Belum ada riwayat"
+              }
+              className={`flex p-2 items-center rounded-lg transition shadow-sm ${
+                hasRiwayat
+                  ? "bg-blue-100 text-blue-500 hover:bg-blue-500 hover:text-white"
+                  : "bg-gray-100 text-gray-300 cursor-not-allowed"
+              }`}
+            >
+              <DetailIcon className="w-4 h-4" />
+            </button>
 
-          {episodeAktif ? (
-            <button
-              onClick={() => setIsModalTutupOpen(true)}
-              className="rounded bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition"
-            >
-              Selesaikan
-            </button>
-          ) : (
-            <button
-              onClick={() => setIsModalBukaOpen(true)}
-              className="rounded bg-brand-600 px-3 py-1.5 font-semibold text-white hover:bg-brand-700 transition"
-            >
-              Buka Episode
-            </button>
-          )}
+            {episodeAktif ? (
+              <button
+                onClick={() => setIsModalTutupOpen(true)}
+                title="Selesaikan episode"
+                className="flex p-2 items-center bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-500 hover:text-white transition shadow-sm"
+              >
+                <CheckIcon className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsModalBukaOpen(true)}
+                title="Buka episode baru"
+                className="flex p-2 items-center bg-brand-100 text-brand-600 rounded-lg hover:bg-brand-600 hover:text-white transition shadow-sm"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </td>
       </tr>
 
