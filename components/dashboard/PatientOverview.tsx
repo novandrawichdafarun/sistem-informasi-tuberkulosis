@@ -86,9 +86,9 @@ export default function PatientOverview({
           </div>
           <div className="mt-6 space-y-2 border-t border-slate-100 pt-4 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">Dosis diminum tepat waktu</span>
+              <span className="text-slate-500">Obat diminum tepat waktu</span>
               <span className="font-semibold text-brand-950">
-                {k.diminum} / {k.dinilai} dosis
+                {k.diminum} / {k.dinilai} Obat
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -108,7 +108,7 @@ export default function PatientOverview({
             </h3>
             {totalTerlapor > 0 && (
               <span className="text-xs text-slate-500">
-                {diminum}/{totalTerlapor} dosis
+                {diminum}/{totalTerlapor} Obat
               </span>
             )}
           </div>

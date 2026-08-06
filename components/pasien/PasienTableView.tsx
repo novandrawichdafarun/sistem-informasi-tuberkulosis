@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PasienData } from "@/types/pasien";
 import TableSearchInput from "@/components/molecules/TableSearchInput";
@@ -11,15 +11,25 @@ import TambahPasienModal from "./TambahPasienModal";
 
 export default function PasienTableView({ data }: { data: PasienData[] }) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedQuery(query.trim().toLowerCase()),
+      500,
+    );
+    return () => clearTimeout(t);
+  }, [query]);
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery;
     if (!q) return data;
     return data.filter(
       (p) =>
         p.nama_lengkap.toLowerCase().includes(q) ||
         (p.domisili || "").toLowerCase().includes(q),
     );
-  }, [data, query]);
+  }, [data, debouncedQuery]);
 
   return (
     <div className="space-y-4">

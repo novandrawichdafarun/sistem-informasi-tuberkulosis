@@ -8,9 +8,15 @@ import { CheckIcon, CloseIcon } from "@/components/asset/icons";
 
 interface LaporanMakanProps {
   todaysReports: LaporanMakanData[];
+  isEpisodeActive: boolean;
+  id_episode?: number;
 }
 
-export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
+export default function LaporanMakanForm({
+  todaysReports,
+  isEpisodeActive,
+  id_episode,
+}: LaporanMakanProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
@@ -18,6 +24,11 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
   const [sukses, setSukses] = useState<string | null>(null);
   const reportCount = todaysReports.length;
   const maxReached = reportCount >= 3;
+  const isBlocked = maxReached || !isEpisodeActive;
+
+  const blockedMessage = !isEpisodeActive
+    ? "Episode belum dibuka. Anda belum bisa melaporkan makan untuk saat ini."
+    : "Sudah mencapai batas pelaporan makan hari ini (3x). Anda tidak bisa melaporkan lagi.";
 
   // Pesan sukses otomatis hilang setelah beberapa detik (tampil seperti alert).
   useEffect(() => {
@@ -29,10 +40,8 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (maxReached) {
-      setError(
-        "Sudah mencapai batas pelaporan makan hari ini (3x). Anda tidak bisa melaporkan lagi.",
-      );
+    if (isBlocked) {
+      setError(blockedMessage);
       setSukses(null);
       return;
     }
@@ -54,7 +63,7 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
   };
 
   const inputClass = `w-full rounded-lg border border-slate-300 p-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 ${
-    maxReached ? "cursor-not-allowed bg-slate-100" : ""
+    isBlocked ? "cursor-not-allowed bg-slate-100" : ""
   }`;
 
   return (
@@ -63,6 +72,8 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
       onSubmit={handleSubmit}
       className="rounded-2xl border border-slate-200 bg-white p-6"
     >
+      <input type="hidden" name="id_episode" value={id_episode} />
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-brand-950">
@@ -79,10 +90,9 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
         </div>
       </div>
 
-      {maxReached ? (
+      {isBlocked ? (
         <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
-          Sudah mencapai batas pelaporan makan hari ini (3x). Anda tidak bisa
-          melaporkan lagi.
+          {blockedMessage}
         </div>
       ) : (
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
@@ -125,7 +135,7 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
             maxLength={50}
             placeholder="Contoh: Nasi Putih"
             className={inputClass}
-            disabled={maxReached}
+            disabled={isBlocked}
           />
         </div>
 
@@ -140,7 +150,7 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
             maxLength={50}
             placeholder="Contoh: Dada Ayam"
             className={inputClass}
-            disabled={maxReached}
+            disabled={isBlocked}
           />
         </div>
 
@@ -155,7 +165,7 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
             maxLength={50}
             placeholder="Contoh: Sayur Bayam"
             className={inputClass}
-            disabled={maxReached}
+            disabled={isBlocked}
           />
         </div>
 
@@ -169,7 +179,7 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
             maxLength={500}
             placeholder="Contoh: porsi sedikit karena mual"
             className={inputClass}
-            disabled={maxReached}
+            disabled={isBlocked}
           />
         </div>
       </div>
@@ -177,7 +187,7 @@ export default function LaporanMakanForm({ todaysReports }: LaporanMakanProps) {
       <div className="mt-5 flex justify-end">
         <button
           type="submit"
-          disabled={isPending || maxReached}
+          disabled={isPending || isBlocked}
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:bg-brand-400"
         >
           {isPending ? "Menyimpan..." : "Simpan Laporan"}

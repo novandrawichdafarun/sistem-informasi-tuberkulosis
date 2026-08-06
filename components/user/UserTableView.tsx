@@ -1,7 +1,7 @@
 "use client";
 
 import { UserData } from "@/types/user";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TableSearchInput from "../molecules/TableSearchInput";
 import DeleteUserButton from "./DeleteUserButton";
 import EditUserModal from "./EditUserModal";
@@ -9,11 +9,21 @@ import TambahUserModal from "./TambahUserModal";
 
 export default function UserTableView({ data }: { data: UserData[] }) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedQuery(query.trim().toLowerCase()),
+      500,
+    );
+    return () => clearTimeout(t);
+  }, [query]);
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery;
     if (!q) return data;
     return data.filter((p) => p.email.toLowerCase().includes(q));
-  }, [data, query]);
+  }, [data, debouncedQuery]);
 
   return (
     <div className="space-y-4">

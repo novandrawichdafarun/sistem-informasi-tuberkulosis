@@ -136,6 +136,7 @@ export const getPemeriksaanLabByUser = async (
             dna_bakteri_tb: lab.dna_bakteri_tb,
             status_resistensi: lab.status_resistensi,
             hasil_tes: lab.hasil_tes,
+            hasil_bta: lab.hasil_bta,
             berkas_pendukung_url: lab.berkas_pendukung_url,
             created_at: lab.created_at,
           }) as PemeriksaanLabData,

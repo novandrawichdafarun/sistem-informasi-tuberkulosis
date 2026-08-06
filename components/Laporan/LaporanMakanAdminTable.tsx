@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LaporanMakanPasienOverview } from "@/types/laporan";
 import { SearchIcon } from "../asset/icons";
 import LaporanMakanRowView from "./LaporanMakanRowView";
@@ -11,12 +11,21 @@ export default function LaporanMakanAdminTable({
   rows: LaporanMakanPasienOverview[];
 }) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedQuery(query.trim().toLowerCase()),
+      500,
+    );
+    return () => clearTimeout(t);
+  }, [query]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery;
     if (!q) return rows;
     return rows.filter((r) => r.nama_lengkap.toLowerCase().includes(q));
-  }, [rows, query]);
+  }, [rows, debouncedQuery]);
 
   return (
     <div className="space-y-4">

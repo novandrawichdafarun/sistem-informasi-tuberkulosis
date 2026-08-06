@@ -92,7 +92,7 @@ export default async function StatistikPage() {
       {/* Tren kepatuhan */}
       <ChartCard
         title="Tren Kepatuhan 6 Bulan Terakhir"
-        subtitle="Persentase dosis diminum dari total jadwal per bulan"
+        subtitle="Persentase obat yang diminum dari total jadwal per bulan"
       >
         <LineChart
           labels={s.trenKepatuhan.map((p) => p.label)}

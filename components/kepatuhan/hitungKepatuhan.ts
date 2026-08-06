@@ -2,7 +2,7 @@ import { KepatuhanHarian } from "@/types/laporan";
 
 export type RingkasKepatuhanObat = {
   persentase: number; // 0–100, mulai dari 100%
-  dinilai: number; // dosis yang sudah jatuh tempo (dasar penilaian)
+  dinilai: number; // obat yang sudah jatuh tempo (dasar penilaian)
   diminum: number; // diminum tepat waktu
   terlewat: number; // dilaporkan tapi telat
   tidakMinum: number; // jatuh tempo tapi tidak dilaporkan
@@ -11,8 +11,8 @@ export type RingkasKepatuhanObat = {
 /**
  * Kepatuhan minum obat dengan model "mulai 100%, berkurang tiap telat/tidak minum".
  *
- * - Hanya dosis yang **sudah jatuh tempo** yang dinilai.
- * - Dosis hari ini / mendatang yang **belum dilaporkan** diberi grace (tidak dihitung),
+ * - Hanya obat yang **sudah jatuh tempo** yang dinilai.
+ * - Obat hari ini / mendatang yang **belum dilaporkan** diberi grace (tidak dihitung),
  *   sehingga tidak langsung menurunkan persentase sebelum waktunya.
  * - Persentase = diminum / dinilai. Telat (terlewat) dan tidak minum sama-sama mengurangi.
  */

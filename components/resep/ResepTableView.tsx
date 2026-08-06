@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PasienResepOverview } from "@/types/resep";
 import { ObatData } from "@/types/obat";
 import TableSearchInput from "@/components/molecules/TableSearchInput";
@@ -14,11 +14,21 @@ export default function ResepTableView({
   obatList: ObatData[];
 }) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedQuery(query.trim().toLowerCase()),
+      500,
+    );
+    return () => clearTimeout(t);
+  }, [query]);
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery;
     if (!q) return data;
     return data.filter((d) => d.nama_lengkap.toLowerCase().includes(q));
-  }, [data, query]);
+  }, [data, debouncedQuery]);
 
   return (
     <div className="space-y-4">
@@ -41,7 +51,10 @@ export default function ResepTableView({
             <tbody className="divide-y divide-gray-200">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-gray-400">
+                  <td
+                    colSpan={4}
+                    className="px-6 py-10 text-center text-gray-400"
+                  >
                     {data.length === 0
                       ? "Belum ada data pasien."
                       : "Pasien tidak ditemukan."}

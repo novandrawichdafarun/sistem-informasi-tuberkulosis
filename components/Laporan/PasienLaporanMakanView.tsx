@@ -3,7 +3,11 @@ import LaporanMakanForm from "./LaporanMakanForm";
 import { getRiwayatMakanAction } from "@/actions/laporan";
 import { getPasienProfileAction } from "@/actions/pasien";
 import InfoStat from "@/components/card/InfoStat";
-import { MealIcon, ClipboardIcon, CalendarIcon } from "@/components/asset/icons";
+import {
+  MealIcon,
+  ClipboardIcon,
+  CalendarIcon,
+} from "@/components/asset/icons";
 
 const TARGET_PER_HARI = 3;
 
@@ -15,6 +19,7 @@ export default async function PasienLaporanMakanView() {
   const data = res.success && res.data ? res.data : [];
   const profile = profileRes.success ? (profileRes.data ?? null) : null;
   const episode = profile?.episodeAktif ?? null;
+  const isEpisodeActive = episode?.status_episode === "aktif";
 
   const todayDate = todayISO();
   // waktu_makan tersimpan sebagai UTC → konversi ke tanggal lokal dulu agar
@@ -26,7 +31,9 @@ export default async function PasienLaporanMakanView() {
       "0",
     )}-${String(d.getDate()).padStart(2, "0")}`;
   };
-  const todaysReports = data.filter((d) => tglLokal(d.waktu_makan) === todayDate);
+  const todaysReports = data.filter(
+    (d) => tglLokal(d.waktu_makan) === todayDate,
+  );
 
   // Kepatuhan makan per episode aktif: model "mulai 100%, berkurang tiap porsi
   // tidak dilaporkan". Target 3x/hari, hanya menilai hari yang sudah SELESAI
@@ -40,7 +47,9 @@ export default async function PasienLaporanMakanView() {
     hariBerjalan = getDayCount(mulai, todayDate);
 
     // Total laporan sepanjang episode (termasuk hari ini) untuk kartu ringkasan.
-    laporanEpisode = data.filter((d) => tglLokal(d.waktu_makan) >= mulai).length;
+    laporanEpisode = data.filter(
+      (d) => tglLokal(d.waktu_makan) >= mulai,
+    ).length;
 
     // Penilaian hanya untuk hari yang sudah selesai (mulai s/d kemarin).
     if (mulai <= kemarin) {
@@ -109,7 +118,11 @@ export default async function PasienLaporanMakanView() {
         </div>
       )}
 
-      <LaporanMakanForm todaysReports={todaysReports} />
+      <LaporanMakanForm
+        todaysReports={todaysReports}
+        isEpisodeActive={isEpisodeActive}
+        id_episode={episode?.id_episode}
+      />
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="border-b border-slate-100 px-6 py-4">

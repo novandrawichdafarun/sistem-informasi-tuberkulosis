@@ -67,7 +67,7 @@ export default function MedicationBanner({
                   {namaObat}
                 </p>
                 <p className="mt-1 text-sm text-slate-500">
-                  {item.detail_obat?.jumlah_obat_per_minum ?? 0} dosis •{" "}
+                  {item.detail_obat?.jumlah_obat_per_minum ?? 0} Obat •{" "}
                   {item.detail_obat?.aturan_pakai || "-"}
                 </p>
                 <p className="mt-2 text-xs text-slate-400">

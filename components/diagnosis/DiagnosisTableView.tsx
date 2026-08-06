@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PasienDiagnosisOverview } from "@/types/diagnosis";
 import TableSearchInput from "@/components/molecules/TableSearchInput";
 import DiagnosisRowView from "./DiagnosisRowVIew";
@@ -11,11 +11,21 @@ export default function DiagnosisTableView({
   data: PasienDiagnosisOverview[];
 }) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedQuery(query.trim().toLowerCase()),
+      500,
+    );
+    return () => clearTimeout(t);
+  }, [query]);
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery;
     if (!q) return data;
     return data.filter((d) => d.nama_lengkap.toLowerCase().includes(q));
-  }, [data, query]);
+  }, [data, debouncedQuery]);
 
   return (
     <div className="space-y-4">
@@ -39,7 +49,10 @@ export default function DiagnosisTableView({
             <tbody className="divide-y divide-gray-200">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-8 text-center text-gray-500"
+                  >
                     {data.length === 0
                       ? "Belum ada data pasien atau pemeriksaan lab."
                       : "Pasien tidak ditemukan."}

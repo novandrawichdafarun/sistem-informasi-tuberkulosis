@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ObatData } from "@/types/obat";
 import TableSearchInput from "@/components/molecules/TableSearchInput";
 import EditObatModal from "./EditObatModal";
@@ -14,8 +14,18 @@ interface Props {
 
 export default function ObatTableView({ data }: Props) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedQuery(query.trim().toLowerCase()),
+      500,
+    );
+    return () => clearTimeout(t);
+  }, [query]);
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery;
     if (!q) return data;
     return data.filter(
       (o) =>
@@ -23,7 +33,7 @@ export default function ObatTableView({ data }: Props) {
         (o.kategori_obat || "").toLowerCase().includes(q) ||
         (o.jenis_obat || "").toLowerCase().includes(q),
     );
-  }, [data, query]);
+  }, [data, debouncedQuery]);
 
   return (
     <div className="space-y-4">

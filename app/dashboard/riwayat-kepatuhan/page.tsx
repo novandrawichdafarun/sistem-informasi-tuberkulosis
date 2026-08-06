@@ -33,13 +33,16 @@ export default async function RiwayatKepatuhanPage() {
   // Ambil rentang 1 tahun agar kalender bisa digeser antar-bulan.
   // (Action & argumen `days` sudah ada — tanpa perubahan backend.)
   const res = await getKepatuhanAction(365);
-  const allDays: KepatuhanHarian[] = res.success && res.data ? res.data.days : [];
+  const allDays: KepatuhanHarian[] =
+    res.success && res.data ? res.data.days : [];
 
   const today = todayISO();
   const batas30 = isoDaysAgo(29);
 
   // Ringkasan 30 hari terakhir — model "mulai 100%, berkurang tiap telat/tidak minum".
-  const last30 = allDays.filter((d) => d.tanggal >= batas30 && d.tanggal <= today);
+  const last30 = allDays.filter(
+    (d) => d.tanggal >= batas30 && d.tanggal <= today,
+  );
   const { persentase, diminum, terlewat, tidakMinum, dinilai } =
     hitungKepatuhanObat(last30, today);
   const kat = kategori(persentase);
@@ -75,10 +78,10 @@ export default async function RiwayatKepatuhanPage() {
               {kat.label}
             </span>
             <p className="mt-3 text-xs text-slate-500">
-              Mulai 100%, berkurang tiap dosis telat atau tidak diminum.
+              Mulai 100%, berkurang tiap obat yang telat atau tidak diminum.
               {dinilai > 0
-                ? ` ${diminum} dari ${dinilai} dosis jatuh tempo diminum tepat waktu.`
-                : " Belum ada dosis yang jatuh tempo."}
+                ? ` ${diminum} dari ${dinilai} obat yang diminum tepat waktu.`
+                : " Belum ada jadwal minum obat yang jatuh tempo."}
             </p>
           </div>
         </div>

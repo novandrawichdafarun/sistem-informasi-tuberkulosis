@@ -29,7 +29,7 @@ const features = [
   },
   {
     title: "Kalender Pengobatan",
-    desc: "Visualisasi kepatuhan bulanan agar pasien tak melewatkan satu dosis pun.",
+    desc: "Visualisasi kepatuhan bulanan agar pasien tak melewatkan satu obat pun.",
     icon: (
       <path
         strokeLinecap="round"
@@ -70,8 +70,7 @@ export default async function Home() {
       <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
         <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-950 sm:text-5xl">
           Dampingi Setiap Langkah{" "}
-          <span className="text-brand-600">Kesembuhan</span> Pasien
-          Tuberkulosis
+          <span className="text-brand-600">Kesembuhan</span> Pasien Tuberkulosis
         </h1>
 
         <p className="mt-5 max-w-2xl text-base leading-7 text-brand-900/60 sm:text-lg">

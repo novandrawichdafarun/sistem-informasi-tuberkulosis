@@ -97,7 +97,7 @@ export default function LaporanMakanRowView({
       {isExpanded && (
         <tr>
           <td
-            colSpan={4}
+            colSpan={5}
             className="bg-slate-50 border-b border-gray-200 p-0 shadow-inner"
           >
             <div className="p-4 pl-10 border-l-4 border-brand-400">
