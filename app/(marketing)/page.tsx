@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "@/components/asset/Logo";
+import PointerSpotlight from "@/components/marketing/PointerSpotlight";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
@@ -40,6 +41,16 @@ const features = [
   },
 ];
 
+// Judul hero dipecah per-kata agar bisa dianimasikan muncul berurutan.
+const heroWords = [
+  "Dampingi",
+  "Setiap",
+  "Langkah",
+  "Kesembuhan",
+  "Pasien",
+  "Tuberkulosis",
+];
+
 export default async function Home() {
   const session = await getServerSession(authOptions);
   if (session) {
@@ -48,6 +59,9 @@ export default async function Home() {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-linear-to-br from-brand-50 via-white to-mint-300/20">
+      {/* Spotlight mengikuti pointer (mouse & sentuhan) */}
+      <PointerSpotlight />
+
       {/* Decorative background */}
       <div
         aria-hidden
@@ -57,9 +71,23 @@ export default async function Home() {
         aria-hidden
         className="pointer-events-none absolute -bottom-40 -right-24 h-96 w-96 rounded-full bg-brand-600/20 blur-3xl"
       />
+      {/* Pola titik halus */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at center, var(--brand-300) 1px, transparent 1.5px)",
+          backgroundSize: "24px 24px",
+          maskImage:
+            "radial-gradient(ellipse at 50% 30%, black 25%, transparent 72%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at 50% 30%, black 25%, transparent 72%)",
+        }}
+      />
 
       {/* Header */}
-      <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center gap-3 px-6 py-6">
+      <header className="animate-fade-up relative z-10 mx-auto flex w-full max-w-6xl items-center gap-3 px-6 py-6">
         <Logo size="md" />
         <span className="text-xl font-bold tracking-tight text-brand-800">
           NU-TB<span className="text-brand-500">Care</span>
@@ -68,21 +96,43 @@ export default async function Home() {
 
       {/* Hero */}
       <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
-        <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-950 sm:text-5xl">
-          Dampingi Setiap Langkah{" "}
-          <span className="text-brand-600">Kesembuhan</span> Pasien Tuberkulosis
+        <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-800 sm:text-5xl">
+          {heroWords.map((word, i) => {
+            const highlight = word === "Kesembuhan";
+            return (
+              <span
+                key={word}
+                className="animate-fade-up mr-[0.25em] inline-block"
+                style={{ animationDelay: `${0.1 + i * 0.09}s` }}
+              >
+                {highlight ? (
+                  <span className="animate-text-shimmer bg-linear-to-r from-brand-600 via-brand-300 to-brand-600 bg-clip-text text-transparent">
+                    {word}
+                  </span>
+                ) : (
+                  word
+                )}
+              </span>
+            );
+          })}
         </h1>
 
-        <p className="mt-5 max-w-2xl text-base leading-7 text-brand-900/60 sm:text-lg">
+        <p
+          className="animate-fade-up mt-5 max-w-2xl text-base leading-7 text-brand-900/60 sm:text-lg"
+          style={{ animationDelay: "0.7s" }}
+        >
           NU-TBCare membantu pasien melaporkan kepatuhan pengobatan secara
           mandiri dan memudahkan petugas memantau perkembangannya semua dalam
           satu sistem sederhana.
         </p>
 
-        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
+        <div
+          className="animate-fade-up mt-8 flex flex-col items-center gap-3 sm:flex-row"
+          style={{ animationDelay: "0.82s" }}
+        >
           <Link
             href="/login"
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-8 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-all hover:bg-brand-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 sm:w-auto"
+            className="group flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-8 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-all hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 sm:w-auto"
           >
             Masuk
             <svg
@@ -91,7 +141,7 @@ export default async function Home() {
               fill="none"
               stroke="currentColor"
               strokeWidth={2}
-              className="h-4 w-4"
+              className="h-4 w-4 transition-transform group-hover:translate-x-1"
             >
               <path
                 strokeLinecap="round"
@@ -104,12 +154,13 @@ export default async function Home() {
 
         {/* Features */}
         <div className="mt-16 grid w-full max-w-5xl grid-cols-1 gap-5 sm:grid-cols-3">
-          {features.map((f) => (
+          {features.map((f, i) => (
             <div
               key={f.title}
-              className="rounded-2xl border border-brand-100 bg-white/80 p-6 text-left shadow-sm shadow-brand-900/5 backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-md"
+              className="group animate-fade-up h-full rounded-2xl border border-white/60 bg-white/50 p-6 text-left shadow-lg shadow-brand-900/5 ring-1 ring-white/40 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-200/70 hover:bg-white/70 hover:shadow-xl hover:shadow-brand-900/10"
+              style={{ animationDelay: `${0.9 + i * 0.1}s` }}
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-brand-100 to-mint-300/40 text-brand-600 shadow-sm transition-transform duration-300 group-hover:scale-110">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -121,7 +172,7 @@ export default async function Home() {
                   {f.icon}
                 </svg>
               </div>
-              <h3 className="mt-4 text-base font-semibold text-brand-950">
+              <h3 className="mt-4 text-base font-semibold text-brand-800">
                 {f.title}
               </h3>
               <p className="mt-1.5 text-sm leading-6 text-brand-900/60">
