@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { submitLaporanObatAction } from "@/actions/laporan";
-import { StatusLaporanInput, ReporterRole } from "@/types/laporan";
+import { ReporterRole } from "@/types/laporan";
 import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
+import { formatRemainingTime, formatTimeOnly, todayISO } from "@/utils/date";
 
 interface ModalLaporObatProps {
   idJadwal: number;
@@ -20,24 +21,30 @@ export default function ModalLaporObat({
   onClose,
 }: ModalLaporObatProps) {
   const router = useRouter();
-  const [status, setStatus] = useState<StatusLaporanInput>("diminum");
   const [catatan, setCatatan] = useState("");
   const [reportedBy, setReportedBy] = useState<ReporterRole>("pasien");
   const [error, setError] = useState<string | null>(null);
-
-  // useTransition digunakan untuk menangani status "loading" saat Server Action dipanggil
   const [isPending, startTransition] = useTransition();
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const [today] = useState(() => todayISO());
 
-  // Fungsi yang dijalankan saat tombol "Simpan" ditekan
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(Date.now()), 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const jadwalWaktu = new Date(`${today}T${waktuMinum}:00`);
+  const terlambatBatas = new Date(jadwalWaktu.getTime() + 60 * 60 * 1000);
+  const isCurrentlyLate = currentTime > terlambatBatas.getTime();
+  const remainingMs = terlambatBatas.getTime() - currentTime;
+
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Mencegah browser melakukan refresh halaman
+    e.preventDefault();
     setError(null);
 
-    // Membungkus pemanggilan Server Action dengan startTransition
     startTransition(async () => {
       const formData = new FormData();
       formData.append("id_jadwal", String(idJadwal));
-      formData.append("status_input", status);
       formData.append("catatan_kepatuhan", catatan);
       formData.append("reported_by", reportedBy);
 
@@ -58,7 +65,6 @@ export default function ModalLaporObat({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-        {/* Header Modal */}
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Lapor Minum Obat
         </h3>
@@ -72,45 +78,35 @@ export default function ModalLaporObat({
           </div>
         )}
 
-        {/* Form Body */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Input Status */}
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Status
-            </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as StatusLaporanInput)}
-              className="w-full rounded-md border border-gray-300 p-2"
-              disabled={isPending}
-            >
-              <option value="diminum">Sudah Diminum</option>
-              <option value="ditunda">Ditunda</option>
-            </select>
-          </div>
-
-          {/* Input Catatan (Hanya wajib jika ditunda, tapi bisa diisi kapan saja) */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Catatan:{" "}
-              {status === "ditunda" && <span className="text-red-500">*</span>}
+              Catatan
+              {isCurrentlyLate && <span className="text-red-500"> *</span>}
             </label>
             <textarea
               value={catatan}
               onChange={(e) => setCatatan(e.target.value)}
               placeholder={
-                status === "ditunda"
-                  ? "Tuliskan alasan penundaan (wajib)..."
+                isCurrentlyLate
+                  ? "Tuliskan alasan keterlambatan..."
                   : "Catatan tambahan (opsional)..."
               }
               className="h-24 w-full rounded-md border border-gray-300 p-2"
-              required={status === "ditunda"}
+              required={isCurrentlyLate}
               disabled={isPending}
             />
+            <p className="mt-2 text-xs text-slate-500">
+              {isCurrentlyLate
+                ? `Laporan ini otomatis terhitung telat sejak ${formatTimeOnly(
+                    terlambatBatas,
+                  )}.`
+                : `Anda akan dianggap telat jika melapor setelah ${formatTimeOnly(
+                    terlambatBatas,
+                  )} (${formatRemainingTime(remainingMs)} lagi).`}
+            </p>
           </div>
 
-          {/* Input Dilaporkan Oleh */}
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
               Dilaporkan Oleh
@@ -127,7 +123,6 @@ export default function ModalLaporObat({
             </select>
           </div>
 
-          {/* Footer / Buttons */}
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"

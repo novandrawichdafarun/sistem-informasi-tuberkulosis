@@ -1,10 +1,8 @@
-export type StatusLaporanInput = "diminum" | "ditunda";
-export type StatusLaporanFinal = "diminum" | "ditunda" | "terlewat";
+export type StatusLaporan = "diminum" | "terlewat";
 export type ReporterRole = "pasien" | "pendamping" | "nakes";
 
 export interface LaporanObatPayload {
   id_jadwal: number;
-  status_input: StatusLaporanInput;
   catatan_kepatuhan?: string;
   reported_by: ReporterRole;
 }
@@ -52,7 +50,7 @@ export interface JadwalObatHariIni {
   // medication_log bisa null jika pasien belum melakukan pelaporan
   medication_log: {
     id_log: number;
-    status: StatusLaporanFinal;
+    status: StatusLaporan;
     catatan_kepatuhan: string | null;
   } | null;
 }
@@ -60,7 +58,7 @@ export interface JadwalObatHariIni {
 export interface KepatuhanHarian {
   tanggal: string; // YYYY-MM-DD
   jam_jadwal: string;
-  status: StatusLaporanFinal | null; // null = belum dilaporkan
+  status: StatusLaporan | null; // null = belum dilaporkan
   reported_at: string | null;
 }
 

@@ -147,3 +147,17 @@ export function isReportLate(
 
   return currentTime > maxValidTime;
 }
+
+export function formatRemainingTime(ms: number) {
+  const minutes = Math.ceil(ms / 60000);
+  if (minutes <= 0) return "kurang dari 1 menit";
+  if (minutes === 1) return "1 menit";
+  return `${minutes} menit`;
+}
+
+export function formatTimeOnly(date: Date) {
+  return date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}

@@ -7,7 +7,7 @@ import {
   LaporanMakanPayload,
   LaporanObatPayload,
   RingkasanKepatuhan,
-  StatusLaporanFinal,
+  StatusLaporan,
 } from "@/types/laporan";
 import { verifyPasienAccess, verifySuperAdminAccess } from "@/utils/access";
 import { isoDaysAgo, isReportLate, todayISO } from "@/utils/date";
@@ -132,7 +132,7 @@ export async function hitungKepatuhan(
     return {
       tanggal: j.tanggal_jadwal,
       jam_jadwal: j.jam_jadwal,
-      status: (log?.status as StatusLaporanFinal) ?? null,
+      status: (log?.status as StatusLaporan) ?? null,
       reported_at: log?.reported_at ?? null,
     };
   });
@@ -196,7 +196,7 @@ export const getKepatuhanByUser = async (
       return {
         tanggal: j.tanggal_jadwal,
         jam_jadwal: j.jam_jadwal,
-        status: (log?.status as StatusLaporanFinal) ?? null,
+        status: (log?.status as StatusLaporan) ?? null,
         reported_at: log?.reported_at ?? null,
       };
     });
@@ -245,15 +245,21 @@ export async function laporMinumObat(
         "Jadwal minum obat tidak ditemukan",
       );
 
-    let finalStatus: StatusLaporanFinal = "diminum";
-    if (payload.status_input === "ditunda") {
-      finalStatus = "ditunda";
-    } else if (payload.status_input === "diminum") {
-      const late = isReportLate(jadwal.tanggal_jadwal, jadwal.jam_jadwal, 1);
-      if (late) {
-        finalStatus = "terlewat";
+    const late = isReportLate(jadwal.tanggal_jadwal, jadwal.jam_jadwal, 1);
+
+    if (late) {
+      if (
+        !payload.catatan_kepatuhan ||
+        payload.catatan_kepatuhan.trim().length === 0
+      ) {
+        return {
+          success: false,
+          error: "Alasan wajib diisi jika laporan terlambat.",
+        };
       }
     }
+
+    const finalStatus: StatusLaporan = late ? "terlewat" : "diminum";
 
     const { error: insertError } = await supabase
       .from("medication_log")
