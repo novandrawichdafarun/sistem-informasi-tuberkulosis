@@ -20,7 +20,6 @@ import {
 } from "@/types/episodePengobatan";
 import { handleActionError } from "@/utils/error";
 import { requireSuperAdminSession } from "@/utils/session";
-import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
 import { revalidatePath } from "next/cache";
 
@@ -29,9 +28,7 @@ export async function getDaftarEpisodeOverviewAction(): Promise<
 > {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
-
-    return await getDaftarPasienDanEpisode(supabase, superAdminId);
+    return await getDaftarPasienDanEpisode(superAdminId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -42,9 +39,7 @@ export async function getEpisodeAktifAction(
 ): Promise<ActionResponse<EpisodePengobatanData>> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
-
-    return await getEpisodeAktifByPasienId(supabase, id_pasien, superAdminId);
+    return await getEpisodeAktifByPasienId(id_pasien, superAdminId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -55,13 +50,12 @@ export async function bukaEpisodeAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, bukaEpisodeSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await bukaEpisode(supabase, data, superAdminId);
+    const result = await bukaEpisode(data, superAdminId);
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
@@ -74,13 +68,12 @@ export async function tutupEpisodeAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, tutupEpisodeSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await tutupEpisode(supabase, data, superAdminId);
+    const result = await tutupEpisode(data, superAdminId);
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
   } catch (error) {
@@ -93,13 +86,12 @@ export async function editEpisodeAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, editEpisodeSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await editEpisode(supabase, data, superAdminId);
+    const result = await editEpisode(data, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
     return result;
@@ -113,9 +105,8 @@ export async function hapusEpisodeAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
-    const result = await hapusEpisode(supabase, id_episode, superAdminId);
+    const result = await hapusEpisode(id_episode, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/episode-pengobatan");
 

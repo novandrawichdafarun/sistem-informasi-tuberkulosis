@@ -1,33 +1,31 @@
+import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
+import type { RowDataPacket } from "mysql2/promise";
+
 import { ActionResponse } from "@/types/action";
 import { CreateUserPayload, UpdateUserPayload, UserData } from "@/types/user";
 import { verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
-import { SupabaseClient } from "@supabase/supabase-js";
-import bcrypt from "bcryptjs";
+import { getMySQLPool } from "@/database/mysql-client";
+import { isMySQLDuplicateError } from "@/utils/mysql";
 
 export const getDaftarAdminUser = async (
-  supabase: SupabaseClient,
   id_super_admin: string,
 ): Promise<ActionResponse<UserData[]>> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data, error: dataError } = await supabase
-      .from("users")
-      .select("id_user, email, role, created_at")
-      .eq("role", "super_admin")
-      .neq("id_user", id_super_admin)
-      .order("created_at", { ascending: false });
+    const pool = getMySQLPool();
+    const [rows] = await pool.execute<RowDataPacket[]>({
+      sql: `SELECT id_user, email, role, created_at FROM users
+            WHERE role = 'super_admin' AND id_user != ?
+            ORDER BY created_at DESC`,
+      values: [id_super_admin],
+    });
 
-    if (dataError)
-      handleServiceError(dataError?.message, "Gagal mengambil data pengguna");
-
-    return { success: true, data: data as unknown as UserData[] };
+    return { success: true, data: rows as unknown as UserData[] };
   } catch (error) {
     return handleServiceError(
       error,
@@ -37,51 +35,32 @@ export const getDaftarAdminUser = async (
 };
 
 export const createUser = async (
-  supabase: SupabaseClient,
   payload: CreateUserPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    // Cek duplikasi Email
-    const { data: existingUser } = await supabase
-      .from("users")
-      .select("id_user")
-      .eq("email", payload.email)
-      .single();
-
-    if (existingUser)
-      return handleServiceError(
-        existingUser,
-        "Email sudah terdaftar di sistem!",
-      );
-
-    // Buat akun login admin
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(payload.password, salt);
 
-    const { error: insertError } = await supabase
-      .from("users")
-      .insert({
-        email: payload.email,
-        password_hash: hashedPassword,
-        role: "super_admin",
-      })
-      .single();
-
-    if (insertError)
-      return handleServiceError(
-        insertError?.message,
-        "Gagal menyimpan data User",
-      );
-
-    return { success: true, message: "Data User berhasil ditambahkan!" };
+    try {
+      const pool = getMySQLPool();
+      const id_user = randomUUID();
+      await pool.execute({
+        sql: `INSERT INTO users (id_user, email, password_hash, role)
+              VALUES (?, ?, ?, 'super_admin')`,
+        values: [id_user, payload.email, hashedPassword],
+      });
+      return { success: true, message: "Data User berhasil ditambahkan!" };
+    } catch (err) {
+      if (isMySQLDuplicateError(err)) {
+        return { success: false, error: "Email sudah terdaftar di sistem!" };
+      }
+      return handleServiceError(err, "Gagal menyimpan data User");
+    }
   } catch (error) {
     return handleServiceError(
       error,
@@ -91,47 +70,49 @@ export const createUser = async (
 };
 
 export const updateUser = async (
-  supabase: SupabaseClient,
   payload: UpdateUserPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: user } = await supabase
-      .from("users")
-      .select("id_user")
-      .eq("id_user", payload.id_user)
-      .single();
+    try {
+      const pool = getMySQLPool();
 
-    if (!user) return handleServiceError(user, "User tidak ditemukan");
+      const [checkRows] = await pool.execute<RowDataPacket[]>({
+        sql: "SELECT id_user FROM users WHERE id_user = ? LIMIT 1",
+        values: [payload.id_user],
+      });
+      if (checkRows.length === 0) {
+        return { success: false, error: "User tidak ditemukan" };
+      }
 
-    const updateUserData: { email: string; password_hash?: string } = {
-      email: payload.email,
-    };
+      if (payload.password) {
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(payload.password, salt);
+        await pool.execute({
+          sql: "UPDATE users SET email = ?, password_hash = ? WHERE id_user = ?",
+          values: [payload.email, hashed, payload.id_user],
+        });
+      } else {
+        await pool.execute({
+          sql: "UPDATE users SET email = ? WHERE id_user = ?",
+          values: [payload.email, payload.id_user],
+        });
+      }
 
-    if (payload.password) {
-      const salt = await bcrypt.genSalt(10);
-      updateUserData.password_hash = await bcrypt.hash(payload.password, salt);
+      return { success: true, message: "Data User berhasil diperbarui!" };
+    } catch (err) {
+      if (isMySQLDuplicateError(err)) {
+        return {
+          success: false,
+          error: "Gagal memperbarui kredensial (Email mungkin sudah dipakai).",
+        };
+      }
+      return handleServiceError(err, "Gagal memperbarui kredensial.");
     }
-
-    const { error: updateError } = await supabase
-      .from("users")
-      .update(updateUserData)
-      .eq("id_user", payload.id_user);
-
-    if (updateError)
-      return handleServiceError(
-        updateError?.message,
-        "Gagal memperbarui kredensial (Email mungkin sudah dipakai).",
-      );
-
-    return { success: true, message: "Data User berhasil diperbarui!" };
   } catch (error) {
     return handleServiceError(
       error,
@@ -141,41 +122,34 @@ export const updateUser = async (
 };
 
 export const deleteuser = async (
-  supabase: SupabaseClient,
   id_user: string,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: user } = await supabase
-      .from("users")
-      .select("id_user")
-      .eq("id_user", id_user)
-      .single();
-
-    if (!user) return handleServiceError(user, "User tidak ditmeukan");
-
-    const { error: deleteError } = await supabase
-      .from("users")
-      .delete()
-      .eq("id_user", id_user);
-
-    if (deleteError)
-      return handleServiceError(
-        deleteError?.message,
-        "Gagal menghapus data User.",
-      );
-
-    return {
-      success: true,
-      message: "Data User berhasil dihapus permanen.",
-    };
+    try {
+      const pool = getMySQLPool();
+      const [checkRows] = await pool.execute<RowDataPacket[]>({
+        sql: "SELECT id_user FROM users WHERE id_user = ? LIMIT 1",
+        values: [id_user],
+      });
+      if (checkRows.length === 0) {
+        return { success: false, error: "User tidak ditemukan" };
+      }
+      await pool.execute({
+        sql: "DELETE FROM users WHERE id_user = ?",
+        values: [id_user],
+      });
+      return {
+        success: true,
+        message: "Data User berhasil dihapus permanen.",
+      };
+    } catch (err) {
+      return handleServiceError(err, "Gagal menghapus data User.");
+    }
   } catch (error) {
     return handleServiceError(
       error,

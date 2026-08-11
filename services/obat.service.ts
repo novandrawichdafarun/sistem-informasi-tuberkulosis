@@ -1,38 +1,26 @@
+import type { RowDataPacket } from "mysql2/promise";
+
 import { ActionResponse } from "@/types/action";
 import { CreateObatPayload, ObatData, UpdateObatPayload } from "@/types/obat";
 import { verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { getMySQLPool } from "@/database/mysql-client";
 
 export const getDaftarObat = async (
-  supabase: SupabaseClient,
   id_super_admin: string,
 ): Promise<ActionResponse<ObatData[]>> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: obat, error: obatError } = await supabase
-      .from("obat")
-      .select(
-        `
-          id_obat, nama_obat, jenis_obat, kategori_obat,
-          deskripsi, dosis, is_active, created_at
-        `,
-      )
-      .order("created_at", { ascending: false });
-
-    if (obatError)
-      return handleServiceError(
-        obatError?.message,
-        "Gagal mengambil data obat dari sistem",
-      );
-
-    return { success: true, data: obat as ObatData[] };
+    const pool = getMySQLPool();
+    const [rows] = await pool.execute<RowDataPacket[]>({
+      sql: `SELECT id_obat, nama_obat, jenis_obat, kategori_obat,
+              deskripsi, dosis, is_active, created_at
+       FROM obat ORDER BY created_at DESC`,
+    });
+    return { success: true, data: rows as unknown as ObatData[] };
   } catch (error) {
     return handleServiceError(
       error,
@@ -42,35 +30,35 @@ export const getDaftarObat = async (
 };
 
 export const createObat = async (
-  supabase: SupabaseClient,
   payload: CreateObatPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: existingObat } = await supabase
-      .from("obat")
-      .select("id_obat")
-      .eq("nama_obat", payload.nama_obat)
-      .single();
+    const pool = getMySQLPool();
+    const [existingRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_obat FROM obat WHERE nama_obat = ? AND dosis = ? LIMIT 1",
+      values: [payload.nama_obat, payload.dosis],
+    });
+    if (existingRows.length > 0) {
+      return { success: false, error: "Obat sudah terdaftar di sistem!" };
+    }
 
-    if (existingObat)
-      return handleServiceError(
-        existingObat,
-        "Obat sudah terdaftar di sistem!",
-      );
-
-    const { error: insertError } = await supabase.from("obat").insert(payload);
-
-    if (insertError)
-      return handleServiceError(insertError?.message, "Gagal menyimpan obat");
-
+    await pool.execute({
+      sql: `INSERT INTO obat (nama_obat, jenis_obat, kategori_obat, deskripsi, dosis, is_active)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+      values: [
+        payload.nama_obat,
+        payload.jenis_obat,
+        payload.kategori_obat,
+        payload.deskripsi ?? null,
+        payload.dosis ?? null,
+        payload.is_active ?? true,
+      ],
+    });
     return { success: true, message: "Obat berhasil ditambahkan!" };
   } catch (error) {
     return handleServiceError(
@@ -81,39 +69,37 @@ export const createObat = async (
 };
 
 export const updateObat = async (
-  supabase: SupabaseClient,
   payload: UpdateObatPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: obat, error: checkError } = await supabase
-      .from("obat")
-      .select("id_obat")
-      .eq("id_obat", payload.id_obat)
-      .single();
-
-    if (checkError || !obat)
-      return handleServiceError(checkError?.message, "Data tidak ditemukan");
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_obat FROM obat WHERE id_obat = ? LIMIT 1",
+      values: [payload.id_obat],
+    });
+    if (checkRows.length === 0) {
+      return { success: false, error: "Data tidak ditemukan" };
+    }
 
     const { id_obat, ...updateData } = payload;
-    const { error: updateError } = await supabase
-      .from("obat")
-      .update(updateData)
-      .eq("id_obat", id_obat);
+    const columns = Object.keys(updateData);
+    if (columns.length === 0) {
+      return { success: true, message: "Tidak ada perubahan." };
+    }
+    const setClause = columns.map((c) => `${c} = ?`).join(", ");
+    const values = columns.map(
+      (c) => (updateData as Record<string, unknown>)[c],
+    );
 
-    if (updateError)
-      return handleServiceError(
-        updateError?.message,
-        "Gagal memeperbarui data.",
-      );
-
+    await pool.execute({
+      sql: `UPDATE obat SET ${setClause} WHERE id_obat = ?`,
+      values: [...values, id_obat],
+    });
     return {
       success: true,
       message: "Data Obat berhasil diperbarui!",
@@ -127,41 +113,29 @@ export const updateObat = async (
 };
 
 export const toggleStatusObat = async (
-  supabase: SupabaseClient,
   id_obat: number,
   status: boolean,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: obat, error: checkError } = await supabase
-      .from("obat")
-      .select("id_obat")
-      .eq("id_obat", id_obat)
-      .single();
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_obat FROM obat WHERE id_obat = ? LIMIT 1",
+      values: [id_obat],
+    });
+    if (checkRows.length === 0) {
+      return { success: false, error: "Data tidak ditemukan" };
+    }
 
-    if (checkError || !obat)
-      return handleServiceError(checkError?.message, "Data tidak ditemukan");
-
-    const { error: updateError } = await supabase
-      .from("obat")
-      .update({ is_active: status })
-      .eq("id_obat", id_obat)
-      .single();
-
-    if (updateError)
-      return handleServiceError(updateError?.message, "Gagal mengubah status.");
-
-    return {
-      success: true,
-      message: "Status Obat berhasil diubah!",
-    };
+    await pool.execute({
+      sql: "UPDATE obat SET is_active = ? WHERE id_obat = ?",
+      values: [status ? 1 : 0, id_obat],
+    });
+    return { success: true, message: "Status Obat berhasil diubah!" };
   } catch (error) {
     return handleServiceError(
       error,
@@ -171,39 +145,35 @@ export const toggleStatusObat = async (
 };
 
 export const deleteObat = async (
-  supabase: SupabaseClient,
   id_obat: number,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: obat, error: checkError } = await supabase
-      .from("obat")
-      .select("id_obat")
-      .eq("id_obat", id_obat)
-      .single();
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_obat FROM obat WHERE id_obat = ? LIMIT 1",
+      values: [id_obat],
+    });
+    if (checkRows.length === 0) {
+      return { success: false, error: "Data tidak ditemukan" };
+    }
 
-    if (checkError || !obat)
-      return handleServiceError(checkError?.message, "Data tidak ditemukan");
-
-    const { error: deleteError } = await supabase
-      .from("obat")
-      .delete()
-      .eq("id_obat", id_obat);
-
-    if (deleteError)
-      return handleServiceError(deleteError?.message, "Gagal menghapus data.");
-
-    return {
-      success: true,
-      message: "Data Obat berhasil dihapus.",
-    };
+    try {
+      await pool.execute({
+        sql: "DELETE FROM obat WHERE id_obat = ?",
+        values: [id_obat],
+      });
+      return { success: true, message: "Data Obat berhasil dihapus." };
+    } catch (err) {
+      return handleServiceError(
+        err,
+        "Gagal menghapus. Obat masih digunakan di resep pengobatan.",
+      );
+    }
   } catch (error) {
     return handleServiceError(
       error,

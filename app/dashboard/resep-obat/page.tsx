@@ -12,11 +12,14 @@ export default async function ResepObatPage() {
 
   const daftar = resepRes.success && resepRes.data ? resepRes.data : [];
   const obatList = obatRes.success && obatRes.data ? obatRes.data : [];
+  const obatActive = obatList.filter((obat) => obat.is_active === true);
 
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Resep &amp; Jadwal Obat</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Resep &amp; Jadwal Obat
+        </h1>
         <p className="text-sm text-gray-500">
           Buat resep pengobatan dan jadwal minum obat harian pasien. Jadwal yang
           dibuat akan tampil di aplikasi pasien &amp; menjadi dasar perhitungan
@@ -30,7 +33,7 @@ export default async function ResepObatPage() {
         </div>
       )}
 
-      <ResepTableView data={daftar} obatList={obatList} />
+      <ResepTableView data={daftar} obatList={obatActive} />
     </div>
   );
 }

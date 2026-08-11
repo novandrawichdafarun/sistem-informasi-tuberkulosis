@@ -1,8 +1,9 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
+import { RowDataPacket } from "mysql2";
 import { loginUserService } from "@/services/auth.service";
+import { getMySQLPool } from "@/database/mysql-client";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -21,14 +22,7 @@ export const authOptions: NextAuthOptions = {
         const userAgent =
           headersList.get("user-agent") || "Perangkat Tidak Dikenal";
 
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          { auth: { persistSession: false } },
-        );
-
         const result = await loginUserService(
-          supabase,
           credentials.email,
           credentials.password,
           userAgent,
@@ -54,20 +48,25 @@ export const authOptions: NextAuthOptions = {
         token.sessionToken = user.sessionToken;
       }
 
+      // Verifikasi session_token masih ada di DB.
+      // Kalau row-nya sudah di-delete (karena limit 3-device kick),
+      // set ForceLogout supaya user diminta login ulang.
       if (token.sessionToken) {
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          { auth: { persistSession: false } },
-        );
-
-        const { data: sessionData } = await supabase
-          .from("user_sessions")
-          .select("session_token")
-          .eq("session_token", token.sessionToken)
-          .single();
-
-        if (!sessionData) {
+        try {
+          const pool = getMySQLPool();
+          const [rows] = await pool.execute<RowDataPacket[]>({
+            sql: `SELECT session_token FROM user_sessions
+                  WHERE session_token = ? LIMIT 1`,
+            values: [token.sessionToken],
+          });
+          if (rows.length === 0) {
+            token.error = "ForceLogout";
+            return token;
+          }
+        } catch (err) {
+          // DB error → same behavior as original (Supabase silent-error):
+          // treat as session-not-found untuk safety.
+          console.error("[NextAuth JWT] Session verify error:", err);
           token.error = "ForceLogout";
           return token;
         }

@@ -1,37 +1,64 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import type { RowDataPacket } from "mysql2/promise";
+import { getMySQLPool } from "@/database/mysql-client";
 
-export async function verifySuperAdminAccess(
-  supabase: SupabaseClient,
-  id_super_admin: string,
-) {
-  const { data, error } = await supabase
-    .from("users")
-    .select("id_user, role")
-    .eq("id_user", id_super_admin)
-    .eq("role", "super_admin")
-    .single();
-
-  if (error || !data) {
-    return { superAdmin: null, error };
-  }
-
-  return { superAdmin: data, error };
+interface SuperAdminRow extends RowDataPacket {
+  id_user: string;
+  email: string;
+  role: "super_admin";
 }
 
-export async function verifyPasienAccess(
-  supabase: SupabaseClient,
-  id_user_pasien: string,
-) {
-  const { data, error } = await supabase
-    .from("users")
-    .select("id_user, role")
-    .eq("id_user", id_user_pasien)
-    .eq("role", "pasien")
-    .single();
+interface PasienRow extends RowDataPacket {
+  id_pasien: number;
+  id_user: string;
+}
 
-  if (error || !data) {
-    return { pasien: null, error };
+/**
+ * Verifikasi id_user adalah super_admin yang aktif.
+ */
+export async function verifySuperAdminAccess(id_user: string): Promise<{
+  superAdmin: { id_user: string; email: string; role: string } | null;
+  error: string | null;
+}> {
+  try {
+    const pool = getMySQLPool();
+    const [rows] = await pool.execute<SuperAdminRow[]>({
+      sql: `SELECT id_user, email, role FROM users
+            WHERE id_user = ? AND role = 'super_admin' LIMIT 1`,
+      values: [id_user],
+    });
+    if (rows.length === 0) {
+      return { superAdmin: null, error: "Bukan super admin" };
+    }
+    return { superAdmin: rows[0], error: null };
+  } catch (err) {
+    return { superAdmin: null, error: (err as Error).message };
   }
+}
 
-  return { pasien: data, error };
+/**
+ * Verifikasi id_user adalah pasien (role='pasien' + entri di tabel pasien).
+ * Kritis: dulu di-handle otomatis oleh RLS "Pasien kelola log sendiri".
+ * Sekarang wajib eksplisit.
+ */
+export async function verifyPasienAccess(id_user: string): Promise<{
+  pasien: { id_pasien: number; id_user: string } | null;
+  error: string | null;
+}> {
+  try {
+    const pool = getMySQLPool();
+    const [rows] = await pool.execute<PasienRow[]>({
+      sql: `SELECT p.id_pasien, p.id_user
+            FROM pasien p
+            JOIN users u ON u.id_user = p.id_user
+            WHERE p.id_user = ? AND u.role = 'pasien'
+            LIMIT 1`,
+      values: [id_user],
+    });
+    if (rows.length === 0) {
+      return { pasien: null, error: "Bukan pasien" };
+    }
+    return { pasien: rows[0], error: null };
+  } catch (err) {
+    return { pasien: null, error: (err as Error).message };
+  }
 }

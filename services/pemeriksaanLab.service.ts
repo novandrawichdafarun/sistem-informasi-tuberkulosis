@@ -1,3 +1,5 @@
+import type { RowDataPacket } from "mysql2/promise";
+
 import { ActionResponse } from "@/types/action";
 import {
   CreatePemeriksaanLabPayload,
@@ -8,54 +10,64 @@ import {
 import { verifyPasienAccess, verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
 import { getPasienIdByUser } from "@/utils/Pasien";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { getMySQLPool } from "@/database/mysql-client";
+import { ensureArray } from "@/utils/mysql";
 
 export const getDaftarPemeriksaanLab = async (
-  supabase: SupabaseClient,
   id_super_admin: string,
 ): Promise<ActionResponse<PasienPemeriksaanLabOverview[]>> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: pasienData, error: pasienError } = await supabase
-      .from("pasien")
-      .select(
-        `
-        id_pasien, nama_lengkap, usia, jenis_kelamin, domisili,
-        episode_pengobatan (
-          id_episode, status_episode,
-          pemeriksaan_lab ( 
-            id_tes, id_episode,
-            jenis_tes, tanggal_tes, periode_pemeriksaan, 
-            jenis_sample, kualitas_sample, dna_bakteri_tb, 
-            status_resistensi, hasil_tes, hasil_bta,
-            berkas_pendukung_url, created_at
-          )
-        )
-      `,
-      )
-      .order("created_at", { ascending: false });
+    const pool = getMySQLPool();
+    const [rows] = await pool.execute<RowDataPacket[]>({
+      sql: `SELECT
+        p.id_pasien, p.nama_lengkap, p.usia, p.jenis_kelamin, p.domisili,
+        (
+          SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
+            'id_episode', e.id_episode,
+            'status_episode', e.status_episode,
+            'pemeriksaan_lab', (
+              SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
+                'id_tes', pl.id_tes,
+                'id_episode', pl.id_episode,
+                'jenis_tes', pl.jenis_tes,
+                'tanggal_tes', pl.tanggal_tes,
+                'periode_pemeriksaan', pl.periode_pemeriksaan,
+                'jenis_sample', pl.jenis_sample,
+                'kualitas_sample', pl.kualitas_sample,
+                'dna_bakteri_tb', pl.dna_bakteri_tb,
+                'status_resistensi', pl.status_resistensi,
+                'hasil_tes', pl.hasil_tes,
+                'hasil_bta', pl.hasil_bta,
+                'berkas_pendukung_url', pl.berkas_pendukung_url,
+                'created_at', pl.created_at
+              )), JSON_ARRAY())
+              FROM pemeriksaan_lab pl WHERE pl.id_episode = e.id_episode
+            )
+          )), JSON_ARRAY())
+          FROM episode_pengobatan e WHERE e.id_pasien = p.id_pasien
+        ) AS episode_pengobatan
+      FROM pasien p
+      ORDER BY p.created_at DESC`,
+    });
 
-    if (pasienError)
-      return handleServiceError(pasienError?.message, "Pasien tidak ditemukan");
+    const formattedData: PasienPemeriksaanLabOverview[] = rows.map((pasien) => {
+      const rawEpisodes = ensureArray<{
+        id_episode: number;
+        status_episode: string;
+        pemeriksaan_lab: PemeriksaanLabData[] | null;
+      }>(pasien.episode_pengobatan);
 
-    const formattedData: PasienPemeriksaanLabOverview[] = (
-      pasienData ?? []
-    ).map((pasien) => {
-      const rawEpisodes = pasien.episode_pengobatan || [];
       const episodeAktif =
         rawEpisodes.find((ep) => ep.status_episode === "aktif") || null;
 
       let riwayat: PemeriksaanLabData[] = [];
       rawEpisodes.forEach((ep) => {
-        if (ep.pemeriksaan_lab) {
-          riwayat = [...riwayat, ...ep.pemeriksaan_lab];
-        }
+        const arr = ensureArray<PemeriksaanLabData>(ep.pemeriksaan_lab);
+        riwayat = [...riwayat, ...arr];
       });
 
       riwayat.sort(
@@ -89,66 +101,29 @@ export const getDaftarPemeriksaanLab = async (
 };
 
 export const getPemeriksaanLabByUser = async (
-  supabase: SupabaseClient,
   id_user_pasien: string,
 ): Promise<ActionResponse<PemeriksaanLabData[]>> => {
   try {
-    const { pasien, error } = await verifyPasienAccess(
-      supabase,
-      id_user_pasien,
-    );
-
+    const { pasien, error } = await verifyPasienAccess(id_user_pasien);
     if (error || !pasien)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
+    const id_pasien = await getPasienIdByUser(id_user_pasien);
+    if (!id_pasien) return { success: true, data: [] };
 
-    const { data, error: dataError } = await supabase
-      .from("episode_pengobatan")
-      .select(
-        `
-        id_pasien,
-        pemeriksaan_lab (
-          id_tes, id_episode, jenis_tes, tanggal_tes, periode_pemeriksaan,
-          jenis_sample, kualitas_sample, dna_bakteri_tb, status_resistensi,
-          hasil_tes, hasil_bta, berkas_pendukung_url, created_at
-        )
-        `,
-      )
-      .eq("id_pasien", id_pasien)
-      .order("created_at", { ascending: false });
-
-    if (dataError)
-      return handleServiceError(dataError?.message, "Gagal memuat hasil lab.");
-
-    // Flatkan struktur: extract pemeriksaan_klinis dari setiap episode
-    const labList: PemeriksaanLabData[] = (data ?? []).flatMap((episode) =>
-      (episode.pemeriksaan_lab ?? []).map(
-        (lab) =>
-          ({
-            id_tes: lab.id_tes,
-            id_episode: lab.id_episode,
-            jenis_tes: lab.jenis_tes,
-            tanggal_tes: lab.tanggal_tes,
-            periode_pemeriksaan: lab.periode_pemeriksaan,
-            jenis_sample: lab.jenis_sample,
-            kualitas_sample: lab.kualitas_sample,
-            dna_bakteri_tb: lab.dna_bakteri_tb,
-            status_resistensi: lab.status_resistensi,
-            hasil_tes: lab.hasil_tes,
-            hasil_bta: lab.hasil_bta,
-            berkas_pendukung_url: lab.berkas_pendukung_url,
-            created_at: lab.created_at,
-          }) as PemeriksaanLabData,
-      ),
-    );
-
-    labList.sort(
-      (a, b) =>
-        new Date(b.tanggal_tes).getTime() - new Date(a.tanggal_tes).getTime(),
-    );
-
-    return { success: true, data: labList };
+    const pool = getMySQLPool();
+    const [rows] = await pool.execute<RowDataPacket[]>({
+      sql: `SELECT pl.id_tes, pl.id_episode, pl.jenis_tes, pl.tanggal_tes,
+              pl.periode_pemeriksaan, pl.jenis_sample, pl.kualitas_sample,
+              pl.dna_bakteri_tb, pl.status_resistensi, pl.hasil_tes,
+              pl.hasil_bta, pl.berkas_pendukung_url, pl.created_at
+      FROM pemeriksaan_lab pl
+      JOIN episode_pengobatan e ON pl.id_episode = e.id_episode
+      WHERE e.id_pasien = ?
+      ORDER BY pl.tanggal_tes DESC`,
+      values: [id_pasien],
+    });
+    return { success: true, data: rows as unknown as PemeriksaanLabData[] };
   } catch (error) {
     return handleServiceError(
       error,
@@ -158,79 +133,78 @@ export const getPemeriksaanLabByUser = async (
 };
 
 export const createPemeriksaanLab = async (
-  supabase: SupabaseClient,
   payload: CreatePemeriksaanLabPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: episode, error: checkError } = await supabase
-      .from("episode_pengobatan")
-      .select("id_episode")
-      .eq("id_episode", payload.id_episode)
-      .single();
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_episode FROM episode_pengobatan WHERE id_episode = ? LIMIT 1",
+      values: [payload.id_episode],
+    });
+    if (checkRows.length === 0) {
+      return {
+        success: false,
+        error: "Episode pengobatan pasien tidak ada.",
+      };
+    }
 
-    if (checkError || !episode)
-      return handleServiceError(
-        checkError?.message,
-        "Episode pengobatan pasien tidak ada.",
-      );
+    const columns = Object.keys(payload);
+    const placeholders = columns.map(() => "?").join(", ");
+    const values = columns.map(
+      (c) => (payload as unknown as Record<string, unknown>)[c],
+    );
 
-    const { error: insertError } = await supabase
-      .from("pemeriksaan_lab")
-      .insert(payload);
+    await pool.execute({
+      sql: `INSERT INTO pemeriksaan_lab (${columns.join(", ")}) VALUES (${placeholders})`,
+      values,
+    });
 
-    if (insertError)
-      return handleServiceError(
-        insertError?.message,
-        "Gagal menyimpan pemeriksaan lab",
-      );
-
-    return { success: true, message: "Pemeriksaan lab berhasil ditambahkan!" };
+    return {
+      success: true,
+      message: "Pemeriksaan lab berhasil ditambahkan!",
+    };
   } catch (error) {
     return handleServiceError(error, "Gagal menambah data pemeriksaan lab.");
   }
 };
 
 export const updatePemeriksaanLab = async (
-  supabase: SupabaseClient,
   payload: UpdatePemeriksaanLabPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: tesLab, error: checkError } = await supabase
-      .from("pemeriksaan_lab")
-      .select("id_tes")
-      .eq("id_tes", payload.id_tes)
-      .single();
-
-    if (checkError || !tesLab)
-      return handleServiceError(checkError, "Data tidak ditemukan");
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_tes FROM pemeriksaan_lab WHERE id_tes = ? LIMIT 1",
+      values: [payload.id_tes],
+    });
+    if (checkRows.length === 0) {
+      return { success: false, error: "Data tidak ditemukan" };
+    }
 
     const { id_tes, ...updateData } = payload;
-    const { error: updateError } = await supabase
-      .from("pemeriksaan_lab")
-      .update(updateData)
-      .eq("id_tes", id_tes);
+    const columns = Object.keys(updateData);
+    if (columns.length === 0) {
+      return { success: true, message: "Tidak ada perubahan." };
+    }
+    const setClause = columns.map((c) => `${c} = ?`).join(", ");
+    const values = columns.map(
+      (c) => (updateData as Record<string, unknown>)[c],
+    );
 
-    if (updateError)
-      return handleServiceError(
-        updateError?.message,
-        "Gagal memeperbarui data.",
-      );
+    await pool.execute({
+      sql: `UPDATE pemeriksaan_lab SET ${setClause} WHERE id_tes = ?`,
+      values: [...values, id_tes],
+    });
 
     return {
       success: true,
@@ -242,35 +216,26 @@ export const updatePemeriksaanLab = async (
 };
 
 export const deletePemeriksaanLab = async (
-  supabase: SupabaseClient,
   id_tes: number,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: tesLab, error: checkError } = await supabase
-      .from("pemeriksaan_lab")
-      .select("id_tes")
-      .eq("id_tes", id_tes)
-      .single();
-
-    if (checkError || !tesLab)
-      return handleServiceError(checkError, "Data tidak ditemukan");
-
-    const { error: deleteError } = await supabase
-      .from("pemeriksaan_lab")
-      .delete()
-      .eq("id_tes", id_tes);
-
-    if (deleteError)
-      return handleServiceError(deleteError?.message, "Gagal menghapus data");
-
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_tes FROM pemeriksaan_lab WHERE id_tes = ? LIMIT 1",
+      values: [id_tes],
+    });
+    if (checkRows.length === 0) {
+      return { success: false, error: "Data tidak ditemukan" };
+    }
+    await pool.execute({
+      sql: "DELETE FROM pemeriksaan_lab WHERE id_tes = ?",
+      values: [id_tes],
+    });
     return { success: true, message: "Pemeriksaan lab berhasil dihapus." };
   } catch (error) {
     return handleServiceError(error, "Gagal menghapus data pemeriksaan lab.");

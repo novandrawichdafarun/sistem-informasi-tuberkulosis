@@ -24,7 +24,7 @@ export interface CreatePemeriksaanLabPayload {
   periode_pemeriksaan: string;
 
   jenis_sample?: string | null;
-  kualitas_sampl?: string | null;
+  kualitas_sample?: string | null;
 
   dna_bakteri_tb: string;
   status_resistensi: string;

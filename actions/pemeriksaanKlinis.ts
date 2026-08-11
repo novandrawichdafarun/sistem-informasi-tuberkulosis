@@ -21,7 +21,6 @@ import {
   requirePasienSession,
   requireSuperAdminSession,
 } from "@/utils/session";
-import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
 import { revalidatePath } from "next/cache";
 
@@ -30,9 +29,7 @@ export async function getDaftarPemeriksaanAction(): Promise<
 > {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
-
-    return await getDaftarPemeriksaan(supabase, superAdminId);
+    return await getDaftarPemeriksaan(superAdminId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -43,8 +40,7 @@ export async function getPemeriksaanKlinisByUserAction(): Promise<
 > {
   try {
     const userId = await requirePasienSession();
-    const supabase = await getSupabaseServer();
-    return await getPemeriksaanKlinisByUser(supabase, userId);
+    return await getPemeriksaanKlinisByUser(userId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -55,13 +51,12 @@ export async function createPemeriksaanAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, createPemeriksaanSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await createPemeriksaanKlinis(supabase, data, superAdminId);
+    const result = await createPemeriksaanKlinis(data, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 
@@ -76,13 +71,12 @@ export async function updatePemeriksaanAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, updatePemeriksaanSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await updatePemeriksaanKlinis(supabase, data, superAdminId);
+    const result = await updatePemeriksaanKlinis(data, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 
@@ -97,13 +91,8 @@ export async function deletePemeriksaanAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
-    const result = await deletePemeriksaanKlinis(
-      supabase,
-      id_periksa,
-      superAdminId,
-    );
+    const result = await deletePemeriksaanKlinis(id_periksa, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pemeriksaan-klinis");
 

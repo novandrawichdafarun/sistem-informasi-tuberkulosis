@@ -161,3 +161,17 @@ export function formatTimeOnly(date: Date) {
     minute: "2-digit",
   });
 }
+
+/** Konversi Date/string → 'YYYY-MM' untuk group by bulan. */
+export function toMonthKey(value: unknown): string {
+  if (value instanceof Date) return value.toISOString().slice(0, 7);
+  if (typeof value === "string") return value.slice(0, 7);
+  return "";
+}
+
+/** Konversi Date/string → 'YYYY-MM-DD'. */
+export function toDateStr(value: unknown): string | null {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (typeof value === "string") return value.slice(0, 10);
+  return null;
+}

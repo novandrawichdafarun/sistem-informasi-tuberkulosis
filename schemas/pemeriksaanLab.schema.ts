@@ -30,6 +30,7 @@ const basePemeriksaanLabSchema = {
     .max(50, "Periode Pemeriksaan maksimal 50 karakter"),
 
   jenis_sample: optionalString(50),
+  kualitas_sample: optionalString(50),
 
   dna_bakteri_tb: z
     .string()

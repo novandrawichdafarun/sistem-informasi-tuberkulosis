@@ -9,7 +9,6 @@ import {
   getDaftarResep,
 } from "@/services/resep.service";
 import { createResepSchema } from "@/schemas/resep.schema";
-import { getSupabaseServer } from "@/utils/supabase/server";
 import { requireSuperAdminSession } from "@/utils/session";
 import { validateFormData } from "@/utils/validation";
 import { handleActionError } from "@/utils/error";
@@ -19,8 +18,7 @@ export async function getDaftarResepAction(): Promise<
 > {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
-    return await getDaftarResep(supabase, superAdminId);
+    return await getDaftarResep(superAdminId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -31,13 +29,12 @@ export async function createResepAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, createResepSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await createResepWithJadwal(supabase, data, superAdminId);
+    const result = await createResepWithJadwal(data, superAdminId);
     if (result.success) {
       revalidatePath("/dashboard/resep-obat");
       revalidatePath("/dashboard/statistik");
@@ -53,9 +50,8 @@ export async function deleteResepAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
-    const result = await deleteResep(supabase, id_resep, superAdminId);
+    const result = await deleteResep(id_resep, superAdminId);
     if (result.success) {
       revalidatePath("/dashboard/resep-obat");
       revalidatePath("/dashboard/statistik");

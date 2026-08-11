@@ -1,19 +1,17 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import type { RowDataPacket } from "mysql2/promise";
+
 import { ActionResponse } from "@/types/action";
 import { handleServiceError } from "@/utils/error";
 import { MonthlyPoint, StatistikAdmin } from "@/types/statistik";
-import { buildMonths, todayISO } from "@/utils/date";
+import { buildMonths, toDateStr, todayISO, toMonthKey } from "@/utils/date";
 import { verifySuperAdminAccess } from "@/utils/access";
+import { getMySQLPool } from "@/database/mysql-client";
 
 export const getStatistikAdmin = async (
-  supabase: SupabaseClient,
   id_super_admin: string,
 ): Promise<ActionResponse<StatistikAdmin>> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
@@ -21,39 +19,81 @@ export const getStatistikAdmin = async (
     const today = todayISO();
     const windowStart = months[0].start;
 
-    // Ambil data mentah (tabel kecil → agregasi di JS).
-    const [pasienRes, episodeRes, resepRes, jadwalRes] = await Promise.all([
-      supabase.from("pasien").select("id_pasien, created_at"),
-      supabase
-        .from("episode_pengobatan")
-        .select(
-          "id_episode, id_pasien, status_episode, tanggal_mulai, tanggal_selesai",
-        ),
-      supabase.from("resep_pengobatan").select("id_resep, id_episode"),
-      supabase
-        .from("jadwal_minum_obat")
-        .select("id_jadwal, id_resep, tanggal_jadwal")
-        .gte("tanggal_jadwal", windowStart)
-        .lte("tanggal_jadwal", today),
+    type PasienRaw = { id_pasien: number; created_at: string };
+    type EpisodeRaw = {
+      id_episode: number;
+      id_pasien: number;
+      status_episode: string;
+      tanggal_mulai: string | null;
+      tanggal_selesai: string | null;
+    };
+    type ResepRaw = { id_resep: number; id_episode: number };
+    type JadwalRaw = {
+      id_jadwal: number;
+      id_resep: number;
+      tanggal_jadwal: string;
+    };
+    type LogRaw = { id_jadwal: number; status: string };
+
+    const pool = getMySQLPool();
+    const [pasienRows, episodeRows, resepRows, jadwalRows] = await Promise.all([
+      pool.execute<RowDataPacket[]>({
+        sql: `SELECT id_pasien, created_at FROM pasien`,
+      }),
+      pool.execute<RowDataPacket[]>({
+        sql: `SELECT id_episode, id_pasien, status_episode,
+                    tanggal_mulai, tanggal_selesai
+             FROM episode_pengobatan`,
+      }),
+      pool.execute<RowDataPacket[]>({
+        sql: `SELECT id_resep, id_episode FROM resep_pengobatan`,
+      }),
+      pool.execute<RowDataPacket[]>({
+        sql: `SELECT id_jadwal, id_resep, tanggal_jadwal
+             FROM jadwal_minum_obat
+             WHERE tanggal_jadwal >= ? AND tanggal_jadwal <= ?`,
+        values: [windowStart, today],
+      }),
     ]);
 
-    const pasien = pasienRes.data ?? [];
-    const episodes = episodeRes.data ?? [];
-    const resep = resepRes.data ?? [];
-    const jadwal = jadwalRes.data ?? [];
+    const pasien: PasienRaw[] = pasienRows[0].map((p) => ({
+      id_pasien: p.id_pasien,
+      created_at: (p.created_at instanceof Date
+        ? p.created_at.toISOString()
+        : p.created_at) as string,
+    }));
+    const episodes: EpisodeRaw[] = episodeRows[0].map((e) => ({
+      id_episode: e.id_episode,
+      id_pasien: e.id_pasien,
+      status_episode: e.status_episode,
+      tanggal_mulai: toDateStr(e.tanggal_mulai),
+      tanggal_selesai: toDateStr(e.tanggal_selesai),
+    }));
+    const resep: ResepRaw[] = resepRows[0].map((r) => ({
+      id_resep: r.id_resep,
+      id_episode: r.id_episode,
+    }));
+    const jadwal: JadwalRaw[] = jadwalRows[0].map((j) => ({
+      id_jadwal: j.id_jadwal,
+      id_resep: j.id_resep,
+      tanggal_jadwal: toDateStr(j.tanggal_jadwal) ?? "",
+    }));
 
-    // Log hanya untuk jadwal di window.
-    const jadwalIds = jadwal.map((j) => j.id_jadwal as number);
-    let logs: { id_jadwal: number; status: string }[] = [];
+    let logs: LogRaw[] = [];
+    const jadwalIds = jadwal.map((j) => j.id_jadwal);
     if (jadwalIds.length > 0) {
-      const logRes = await supabase
-        .from("medication_log")
-        .select("id_jadwal, status")
-        .in("id_jadwal", jadwalIds);
-      logs = (logRes.data as typeof logs) ?? [];
+      const jPh = jadwalIds.map(() => "?").join(",");
+      const [logRows] = await pool.execute<RowDataPacket[]>({
+        sql: `SELECT id_jadwal, status FROM medication_log
+           WHERE id_jadwal IN (${jPh})`,
+        values: jadwalIds,
+      });
+      logs = logRows.map((l) => ({
+        id_jadwal: l.id_jadwal,
+        status: l.status,
+      }));
     }
 
-    // Peta relasi
     const resepEpisode = new Map<number, number>();
     resep.forEach((r) => resepEpisode.set(r.id_resep, r.id_episode));
     const episodePasien = new Map<number, number>();
@@ -61,13 +101,12 @@ export const getStatistikAdmin = async (
     const logStatus = new Map<number, string>();
     logs.forEach((l) => logStatus.set(l.id_jadwal, l.status));
 
-    // Agregasi kepatuhan per bulan & per pasien
     const monthAgg = new Map<string, { total: number; diminum: number }>();
     const patientAgg = new Map<number, { total: number; diminum: number }>();
     months.forEach((m) => monthAgg.set(m.key, { total: 0, diminum: 0 }));
 
     for (const j of jadwal) {
-      const monthKey = (j.tanggal_jadwal as string).slice(0, 7);
+      const monthKey = j.tanggal_jadwal.slice(0, 7);
       const idEpisode = resepEpisode.get(j.id_resep);
       const idPasien = idEpisode ? episodePasien.get(idEpisode) : undefined;
       const diminum = logStatus.get(j.id_jadwal) === "diminum";
@@ -85,13 +124,11 @@ export const getStatistikAdmin = async (
       }
     }
 
-    // Pasien aktif = punya episode berstatus 'aktif'
     const activeSet = new Set<number>();
     episodes.forEach((e) => {
       if (e.status_episode === "aktif") activeSet.add(e.id_pasien);
     });
 
-    // Distribusi kepatuhan pasien aktif (yang punya data jadwal)
     let baik = 0,
       cukup = 0,
       rendah = 0,
@@ -106,7 +143,6 @@ export const getStatistikAdmin = async (
       else rendah += 1;
     });
 
-    // Tren kepatuhan per bulan
     const trenKepatuhan: MonthlyPoint[] = months.map((m) => {
       const ma = monthAgg.get(m.key)!;
       return {
@@ -116,21 +152,17 @@ export const getStatistikAdmin = async (
       };
     });
 
-    // Pasien baru per bulan
     const pasienBaruPerBulan: MonthlyPoint[] = months.map((m) => ({
       key: m.key,
       label: m.label,
-      value: pasien.filter(
-        (p) => (p.created_at as string)?.slice(0, 7) === m.key,
-      ).length,
+      value: pasien.filter((p) => toMonthKey(p.created_at) === m.key).length,
     }));
 
-    // Pasien aktif per bulan (episode overlap dengan bulan tsb)
     const pasienAktifPerBulan: MonthlyPoint[] = months.map((m) => {
       const set = new Set<number>();
       episodes.forEach((e) => {
-        const mulai = e.tanggal_mulai as string | null;
-        const selesai = e.tanggal_selesai as string | null;
+        const mulai = e.tanggal_mulai;
+        const selesai = e.tanggal_selesai;
         if (!mulai) return;
         const overlap = mulai <= m.end && (!selesai || selesai >= m.start);
         if (overlap) set.add(e.id_pasien);

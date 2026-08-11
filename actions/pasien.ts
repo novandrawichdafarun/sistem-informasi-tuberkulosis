@@ -19,7 +19,6 @@ import {
   createPasienSchema,
   updatePasienSchema,
 } from "@/schemas/pasien.schema";
-import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
 import { handleActionError } from "@/utils/error";
 
@@ -28,8 +27,7 @@ export async function getDaftarPasienAction(): Promise<
 > {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
-    return await getDaftarPasien(supabase, superAdminId);
+    return await getDaftarPasien(superAdminId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -40,8 +38,7 @@ export async function getPasienDetailAction(
 ): Promise<ActionResponse<PasienDetail>> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
-    return await getPasienDetail(supabase, id_pasien, superAdminId);
+    return await getPasienDetail(id_pasien, superAdminId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -52,8 +49,7 @@ export async function getPasienProfileAction(): Promise<
 > {
   try {
     const userId = await requirePasienSession();
-    const supabase = await getSupabaseServer();
-    return await getPasienProfileByUser(supabase, userId);
+    return await getPasienProfileByUser(userId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -64,13 +60,12 @@ export async function createPasienAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, createPasienSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await createPasien(supabase, data, superAdminId);
+    const result = await createPasien(data, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -85,13 +80,12 @@ export async function updatePasienAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, updatePasienSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await updatePasien(supabase, data, superAdminId);
+    const result = await updatePasien(data, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -106,9 +100,8 @@ export async function deletePasienAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
-    const result = await deletePasien(supabase, id_pasien, superAdminId);
+    const result = await deletePasien(id_pasien, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 

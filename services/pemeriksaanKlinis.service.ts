@@ -1,3 +1,5 @@
+import type { RowDataPacket } from "mysql2/promise";
+
 import { ActionResponse } from "@/types/action";
 import {
   CreatePemeriksaanPayload,
@@ -8,75 +10,86 @@ import {
 import { verifyPasienAccess, verifySuperAdminAccess } from "@/utils/access";
 import { handleServiceError } from "@/utils/error";
 import { getPasienIdByUser } from "@/utils/Pasien";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { getMySQLPool } from "@/database/mysql-client";
+import { ensureArray } from "@/utils/mysql";
 
 export const getDaftarPemeriksaan = async (
-  supabase: SupabaseClient,
   id_super_admin: string,
 ): Promise<ActionResponse<PasienPemeriksaanOverview[]>> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: pasienData, error: pasienError } = await supabase
-      .from("pasien")
-      .select(
-        `
-        id_pasien, nama_lengkap, usia, jenis_kelamin, domisili,
-        episode_pengobatan (
-          id_episode, status_episode,
-          pemeriksaan_klinis (
-            id_periksa, id_episode, tanggal_periksa, keluhan, tensi,
-            suhu, pernapasan, nadi, saturasi_o2, tinggi_badan,
-            berat_badan, created_at
-          )
-        )
-      `,
-      )
-      .order("created_at", { ascending: false });
+    const pool = getMySQLPool();
+    const [rows] = await pool.execute<RowDataPacket[]>({
+      sql: `SELECT
+        p.id_pasien, p.nama_lengkap, p.usia, p.jenis_kelamin, p.domisili,
+        (
+          SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
+            'id_episode', e.id_episode,
+            'status_episode', e.status_episode,
+            'pemeriksaan_klinis', (
+              SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
+                'id_periksa', pk.id_periksa,
+                'id_episode', pk.id_episode,
+                'tanggal_periksa', pk.tanggal_periksa,
+                'keluhan', pk.keluhan,
+                'tensi', pk.tensi,
+                'suhu', pk.suhu,
+                'pernapasan', pk.pernapasan,
+                'nadi', pk.nadi,
+                'saturasi_o2', pk.saturasi_o2,
+                'tinggi_badan', pk.tinggi_badan,
+                'berat_badan', pk.berat_badan,
+                'created_at', pk.created_at
+              )), JSON_ARRAY())
+              FROM pemeriksaan_klinis pk WHERE pk.id_episode = e.id_episode
+            )
+          )), JSON_ARRAY())
+          FROM episode_pengobatan e WHERE e.id_pasien = p.id_pasien
+        ) AS episode_pengobatan
+      FROM pasien p
+      ORDER BY p.created_at DESC`,
+    });
 
-    if (pasienError)
-      return handleServiceError(pasienError?.message, "Pasien tidak ditemukan");
+    const formattedData: PasienPemeriksaanOverview[] = rows.map((pasien) => {
+      const rawEpisodes = ensureArray<{
+        id_episode: number;
+        status_episode: string;
+        pemeriksaan_klinis: PemeriksaanKlinisData[] | null;
+      }>(pasien.episode_pengobatan);
 
-    const formattedData: PasienPemeriksaanOverview[] = (pasienData ?? []).map(
-      (pasien) => {
-        const rawEpisodes = pasien.episode_pengobatan || [];
-        const episodeAktif =
-          rawEpisodes.find((ep) => ep.status_episode === "aktif") || null;
+      const episodeAktif =
+        rawEpisodes.find((ep) => ep.status_episode === "aktif") || null;
 
-        let riwayat: PemeriksaanKlinisData[] = [];
-        rawEpisodes.forEach((ep) => {
-          if (ep.pemeriksaan_klinis) {
-            riwayat = [...riwayat, ...ep.pemeriksaan_klinis];
-          }
-        });
+      let riwayat: PemeriksaanKlinisData[] = [];
+      rawEpisodes.forEach((ep) => {
+        const arr = ensureArray<PemeriksaanKlinisData>(ep.pemeriksaan_klinis);
+        riwayat = [...riwayat, ...arr];
+      });
 
-        riwayat.sort(
-          (a, b) =>
-            new Date(b.tanggal_periksa).getTime() -
-            new Date(a.tanggal_periksa).getTime(),
-        );
+      riwayat.sort(
+        (a, b) =>
+          new Date(b.tanggal_periksa).getTime() -
+          new Date(a.tanggal_periksa).getTime(),
+      );
 
-        return {
-          id_pasien: pasien.id_pasien,
-          nama_lengkap: pasien.nama_lengkap,
-          usia: pasien.usia,
-          jenis_kelamin: pasien.jenis_kelamin,
-          domisili: pasien.domisili,
-          episodeAktif: episodeAktif
-            ? {
-                id_episode: episodeAktif.id_episode,
-                status_episode: episodeAktif.status_episode,
-              }
-            : null,
-          riwayat_pemeriksaan: riwayat,
-        };
-      },
-    );
+      return {
+        id_pasien: pasien.id_pasien,
+        nama_lengkap: pasien.nama_lengkap,
+        usia: pasien.usia,
+        jenis_kelamin: pasien.jenis_kelamin,
+        domisili: pasien.domisili,
+        episodeAktif: episodeAktif
+          ? {
+              id_episode: episodeAktif.id_episode,
+              status_episode: episodeAktif.status_episode,
+            }
+          : null,
+        riwayat_pemeriksaan: riwayat,
+      };
+    });
 
     return { success: true, data: formattedData };
   } catch (error) {
@@ -88,70 +101,31 @@ export const getDaftarPemeriksaan = async (
 };
 
 export const getPemeriksaanKlinisByUser = async (
-  supabase: SupabaseClient,
   id_user_pasien: string,
 ): Promise<ActionResponse<PemeriksaanKlinisData[]>> => {
   try {
-    const { pasien, error } = await verifyPasienAccess(
-      supabase,
-      id_user_pasien,
-    );
-
+    const { pasien, error } = await verifyPasienAccess(id_user_pasien);
     if (error || !pasien)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const id_pasien = await getPasienIdByUser(supabase, id_user_pasien);
+    const id_pasien = await getPasienIdByUser(id_user_pasien);
+    if (!id_pasien) return { success: true, data: [] };
 
-    const { data, error: dataError } = await supabase
-      .from("episode_pengobatan")
-      .select(
-        `
-        id_pasien,
-        pemeriksaan_klinis (
-          id_periksa, id_episode, tanggal_periksa, keluhan, tensi, suhu,
-          pernapasan, nadi, saturasi_o2, tinggi_badan, berat_badan, created_at
-        )
-        `,
-      )
-      .eq("id_pasien", id_pasien)
-      .order("created_at", { ascending: false });
-
-    if (dataError)
-      return handleServiceError(
-        dataError?.message,
-        "Gagal memuat tanda vital.",
-      );
-
-    // Flatkan struktur: extract pemeriksaan_klinis dari setiap episode
-    const klinisList: PemeriksaanKlinisData[] = (data ?? []).flatMap(
-      (episode) =>
-        (episode.pemeriksaan_klinis ?? []).map(
-          (klinis) =>
-            ({
-              id_periksa: klinis.id_periksa,
-              id_episode: klinis.id_episode,
-              tanggal_periksa: klinis.tanggal_periksa,
-              keluhan: klinis.keluhan,
-              tensi: klinis.tensi,
-              suhu: klinis.suhu,
-              pernapasan: klinis.pernapasan,
-              nadi: klinis.nadi,
-              saturasi_o2: klinis.saturasi_o2,
-              tinggi_badan: klinis.tinggi_badan,
-              berat_badan: klinis.berat_badan,
-              created_at: klinis.created_at,
-            }) as PemeriksaanKlinisData,
-        ),
-    );
-
-    // Sort by tanggal_periksa descending
-    klinisList.sort(
-      (a, b) =>
-        new Date(b.tanggal_periksa).getTime() -
-        new Date(a.tanggal_periksa).getTime(),
-    );
-
-    return { success: true, data: klinisList };
+    const pool = getMySQLPool();
+    const [rows] = await pool.execute<RowDataPacket[]>({
+      sql: `SELECT pk.id_periksa, pk.id_episode, pk.tanggal_periksa,
+              pk.keluhan, pk.tensi, pk.suhu, pk.pernapasan, pk.nadi,
+              pk.saturasi_o2, pk.tinggi_badan, pk.berat_badan, pk.created_at
+       FROM pemeriksaan_klinis pk
+       JOIN episode_pengobatan e ON pk.id_episode = e.id_episode
+       WHERE e.id_pasien = ?
+       ORDER BY pk.tanggal_periksa DESC`,
+      values: [id_pasien],
+    });
+    return {
+      success: true,
+      data: rows as unknown as PemeriksaanKlinisData[],
+    };
   } catch (error) {
     return handleServiceError(
       error,
@@ -161,39 +135,38 @@ export const getPemeriksaanKlinisByUser = async (
 };
 
 export const createPemeriksaanKlinis = async (
-  supabase: SupabaseClient,
   payload: CreatePemeriksaanPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: episode, error: checkError } = await supabase
-      .from("episode_pengobatan")
-      .select("id_episode")
-      .eq("id_episode", payload.id_episode)
-      .single();
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_episode FROM episode_pengobatan WHERE id_episode = ? LIMIT 1",
+      values: [payload.id_episode],
+    });
+    if (checkRows.length === 0) {
+      return {
+        success: false,
+        error: "Episode pengobatan pasien tidak ada.",
+      };
+    }
 
-    if (checkError || !episode)
-      return handleServiceError(
-        checkError?.message,
-        "Episode pengobatan pasien tidak ada.",
-      );
+    const payloadRecord = payload as unknown as Record<string, unknown>;
+    const columns = Object.keys(payloadRecord);
+    const placeholders = columns.map(() => "?").join(", ");
+    const values = columns.map((c) => {
+      const value = (payloadRecord as Record<string, unknown>)[c];
+      return value === undefined ? null : value;
+    });
 
-    const { error: insertError } = await supabase
-      .from("pemeriksaan_klinis")
-      .insert(payload);
-
-    if (insertError)
-      return handleServiceError(
-        insertError?.message,
-        "Gagal menyimpan pemeriksaan klinis.",
-      );
+    await pool.execute({
+      sql: `INSERT INTO pemeriksaan_klinis (${columns.join(", ")}) VALUES (${placeholders})`,
+      values,
+    });
 
     return {
       success: true,
@@ -205,40 +178,37 @@ export const createPemeriksaanKlinis = async (
 };
 
 export const updatePemeriksaanKlinis = async (
-  supabase: SupabaseClient,
   payload: UpdatePemeriksaanPayload,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: periksa, error: checkError } = await supabase
-      .from("pemeriksaan_klinis")
-      .select("id_periksa")
-      .eq("id_periksa", payload.id_periksa)
-      .single();
-
-    if (checkError || !periksa)
-      return handleServiceError(checkError?.message, "Data tidak ditemukan");
-
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_periksa FROM pemeriksaan_klinis WHERE id_periksa = ? LIMIT 1",
+      values: [payload.id_periksa],
+    });
+    if (checkRows.length === 0) {
+      return { success: false, error: "Data tidak ditemukan" };
+    }
     const { id_periksa, ...updateData } = payload;
-    const { error: updateError } = await supabase
-      .from("pemeriksaan_klinis")
-      .update(updateData)
-      .eq("id_periksa", id_periksa);
+    const columns = Object.keys(updateData);
+    const updateDataRecord = updateData as unknown as Record<string, unknown>;
+    const setClause = columns.map((c) => `${c} = ?`).join(", ");
+    const values = columns.map((c) => updateDataRecord[c]);
 
-    if (updateError)
-      return handleServiceError(
-        updateError?.message,
-        "Gagal memeperbarui data.",
-      );
+    await pool.execute({
+      sql: `UPDATE pemeriksaan_klinis SET ${setClause} WHERE id_periksa = ?`,
+      values: [...values, id_periksa],
+    });
 
-    return { success: true, message: "Data pemeriksaan berhasil diperbarui!" };
+    return {
+      success: true,
+      message: "Data pemeriksaan berhasil diperbarui!",
+    };
   } catch (error) {
     return handleServiceError(
       error,
@@ -248,35 +218,26 @@ export const updatePemeriksaanKlinis = async (
 };
 
 export const deletePemeriksaanKlinis = async (
-  supabase: SupabaseClient,
   id_periksa: number,
   id_super_admin: string,
 ): Promise<ActionResponse> => {
   try {
-    const { superAdmin, error } = await verifySuperAdminAccess(
-      supabase,
-      id_super_admin,
-    );
+    const { superAdmin, error } = await verifySuperAdminAccess(id_super_admin);
     if (error || !superAdmin)
       return { success: false, error: "Otoritas tidak valid." };
 
-    const { data: periksa, error: checkError } = await supabase
-      .from("pemeriksaan_klinis")
-      .select("id_periksa")
-      .eq("id_periksa", id_periksa)
-      .single();
-
-    if (checkError || !periksa)
-      return handleServiceError(checkError?.message, "Data tidak ditemukan");
-
-    const { error: deleteError } = await supabase
-      .from("pemeriksaan_klinis")
-      .delete()
-      .eq("id_periksa", id_periksa);
-
-    if (deleteError)
-      return handleServiceError(deleteError?.message, "Gagal menghapus data");
-
+    const pool = getMySQLPool();
+    const [checkRows] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id_periksa FROM pemeriksaan_klinis WHERE id_periksa = ? LIMIT 1",
+      values: [id_periksa],
+    });
+    if (checkRows.length === 0) {
+      return { success: false, error: "Data tidak ditemukan" };
+    }
+    await pool.execute({
+      sql: "DELETE FROM pemeriksaan_klinis WHERE id_periksa = ?",
+      values: [id_periksa],
+    });
     return { success: true, message: "Pemeriksaan berhasil dihapus." };
   } catch (error) {
     return handleServiceError(

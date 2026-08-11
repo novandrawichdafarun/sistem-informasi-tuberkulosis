@@ -12,7 +12,6 @@ import { ActionResponse } from "@/types/action";
 import { ObatData } from "@/types/obat";
 import { handleActionError } from "@/utils/error";
 import { requireSuperAdminSession } from "@/utils/session";
-import { getSupabaseServer } from "@/utils/supabase/server";
 import { validateFormData } from "@/utils/validation";
 import { revalidatePath } from "next/cache";
 
@@ -21,8 +20,7 @@ export async function getDaftarObatAction(): Promise<
 > {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
-    return await getDaftarObat(supabase, superAdminId);
+    return await getDaftarObat(superAdminId);
   } catch (error) {
     return handleActionError(error);
   }
@@ -33,13 +31,12 @@ export async function createObatAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, createObatSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await createObat(supabase, data, superAdminId);
+    const result = await createObat(data, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -54,13 +51,12 @@ export async function updateObatAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
     const { data, error } = validateFormData(formData, updateObatSchema);
     if (error || !data)
       return { success: false, error: error || "Validasi gagal." };
 
-    const result = await updateObat(supabase, data, superAdminId);
+    const result = await updateObat(data, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -76,14 +72,8 @@ export async function toggleStatusObatAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
-    const result = await toggleStatusObat(
-      supabase,
-      id_obat,
-      status,
-      superAdminId,
-    );
+    const result = await toggleStatusObat(id_obat, status, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
@@ -98,9 +88,8 @@ export async function deleteObatAction(
 ): Promise<ActionResponse> {
   try {
     const superAdminId = await requireSuperAdminSession();
-    const supabase = await getSupabaseServer();
 
-    const result = await deleteObat(supabase, id_obat, superAdminId);
+    const result = await deleteObat(id_obat, superAdminId);
 
     if (result.success) revalidatePath("/dashboard/pasien");
 
