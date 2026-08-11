@@ -3,7 +3,12 @@
 import React, { useState, useTransition } from "react";
 import { editEpisodeAction } from "@/actions/episodePengobatan";
 import { EpisodePengobatanData } from "@/types/episodePengobatan";
-import { cencelBtnClass, editBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  editBtnClass,
+  inputClass,
+  selectClass,
+} from "@/utils/classTailwind";
 
 interface EditEpisodeModalProps {
   episode: EpisodePengobatanData;
@@ -34,13 +39,13 @@ export default function EditEpisodeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Edit Data Episode
         </h3>
         {error && (
-          <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded">
+          <div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-600">
             {error}
           </div>
         )}
@@ -49,14 +54,14 @@ export default function EditEpisodeModal({
           <input type="hidden" name="id_episode" value={episode.id_episode} />
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium text-gray-700">
               Tipe Pasien
             </label>
             <select
               name="tipe_pasien"
               required
               defaultValue={episode.tipe_pasien}
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              className={selectClass}
             >
               <option value="Kasus Baru">Kasus Baru</option>
               <option value="Kambuh">Kambuh</option>
@@ -65,7 +70,7 @@ export default function EditEpisodeModal({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium text-gray-700">
               Tanggal Mulai
             </label>
             <input
@@ -73,17 +78,17 @@ export default function EditEpisodeModal({
               name="tanggal_mulai"
               required
               defaultValue={episode.tanggal_mulai}
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              className={inputClass}
             />
 
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium text-gray-700">
               Tanggal Selesai
             </label>
             <input
               type="date"
               name="tanggal_selesai"
               defaultValue={episode.tanggal_selesai || ""}
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              className={inputClass}
             />
           </div>
 
@@ -96,7 +101,7 @@ export default function EditEpisodeModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
+                <label className="block text-sm font-medium text-gray-700">
                   Tanggal Penetapan *
                 </label>
                 <input
@@ -104,19 +109,19 @@ export default function EditEpisodeModal({
                   name="tanggal_penetapan"
                   required
                   defaultValue={episode.hasil_akhir.tanggal_penetapan}
-                  className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
+                <label className="block text-sm font-medium text-gray-700">
                   Status Akhir *
                 </label>
                 <select
                   name="status_akhir"
                   required
                   defaultValue={episode.hasil_akhir.status_akhir}
-                  className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none bg-white"
+                  className={selectClass}
                 >
                   <option value="">-- Pilih Status Akhir --</option>
                   <option value="Sembuh">Sembuh</option>
@@ -132,7 +137,7 @@ export default function EditEpisodeModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
+                <label className="block text-sm font-medium text-gray-700">
                   Catatan Akhir (Opsional)
                 </label>
                 <textarea
@@ -140,13 +145,13 @@ export default function EditEpisodeModal({
                   rows={3}
                   defaultValue={episode.hasil_akhir.catatan_akhir || ""}
                   placeholder="Tambahkan catatan jika diperlukan..."
-                  className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none resize-none"
+                  className={inputClass}
                 />
               </div>
             </>
           )}
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}

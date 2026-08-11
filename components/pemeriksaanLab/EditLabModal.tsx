@@ -4,7 +4,12 @@ import React, { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { updatePemeriksaanLabAction } from "@/actions/pemeriksaanLab";
 import { PemeriksaanLabData } from "@/types/pemeriksaanLab";
-import { cencelBtnClass, editBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  editBtnClass,
+  inputClass,
+  selectClass,
+} from "@/utils/classTailwind";
 
 interface EditLabModalProps {
   data: PemeriksaanLabData;
@@ -35,8 +40,8 @@ export default function EditLabModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Edit Pemeriksaan Laboratorium
         </h3>
@@ -53,7 +58,7 @@ export default function EditLabModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Tanggal Tes *
               </label>
               <input
@@ -61,11 +66,11 @@ export default function EditLabModal({
                 name="tanggal_tes"
                 required
                 defaultValue={data.tanggal_tes}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Periode Pemeriksaan *
               </label>
               <input
@@ -73,12 +78,12 @@ export default function EditLabModal({
                 name="periode_pemeriksaan"
                 defaultValue={data.periode_pemeriksaan}
                 placeholder="Contoh: Bulan ke-2"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Jenis Tes *
               </label>
               <input
@@ -88,7 +93,7 @@ export default function EditLabModal({
                 list="opsi-jenis-tes"
                 placeholder="TCM, IGRA, dll"
                 defaultValue={data.jenis_tes}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
               <datalist id="opsi-jenis-tes">
                 <option value="TCM" />
@@ -105,7 +110,7 @@ export default function EditLabModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 DNA bakteri *
               </label>
               <input
@@ -114,12 +119,12 @@ export default function EditLabModal({
                 placeholder="Isi beban kuman"
                 required
                 defaultValue={data.dna_bakteri_tb}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Status Resistensi *
               </label>
               <input
@@ -128,12 +133,12 @@ export default function EditLabModal({
                 placeholder="Resisten / Sensitif / Indeterminate"
                 required
                 defaultValue={data.status_resistensi}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Jenis Sampel
               </label>
               <input
@@ -141,11 +146,11 @@ export default function EditLabModal({
                 name="jenis_sample"
                 placeholder="Sputum / LCS / Biopsi"
                 defaultValue={data.jenis_sample || ""}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Kualitas Sampel
               </label>
               <input
@@ -153,7 +158,7 @@ export default function EditLabModal({
                 name="kualitas_sample"
                 placeholder="Purulen / Mukoid"
                 defaultValue={data.kualitas_sample || ""}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
@@ -164,14 +169,14 @@ export default function EditLabModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Hasil Tes Umum *
               </label>
               <select
                 name="hasil_tes"
                 required
                 defaultValue={data.hasil_tes}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={selectClass}
               >
                 <option value="P">Positif</option>
                 <option value="N">Negatif</option>
@@ -179,7 +184,7 @@ export default function EditLabModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Hasil Tes BTA
               </label>
               <input
@@ -187,12 +192,12 @@ export default function EditLabModal({
                 name="hasil_bta"
                 placeholder="Negatif / 1+ / 2+ /3+"
                 defaultValue={data.hasil_bta || ""}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-5 mt-2 border-t border-gray-100">
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}

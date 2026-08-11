@@ -1,7 +1,11 @@
 "use client";
 
 import { bukaEpisodeAction } from "@/actions/episodePengobatan";
-import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  submitBtnClass,
+  inputClass,
+} from "@/utils/classTailwind";
 import { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
@@ -39,8 +43,8 @@ export default function BukaEpisoodeModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 text-left">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 text-left backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Buka Episode Pengobatan Baru
         </h3>
@@ -56,7 +60,7 @@ export default function BukaEpisoodeModal({
           <input type="hidden" name="id_pasien" value={id_pasien} />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700">
               Tanggal Mulai *
             </label>
             <input
@@ -64,19 +68,19 @@ export default function BukaEpisoodeModal({
               name="tanggal_mulai"
               defaultValue={todayDate}
               required
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700">
               Tanggal Selesai *
             </label>
             <input
               type="date"
               name="tanggal_selesai"
               required
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              className={inputClass}
             />
           </div>
 
@@ -90,7 +94,7 @@ export default function BukaEpisoodeModal({
               list="list-tipe-pasien"
               required
               placeholder="Pilih atau ketik tipe pasien..."
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              className={inputClass}
             />
             <datalist id="list-tipe-pasien">
               <option value="Kasus Baru" />
@@ -100,7 +104,7 @@ export default function BukaEpisoodeModal({
             </datalist>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}

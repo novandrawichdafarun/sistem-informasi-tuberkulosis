@@ -7,6 +7,7 @@ import {
   MinusIcon,
 } from "../asset/icons";
 import KepatuhanDonut from "../grafik/KepatuhanDonut";
+import KepatuhanKosong from "../grafik/KepatuhanKosong";
 import { dayNumber, todayISO } from "@/utils/date";
 import { KepatuhanHarian, RingkasanKepatuhan } from "@/types/laporan";
 import { hitungKepatuhanObat } from "@/components/kepatuhan/hitungKepatuhan";
@@ -82,7 +83,11 @@ export default function PatientOverview({
         {/* Keaptuhan card */}
         <div className="rounded-2xl border border-brand-200 bg-white p-6">
           <div className="flex justify-center">
-            <KepatuhanDonut percent={k.persentase} />
+            {k.dinilai === 0 ? (
+              <KepatuhanKosong />
+            ) : (
+              <KepatuhanDonut percent={k.persentase} />
+            )}
           </div>
           <div className="mt-6 space-y-2 border-t border-slate-100 pt-4 text-sm">
             <div className="flex items-center justify-between">

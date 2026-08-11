@@ -58,7 +58,7 @@ export default async function LaporanObatPage() {
           icon={PillIcon}
           tone="brand"
           label="Kepatuhan 14 Hari"
-          value={`${k.persentase}%`}
+          value={k.dinilai > 0 ? `${k.persentase}%` : "—"}
           sub={
             k.dinilai > 0 ? `${k.diminum}/${k.dinilai} dosis` : "belum jatuh tempo"
           }

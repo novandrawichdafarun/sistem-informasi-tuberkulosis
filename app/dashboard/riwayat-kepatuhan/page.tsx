@@ -1,4 +1,5 @@
 import Donut from "@/components/grafik/Donut";
+import KepatuhanKosong from "@/components/grafik/KepatuhanKosong";
 import KalenderKepatuhan from "@/components/grafik/KalenderKepatuhan";
 import InfoStat from "@/components/card/InfoStat";
 import { KepatuhanHarian } from "@/types/laporan";
@@ -71,12 +72,18 @@ export default async function RiwayatKepatuhanPage() {
         <div className="relative overflow-hidden rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-white p-6">
           <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-brand-100/60 blur-2xl" />
           <div className="relative flex flex-col items-center text-center">
-            <Donut percent={persentase} />
-            <span
-              className={`mt-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${kat.className}`}
-            >
-              {kat.label}
-            </span>
+            {dinilai === 0 ? (
+              <KepatuhanKosong size="lg" />
+            ) : (
+              <>
+                <Donut percent={persentase} />
+                <span
+                  className={`mt-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${kat.className}`}
+                >
+                  {kat.label}
+                </span>
+              </>
+            )}
             <p className="mt-3 text-xs text-slate-500">
               Mulai 100%, berkurang tiap obat yang telat atau tidak diminum.
               {dinilai > 0
