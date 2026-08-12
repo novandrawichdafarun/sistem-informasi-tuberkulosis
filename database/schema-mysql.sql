@@ -71,7 +71,7 @@ CREATE TABLE users (
 CREATE TABLE password_resets (
   id         INT          NOT NULL AUTO_INCREMENT,
   email      VARCHAR(100) NOT NULL,
-  token      VARCHAR(6)   NOT NULL,
+  token      VARCHAR(255)   NOT NULL,
   expires_at DATETIME     NOT NULL,
   created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),

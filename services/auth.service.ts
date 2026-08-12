@@ -6,6 +6,7 @@ import { OtpPayload, ResetPasswordPayload, UserAuthData } from "@/types/auth";
 import { ActionResponse } from "@/types/action";
 import { handleServiceError } from "@/utils/error";
 import { getMySQLPool } from "@/database/mysql-client";
+import { sendOtpEmail } from "./mail.service";
 
 export const loginUserService = async (
   email: string,
@@ -110,6 +111,18 @@ export const requestPasswordReset = async (
       return { success: false, error: "Email tidak terdaftar di sistem." };
     }
 
+    const [recentRequests] = await pool.execute<RowDataPacket[]>({
+      sql: "SELECT id FROM password_resets WHERE email = ? AND expires_at > DATE_ADD(NOW(), INTERVAL 4 MINUTE) LIMIT 1",
+      values: [email],
+    });
+
+    if (recentRequests.length > 0) {
+      return {
+        success: false,
+        error: "Tunggu 1 menit sebelum meminta kode OTP baru.",
+      };
+    }
+
     await pool.execute({
       sql: `DELETE FROM password_resets
          WHERE email = ? OR expires_at < NOW()`,
@@ -117,15 +130,27 @@ export const requestPasswordReset = async (
     });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const salt = await bcrypt.genSalt(10);
+    const hashedOtp = await bcrypt.hash(otp, salt);
 
     await pool.execute({
       sql: `INSERT INTO password_resets (email, token, expires_at)
-         VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
-      values: [email, otp],
+         VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))`,
+      values: [email, hashedOtp],
     });
 
-    // TODO: kirim email
-    console.log(`[TUTORIAL] Kode OTP untuk ${email} adalah: ${otp}`);
+    const emailResult = await sendOtpEmail({
+      to: email,
+      otpCode: otp,
+    });
+
+    if (!emailResult.success) {
+      return {
+        success: false,
+        error:
+          "Gagal mengirim email OTP. Silakan periksa konfigurasi server email kamu.",
+      };
+    }
 
     return { success: true, message: "Kode OTP telah dikirim ke email." };
   } catch (err) {
@@ -143,12 +168,20 @@ export const verifyOtp = async (
     const { email, token } = payload;
     const pool = getMySQLPool();
     const [rows] = await pool.execute<RowDataPacket[]>({
-      sql: `SELECT id FROM password_resets
-           WHERE email = ? AND token = ? AND expires_at >= NOW()
-           LIMIT 1`,
-      values: [email, token],
+      sql: "SELECT token FROM password_resets WHERE email = ? AND expires_at >= NOW() LIMIT 1",
+      values: [email],
     });
+
     if (rows.length === 0) {
+      return {
+        success: false,
+        error: "Kode OTP salah atau sudah kadaluarsa",
+      };
+    }
+    const hashedOtp = rows[0].token;
+    const isValidOtp = await bcrypt.compare(token, hashedOtp);
+
+    if (!isValidOtp) {
       return {
         success: false,
         error: "Kode OTP salah atau sudah kadaluarsa",
@@ -171,18 +204,27 @@ export const ResetPassword = async (
     const pool = getMySQLPool();
 
     const [rows] = await pool.execute<RowDataPacket[]>({
-      sql: `SELECT id FROM password_resets
-         WHERE email = ? AND token = ? AND expires_at >= NOW()
-         LIMIT 1`,
-      values: [email, token],
+      sql: "SELECT id, token FROM password_resets WHERE email = ? AND expires_at >= NOW() LIMIT 1",
+      values: [email],
     });
+
     if (rows.length === 0) {
       return {
         success: false,
-        error: "Akses ditolak: Token tidak sah atau kedaluwarsa.",
+        error: "Akses ditolak Token tidak sah atau kedaluwarsa.",
       };
     }
+
     const resetId = rows[0].id;
+    const hashedOtp = rows[0].token;
+    const isValidOtp = await bcrypt.compare(token, hashedOtp);
+
+    if (!isValidOtp) {
+      return {
+        success: false,
+        error: "Akses ditolak Token tidak sah atau kedaluwarsa.",
+      };
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
