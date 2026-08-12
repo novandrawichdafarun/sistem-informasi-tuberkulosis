@@ -2,7 +2,12 @@
 
 import { updateDiagnosisAction } from "@/actions/diagnosis";
 import { DiagnosisData } from "@/types/diagnosis";
-import { cencelBtnClass, editBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  editBtnClass,
+  inputClass,
+  selectClass,
+} from "@/utils/classTailwind";
 import React, { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
@@ -35,8 +40,8 @@ export default function EditDiagnosisModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Edit Diagnosa Pasien
         </h3>
@@ -53,7 +58,7 @@ export default function EditDiagnosisModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Tanggal Diagnosa *
               </label>
               <input
@@ -61,7 +66,7 @@ export default function EditDiagnosisModal({
                 name="tanggal_diagnosis"
                 required
                 defaultValue={data.tanggal_diagnosis}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
@@ -72,14 +77,14 @@ export default function EditDiagnosisModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Klasifikasi Anatomi *
               </label>
               <select
                 name="klasifikasi_anatomi"
                 defaultValue={data.klasifikasi_anatomi}
                 required
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={selectClass}
               >
                 <option value="">-- Klasifikasikan TB --</option>
                 <option value="TB Paru">TB Paru</option>
@@ -88,7 +93,7 @@ export default function EditDiagnosisModal({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Lokasi Anatomi
               </label>
               <input
@@ -96,19 +101,19 @@ export default function EditDiagnosisModal({
                 name="lokasi_anatomi"
                 defaultValue={data.lokasi_anatomi || ""}
                 placeholder="Jika Ekstraparu, sebutkan: Kelenjar getah bening, Pleura, ..."
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Klasifikasi Resistensi *
               </label>
               <select
                 name="klasifikasi_resistensi"
                 required
                 defaultValue={data.klasifikasi_resistensi}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={selectClass}
               >
                 <option value="">-- Klaifikasikan Resistensi --</option>
                 <option value="TB-SO (Sensitif Obat)">
@@ -121,7 +126,7 @@ export default function EditDiagnosisModal({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Tipe Resistensi
               </label>
               <input
@@ -130,7 +135,7 @@ export default function EditDiagnosisModal({
                 list="opsi-tipe-resistensi"
                 placeholder="Kosongkan jika SO"
                 defaultValue={data.tipe_resistensi || ""}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
               <datalist id="opsi-tipe-resistensi">
                 <option value="Monoresisten Rifampisin (TB-RR)" />
@@ -146,7 +151,7 @@ export default function EditDiagnosisModal({
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Dasar Diagnosa
               </label>
               <input
@@ -154,11 +159,11 @@ export default function EditDiagnosisModal({
                 name="dasar_diagnosis"
                 placeholder="contoh: Terkonfirmasi Bakteriologis (TCM/BTA+)"
                 defaultValue={data.dasar_diagnosis || ""}
-                className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Catatan Klinis
               </label>
               <input
@@ -166,12 +171,12 @@ export default function EditDiagnosisModal({
                 name="catatan_klinis"
                 placeholder="Catatan tambahan dokter"
                 defaultValue={data.catatan_klinis || ""}
-                className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-5 mt-2 border-t border-gray-100">
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}

@@ -4,7 +4,12 @@ import React, { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { submitLaporanObatAction } from "@/actions/laporan";
 import { ReporterRole } from "@/types/laporan";
-import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  submitBtnClass,
+  inputClass,
+  selectClass,
+} from "@/utils/classTailwind";
 import { formatRemainingTime, formatTimeOnly, todayISO } from "@/utils/date";
 
 interface ModalLaporObatProps {
@@ -63,8 +68,8 @@ export default function ModalLaporObat({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Lapor Minum Obat
         </h3>
@@ -80,7 +85,7 @@ export default function ModalLaporObat({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Catatan
               {isCurrentlyLate && <span className="text-red-500"> *</span>}
             </label>
@@ -92,7 +97,7 @@ export default function ModalLaporObat({
                   ? "Tuliskan alasan keterlambatan..."
                   : "Catatan tambahan (opsional)..."
               }
-              className="h-24 w-full rounded-md border border-gray-300 p-2"
+              className={`${inputClass} h-24`}
               required={isCurrentlyLate}
               disabled={isPending}
             />
@@ -108,13 +113,13 @@ export default function ModalLaporObat({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Dilaporkan Oleh
             </label>
             <select
               value={reportedBy}
               onChange={(e) => setReportedBy(e.target.value as ReporterRole)}
-              className="w-full rounded-md border border-gray-300 p-2"
+              className={selectClass}
               disabled={isPending}
             >
               <option value="pasien">Pasien</option>
@@ -123,7 +128,7 @@ export default function ModalLaporObat({
             </select>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}

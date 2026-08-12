@@ -3,7 +3,12 @@
 import React, { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { createPemeriksaanLabAction } from "@/actions/pemeriksaanLab";
-import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  submitBtnClass,
+  inputClass,
+  selectClass,
+} from "@/utils/classTailwind";
 
 interface TambahLabModalProps {
   id_episode: number;
@@ -34,8 +39,8 @@ export default function TambahLabModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Tambah Pemeriksaan Laboratorium
         </h3>
@@ -51,7 +56,7 @@ export default function TambahLabModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Tanggal Tes *
               </label>
               <input
@@ -59,11 +64,11 @@ export default function TambahLabModal({
                 name="tanggal_tes"
                 required
                 defaultValue={new Date().toLocaleDateString("en-CA")}
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Periode Pemeriksaan *
               </label>
               <input
@@ -71,12 +76,12 @@ export default function TambahLabModal({
                 name="periode_pemeriksaan"
                 required
                 placeholder="Contoh: Bulan ke-2"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Jenis Tes *
               </label>
               <input
@@ -85,7 +90,7 @@ export default function TambahLabModal({
                 required
                 list="opsi-jenis-tes"
                 placeholder="TCM, IGRA, dll"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
               <datalist id="opsi-jenis-tes">
                 <option value="TCM" />
@@ -102,7 +107,7 @@ export default function TambahLabModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 DNA bakteri *
               </label>
               <input
@@ -110,12 +115,12 @@ export default function TambahLabModal({
                 name="dna_bakteri_tb"
                 placeholder="Isi beban kuman"
                 required
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Status Resistensi *
               </label>
               <input
@@ -123,30 +128,30 @@ export default function TambahLabModal({
                 name="status_resistensi"
                 placeholder="Resisten / Sensitif / Indeterminate"
                 required
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Jenis Sampel
               </label>
               <input
                 type="text"
                 name="jenis_sample"
                 placeholder="Sputum / LCS / Biopsi"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Kualitas Sampel
               </label>
               <input
                 type="text"
                 name="kualitas_sample"
                 placeholder="Purulen / Mukoid"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
 
@@ -157,13 +162,13 @@ export default function TambahLabModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Hasil Tes Umum *
               </label>
               <select
                 name="hasil_tes"
                 required
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={selectClass}
               >
                 <option value="P">Positif</option>
                 <option value="N">Negatif</option>
@@ -171,19 +176,19 @@ export default function TambahLabModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
+              <label className="block text-sm font-medium text-gray-700">
                 Hasil Tes BTA
               </label>
               <input
                 type="text"
                 name="hasil_bta"
                 placeholder="Negatif / 1+ / 2+ /3+"
-                className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                className={inputClass}
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-5 mt-2 border-t border-gray-100">
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             {/* Tombol Batal & Simpan seperti sebelumnya */}
             <button
               type="button"
@@ -198,7 +203,7 @@ export default function TambahLabModal({
               disabled={isPending}
               className={submitBtnClass}
             >
-              {isPending ? "Menyimpan..." : "Simpa Data Lab"}
+              {isPending ? "Menyimpan..." : "Simpan Data Lab"}
             </button>
           </div>
         </form>

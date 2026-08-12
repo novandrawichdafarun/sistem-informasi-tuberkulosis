@@ -1,7 +1,12 @@
 "use client";
 
 import { tutupEpisodeAction } from "@/actions/episodePengobatan";
-import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  submitBtnClass,
+  inputClass,
+  selectClass,
+} from "@/utils/classTailwind";
 import { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
@@ -39,8 +44,8 @@ export default function TutupEpisodeModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
         <h3 className="text-lg font-bold text-gray-900 mb-2">
           Selesaikan Episode Pengobatan
         </h3>
@@ -58,7 +63,7 @@ export default function TutupEpisodeModal({
           <input type="hidden" name="id_episode" value={id_episode} />
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Tanggal Penetapan *
             </label>
             <input
@@ -66,18 +71,18 @@ export default function TutupEpisodeModal({
               name="tanggal_penetapan"
               required
               defaultValue={todayDate}
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Status Akhir *
             </label>
             <select
               name="status_akhir"
               required
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none bg-white"
+              className={selectClass}
             >
               <option value="">-- Pilih Status Akhir --</option>
               <option value="Sembuh">Sembuh</option>
@@ -93,18 +98,18 @@ export default function TutupEpisodeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Catatan Akhir (Opsional)
             </label>
             <textarea
               name="catatan_akhir"
               rows={3}
               placeholder="Tambahkan catatan jika diperlukan..."
-              className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none resize-none"
+              className={inputClass}
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}

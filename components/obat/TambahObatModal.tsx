@@ -1,7 +1,12 @@
 "use client";
 
 import { createObatAction } from "@/actions/obat";
-import { cencelBtnClass, submitBtnClass } from "@/utils/classTailwind";
+import {
+  cencelBtnClass,
+  submitBtnClass,
+  inputClass,
+  selectClass,
+} from "@/utils/classTailwind";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -47,8 +52,8 @@ export default function TambahObatModal() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
             <h3 className="text-lg font-bold text-gray-900 mb-4">
               Tambah Obat
             </h3>
@@ -62,7 +67,7 @@ export default function TambahObatModal() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700">
                     Nama Obat *
                   </label>
                   <input
@@ -70,18 +75,18 @@ export default function TambahObatModal() {
                     name="nama_obat"
                     required
                     placeholder="Massukkan nama obat"
-                    className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                    className={inputClass}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700">
                     Jenis Obat *
                   </label>
                   <select
                     name="jenis_obat"
                     required
-                    className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                    className={selectClass}
                   >
                     <option value="">-- Pilih Jenis Obat --</option>
                     <option value="KDT (Kombinasi Dosis Tetap)">
@@ -93,13 +98,13 @@ export default function TambahObatModal() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700">
                     Kategori Obat *
                   </label>
                   <select
                     name="kategori_obat"
                     required
-                    className="w-full rounded border border-gray-300 p-2 text-sm focus:ring-blue-500 outline-none"
+                    className={selectClass}
                   >
                     <option value="">-- Pilih Kategori Obat --</option>
                     <option value="Lini Pertama">Lini Pertama</option>
@@ -115,31 +120,31 @@ export default function TambahObatModal() {
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700">
                     Dosis/mg
                   </label>
                   <input
                     type="number"
                     name="dosis"
                     placeholder="Contoh: 300, 150/75/400/275"
-                    className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
+                    className={inputClass}
                   />
                 </div>
 
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700">
                     Deskripsi
                   </label>
                   <textarea
                     name="deskripsi"
                     rows={2}
                     placeholder="Masukkan Deskripsi Obat"
-                    className="w-full rounded border border-gray-300 px-3 p-2 text-sm focus:ring-blue-500 outline-none"
+                    className={inputClass}
                   ></textarea>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-5 mt-2 border-t border-gray-100">
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
                 {/* Tombol Batal & Simpan seperti sebelumnya */}
                 <button
                   type="button"

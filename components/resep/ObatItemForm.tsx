@@ -66,7 +66,7 @@ export default function ObatItemForm({
           type="checkbox"
           checked={selected}
           onChange={onToggle}
-          className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600"
+          className="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
         />
         <div className="grow">
           <div className="flex items-center gap-2">
