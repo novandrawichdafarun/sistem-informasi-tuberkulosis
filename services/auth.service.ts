@@ -117,12 +117,11 @@ export const requestPasswordReset = async (
     });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     await pool.execute({
       sql: `INSERT INTO password_resets (email, token, expires_at)
-         VALUES (?, ?, ?)`,
-      values: [email, otp, expiresAt],
+         VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
+      values: [email, otp],
     });
 
     // TODO: kirim email

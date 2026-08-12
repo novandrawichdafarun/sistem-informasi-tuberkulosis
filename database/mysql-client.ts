@@ -1,12 +1,20 @@
 import mysql, { type Pool } from "mysql2/promise";
 
+declare global {
+  // cache pool across module reloads (HMR) in dev
+  var __mysqlPool: Pool | undefined;
+}
 let pool: Pool | null = null;
 
 /**
  * MySQL connection pool singleton.
  * Lazy-init: pool dibuat pada panggilan pertama.
+ * Uses global.__mysqlPool so HMR/dev doesn't create many pools.
  */
 export function getMySQLPool(): Pool {
+  if (typeof global !== "undefined" && globalThis.__mysqlPool)
+    return globalThis.__mysqlPool as Pool;
+
   if (pool) return pool;
 
   const host = process.env.MYSQL_HOST;
@@ -56,5 +64,6 @@ export function getMySQLPool(): Pool {
         : undefined,
   });
 
+  if (typeof global !== "undefined") globalThis.__mysqlPool = pool;
   return pool;
 }

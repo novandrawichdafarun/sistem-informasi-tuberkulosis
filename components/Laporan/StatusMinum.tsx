@@ -33,7 +33,7 @@ export default function StatusMinum({
       className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500"
     >
       <MinusIcon className="h-3.5 w-3.5" />
-      Belum lapor
+      Tidak lapor
     </span>
   );
 }

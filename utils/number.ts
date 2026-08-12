@@ -45,3 +45,28 @@ export const optionalNumber = (min: number, max: number, name: string) =>
       .max(max, `${name} terlalu tinggi`)
       .optional(),
   );
+
+/** Kategori kualitatif dari persentase kepatuhan. */
+export function kategori(persen: number): { label: string; className: string } {
+  if (persen >= 80)
+    return {
+      label: "Kepatuhan Baik",
+      className: "bg-emerald-100 text-emerald-700",
+    };
+  if (persen >= 60)
+    return {
+      label: "Kepatuhan Cukup",
+      className: "bg-amber-100 text-amber-700",
+    };
+  return { label: "Perlu Ditingkatkan", className: "bg-red-100 text-red-700" };
+}
+
+export function nilai(v: number | string | null | undefined, unit = "") {
+  if (v === null || v === undefined || v === "") return "-";
+  return `${v}${unit}`;
+}
+
+export function fmt(v: number | null) {
+  if (v == null) return "-";
+  return Number.isInteger(v) ? String(v) : v.toFixed(1);
+}

@@ -1,6 +1,5 @@
 import { getDaftarObatAction } from "@/actions/obat";
 import ObatTableView from "@/components/obat/ObatTableView";
-import TambahObatModal from "@/components/obat/TambahObatModal";
 
 export const metadata = {
   title: "Manajemen Obat | NU-TBCARE",

@@ -1,5 +1,5 @@
 import { formatTanggalID } from "@/utils/date";
-import { hitungBMI } from "@/utils/number";
+import { hitungBMI, nilai } from "@/utils/number";
 import VitalCharts from "@/components/grafik/VitalCharts";
 import VitalBarChart from "@/components/grafik/VitalBarChart";
 import { buildWeightPoints } from "@/components/grafik/WeightChart";
@@ -7,11 +7,6 @@ import VitalCard from "@/components/card/VitalCard";
 import { getPemeriksaanKlinisByUserAction } from "@/actions/pemeriksaanKlinis";
 import { PemeriksaanKlinisIcon } from "@/components/asset/icons";
 import { TrendingUp, TrendingDown } from "lucide-react";
-
-function nilai(v: number | string | null | undefined, unit = "") {
-  if (v === null || v === undefined || v === "") return "-";
-  return `${v}${unit}`;
-}
 
 export default async function PemeriksaanKlinisView() {
   const res = await getPemeriksaanKlinisByUserAction();

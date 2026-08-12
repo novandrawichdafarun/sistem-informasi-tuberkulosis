@@ -69,7 +69,7 @@ const obatItemSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["jam_jadwal"],
-          message: "Jam jadwal harus berbeda untuk setiap pengambilan",
+          message: "Jam jadwal harus berbeda untuk setiap frekuensi minum",
         });
       }
     }

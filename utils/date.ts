@@ -1,6 +1,6 @@
 import { dailyFrequencyRegex } from "./regex";
 
-const BULAN_ID = [
+export const BULAN_ID = [
   "Jan",
   "Feb",
   "Mar",
@@ -13,6 +13,22 @@ const BULAN_ID = [
   "Okt",
   "Nov",
   "Des",
+];
+
+export const HARI = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+export const BULAN = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
 ];
 
 export function todayISO(): string {
@@ -175,3 +191,6 @@ export function toDateStr(value: unknown): string | null {
   if (typeof value === "string") return value.slice(0, 10);
   return null;
 }
+
+export const monthKeyOf = (y: number, m: number) =>
+  `${y}-${String(m + 1).padStart(2, "0")}`;

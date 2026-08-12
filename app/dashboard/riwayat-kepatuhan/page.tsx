@@ -5,42 +5,28 @@ import InfoStat from "@/components/card/InfoStat";
 import { KepatuhanHarian } from "@/types/laporan";
 import { getKepatuhanAction } from "@/actions/laporan";
 import { isoDaysAgo, todayISO } from "@/utils/date";
-import { hitungKepatuhanObat } from "@/components/kepatuhan/hitungKepatuhan";
+import { hitungKepatuhanObat } from "@/utils/kepatuhan";
 import {
   CheckIcon,
   ClockIcon,
   MinusIcon,
   TrendIcon,
 } from "@/components/asset/icons";
+import { kategori } from "@/utils/number";
 
 export const metadata = { title: "Riwayat Kepatuhan | NU-TBCare" };
-
-/** Kategori kualitatif dari persentase kepatuhan. */
-function kategori(persen: number): { label: string; className: string } {
-  if (persen >= 80)
-    return {
-      label: "Kepatuhan Baik",
-      className: "bg-emerald-100 text-emerald-700",
-    };
-  if (persen >= 60)
-    return {
-      label: "Kepatuhan Cukup",
-      className: "bg-amber-100 text-amber-700",
-    };
-  return { label: "Perlu Ditingkatkan", className: "bg-red-100 text-red-700" };
-}
 
 export default async function RiwayatKepatuhanPage() {
   // Ambil rentang 1 tahun agar kalender bisa digeser antar-bulan.
   // (Action & argumen `days` sudah ada — tanpa perubahan backend.)
   const res = await getKepatuhanAction(365);
   const allDays: KepatuhanHarian[] =
-    res.success && res.data ? res.data.days : [];
+    res.success && res.data ? [...res.data.days] : [];
 
   const today = todayISO();
   const batas30 = isoDaysAgo(29);
 
-  // Ringkasan 30 hari terakhir — model "mulai 100%, berkurang tiap telat/tidak minum".
+  // Ringkasan 30 hari terakhir — model "mulai 100%, berkurang tiap telat/belum lapor".
   const last30 = allDays.filter(
     (d) => d.tanggal >= batas30 && d.tanggal <= today,
   );
@@ -69,7 +55,7 @@ export default async function RiwayatKepatuhanPage() {
       {/* Ringkasan */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Kartu donut */}
-        <div className="relative overflow-hidden rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-white p-6">
+        <div className="relative overflow-hidden rounded-2xl border border-brand-100 bg-linear-to-br from-brand-50 via-white to-white p-6">
           <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-brand-100/60 blur-2xl" />
           <div className="relative flex flex-col items-center text-center">
             {dinilai === 0 ? (
@@ -85,7 +71,6 @@ export default async function RiwayatKepatuhanPage() {
               </>
             )}
             <p className="mt-3 text-xs text-slate-500">
-              Mulai 100%, berkurang tiap obat yang telat atau tidak diminum.
               {dinilai > 0
                 ? ` ${diminum} dari ${dinilai} obat yang diminum tepat waktu.`
                 : " Belum ada jadwal minum obat yang jatuh tempo."}
@@ -112,7 +97,7 @@ export default async function RiwayatKepatuhanPage() {
           <InfoStat
             icon={MinusIcon}
             tone="slate"
-            label="Tidak minum"
+            label="Tidak lapor"
             value={String(tidakMinum)}
             sub="jatuh tempo, tak dilaporkan"
           />

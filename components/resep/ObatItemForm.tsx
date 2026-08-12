@@ -3,9 +3,7 @@
 import { type ObatData, type ObatFormValues } from "@/types/obat";
 import { inputClass } from "@/utils/classTailwind";
 import { getDailyFrequencyCount } from "@/utils/date";
-import { FREKUENSI } from "@/utils/obat";
-
-const DEFAULT_JAM = "09:00";
+import { DEFAULT_JAM, FREKUENSI, normalizeJamValues } from "@/utils/obat";
 
 type Props = {
   obat: ObatData;
@@ -16,18 +14,6 @@ type Props = {
   onToggle: () => void;
   onChange: (field: keyof ObatFormValues, value: string | string[]) => void;
 };
-
-function normalizeJamValues(value?: string | string[]): string[] {
-  if (Array.isArray(value)) return value.length ? value : [DEFAULT_JAM];
-  if (!value) return [DEFAULT_JAM];
-
-  const list = value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-  return list.length ? list : [DEFAULT_JAM];
-}
 
 export default function ObatItemForm({
   obat,
@@ -72,7 +58,7 @@ export default function ObatItemForm({
           <div className="flex items-center gap-2">
             <span className="font-medium text-gray-800">{obat.nama_obat}</span>
             <span className="text-xs text-gray-400">
-              {obat.dosis || ""}
+              {`${obat.dosis} mg` || ""}
               {obat.jenis_obat ? ` · ${obat.jenis_obat}` : ""}
             </span>
           </div>

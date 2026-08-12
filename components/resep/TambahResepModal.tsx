@@ -11,7 +11,7 @@ import {
   inputClass,
   submitBtnClass,
 } from "@/utils/classTailwind";
-import { getDayCount } from "@/utils/date";
+import { getDayCount, getDailyFrequencyCount } from "@/utils/date";
 import { FASE, REGIMEN } from "@/utils/obat";
 import ObatItemForm from "./ObatItemForm";
 
@@ -74,6 +74,37 @@ export default function TambahResepModal({
       },
     }));
 
+  const DEFAULT_JAM = "09:00";
+
+  const normalizeJamJadwal = (
+    raw: string | string[] | undefined,
+    frekuensi: string,
+  ): string[] => {
+    let list: string[] = [];
+
+    if (Array.isArray(raw)) {
+      list = raw.map((it) => String(it).trim()).filter(Boolean);
+    } else if (typeof raw === "string") {
+      list = raw
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    const expected = getDailyFrequencyCount(frekuensi);
+    if (expected !== null) {
+      if (list.length < expected) {
+        while (list.length < expected) list.push(DEFAULT_JAM);
+      } else if (list.length > expected) {
+        list = list.slice(0, expected);
+      }
+    } else {
+      if (list.length === 0) list = [DEFAULT_JAM];
+    }
+
+    return list;
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -85,12 +116,11 @@ export default function TambahResepModal({
 
     const obatItems = selectedIds.map((id) => {
       const data = obatForm[id];
-      const jamJadwal = Array.isArray(data.jam_jadwal)
-        ? data.jam_jadwal
-        : data.jam_jadwal
-            .split(",")
-            .map((item) => item.trim())
-            .filter(Boolean);
+
+      const jamJadwal = normalizeJamJadwal(
+        data?.jam_jadwal,
+        data?.frekuensi_minum ?? "1x sehari",
+      );
 
       const quantity = Number(data.jumlah_per_minum);
       const days = getDayCount(

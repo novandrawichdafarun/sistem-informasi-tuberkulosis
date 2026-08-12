@@ -9,13 +9,11 @@ import {
 import KepatuhanDonut from "../grafik/KepatuhanDonut";
 import KepatuhanKosong from "../grafik/KepatuhanKosong";
 import { dayNumber, todayISO } from "@/utils/date";
-import { KepatuhanHarian, RingkasanKepatuhan } from "@/types/laporan";
-import { hitungKepatuhanObat } from "@/components/kepatuhan/hitungKepatuhan";
-
-type CellKey = "diminum" | "terlewat" | "belum";
+import { RingkasanKepatuhan } from "@/types/laporan";
+import { cellKey, CellKeyValue, hitungKepatuhanObat } from "@/utils/kepatuhan";
 
 const STATUS_STYLES: Record<
-  CellKey,
+  CellKeyValue,
   {
     label: string;
     cell: string;
@@ -38,12 +36,6 @@ const STATUS_STYLES: Record<
     icon: MinusIcon,
   },
 };
-
-function cellKey(day: KepatuhanHarian): CellKey {
-  if (day.status === "diminum") return "diminum";
-  if (day.status === "terlewat") return "terlewat";
-  return "belum";
-}
 
 const QUICK_ACTIONS = [
   {
@@ -73,7 +65,7 @@ export default function PatientOverview({
   const diminum = week.filter((d) => d.status === "diminum").length;
   const totalTerlapor = week.filter((d) => d.status !== null).length;
 
-  // Kepatuhan: model "mulai 100%, berkurang tiap telat/tidak minum".
+  // Kepatuhan: model "mulai 100%, berkurang tiap telat/belum lapor".
   const k = hitungKepatuhanObat(summary.days, todayISO());
 
   return (
@@ -154,7 +146,7 @@ export default function PatientOverview({
 
               {/* Legend */}
               <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-slate-100 pt-4">
-                {(Object.keys(STATUS_STYLES) as CellKey[]).map((key) => {
+                {(Object.keys(STATUS_STYLES) as CellKeyValue[]).map((key) => {
                   const s = STATUS_STYLES[key];
                   const Icon = s.icon;
                   return (

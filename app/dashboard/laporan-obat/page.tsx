@@ -11,7 +11,7 @@ import {
 } from "@/utils/date";
 import StatusMinum from "@/components/Laporan/StatusMinum";
 import InfoStat from "@/components/card/InfoStat";
-import { hitungKepatuhanObat } from "@/components/kepatuhan/hitungKepatuhan";
+import { hitungKepatuhanObat } from "@/utils/kepatuhan";
 import { PillIcon, CheckIcon, CloseIcon } from "@/components/asset/icons";
 
 export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
@@ -27,10 +27,25 @@ export default async function LaporanObatPage() {
   const ringkasan =
     kepatuhanRes.success && kepatuhanRes.data
       ? kepatuhanRes.data
-      : { total: 0, diminum: 0, terlewat: 0, belum: 0, persentase: 0, days: [] };
-  const days = [...ringkasan.days].reverse();
+      : {
+          total: 0,
+          diminum: 0,
+          terlewat: 0,
+          belum: 0,
+          persentase: 0,
+          days: [],
+        };
+  const today = todayISO();
+  const yesterday = new Date(new Date(today).getTime() - 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
 
-  // Kepatuhan 14 hari: model "mulai 100%, berkurang tiap telat/tidak minum".
+  // Filter: tampilkan jika sudah dilaporkan OR (belum dilaporkan tapi tanggal <= kemarin)
+  const filteredDays = ringkasan.days
+    .filter((d) => d.status !== null || d.tanggal <= yesterday)
+    .reverse();
+
+  // Kepatuhan 14 hari: model "mulai 100%, berkurang tiap telat/belum lapor".
   const k = hitungKepatuhanObat(ringkasan.days, todayISO());
 
   return (
@@ -60,7 +75,9 @@ export default async function LaporanObatPage() {
           label="Kepatuhan 14 Hari"
           value={k.dinilai > 0 ? `${k.persentase}%` : "—"}
           sub={
-            k.dinilai > 0 ? `${k.diminum}/${k.dinilai} dosis` : "belum jatuh tempo"
+            k.dinilai > 0
+              ? `${k.diminum}/${k.dinilai} obat`
+              : "belum jatuh tempo"
           }
         />
         <InfoStat
@@ -68,12 +85,12 @@ export default async function LaporanObatPage() {
           tone="emerald"
           label="Diminum"
           value={String(k.diminum)}
-          sub="tepat waktu"
+          sub="minum tepat waktu"
         />
         <InfoStat
           icon={CloseIcon}
           tone="red"
-          label="Terlewat"
+          label="Terlewat / Tidak Lapor"
           value={String(k.terlewat + k.tidakMinum)}
           sub="telat / tidak minum"
         />
@@ -84,14 +101,14 @@ export default async function LaporanObatPage() {
           Riwayat 14 Hari Terakhir
         </h2>
 
-        {days.length === 0 ? (
+        {filteredDays.length === 0 ? (
           <p className="mt-4 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
             Belum ada jadwal minum obat. Riwayat akan muncul setelah Nakes
             menetapkan resep pengobatan.
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-slate-100">
-            {days.map((d, i) => (
+            {filteredDays.map((d, i) => (
               <li
                 key={`${d.tanggal}-${i}`}
                 className="flex items-center justify-between py-3"
@@ -104,7 +121,7 @@ export default async function LaporanObatPage() {
                     Jadwal pukul {formatJam(d.jam_jadwal)}
                     {d.reported_at
                       ? ` · dilaporkan ${formatWaktuID(d.reported_at)}`
-                      : ""}
+                      : " . Tidak Dilaporkan / Tidak diminum"}
                   </p>
                 </div>
                 <StatusMinum status={d.status} />

@@ -3,7 +3,7 @@ import { ShieldAlert, ArrowLeft, Lock } from "lucide-react";
 
 export default function ForbiddenView() {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-red-50 via-white to-slate-50 px-6 py-16">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-b from-red-50 via-white to-slate-50 px-6 py-16">
       {/* Ornamen dekoratif */}
       <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-red-100/50 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-amber-100/50 blur-3xl" />
@@ -13,7 +13,7 @@ export default function ForbiddenView() {
           <ShieldAlert className="h-10 w-10" strokeWidth={1.75} />
         </div>
 
-        <p className="mt-8 bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-6xl font-extrabold tracking-tight text-transparent sm:text-7xl">
+        <p className="mt-8 bg-linear-to-r from-red-500 to-red-700 bg-clip-text text-6xl font-extrabold tracking-tight text-transparent sm:text-7xl">
           403
         </p>
         <h1 className="mt-2 text-2xl font-bold text-brand-950 sm:text-3xl">

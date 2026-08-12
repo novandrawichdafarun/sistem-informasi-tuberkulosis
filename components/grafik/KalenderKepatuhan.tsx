@@ -2,46 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { KepatuhanHarian } from "@/types/laporan";
-import { formatTanggalID } from "@/utils/date";
+import { BULAN, formatTanggalID, HARI, monthKeyOf } from "@/utils/date";
 import { CheckIcon, ClockIcon, MinusIcon } from "@/components/asset/icons";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-const HARI = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
-const BULAN = [
-  "Januari",
-  "Februari",
-  "Maret",
-  "April",
-  "Mei",
-  "Juni",
-  "Juli",
-  "Agustus",
-  "September",
-  "Oktober",
-  "November",
-  "Desember",
-];
-
-type CellStatus = "diminum" | "terlewat" | "belum" | "kosong" | "depan";
-
-const STATUS_STYLE: Record<Exclude<CellStatus, "kosong" | "depan">, string> = {
-  diminum: "bg-brand-600 text-white ring-1 ring-inset ring-brand-700/20",
-  terlewat: "bg-red-500 text-white ring-1 ring-inset ring-red-600/20",
-  belum: "bg-slate-100 text-slate-500 ring-1 ring-inset ring-slate-200",
-};
-
-const monthKeyOf = (y: number, m: number) =>
-  `${y}-${String(m + 1).padStart(2, "0")}`;
-
-/** Gabungkan beberapa jadwal pada satu tanggal jadi satu status ringkas. */
-function aggregate(records: KepatuhanHarian[]): CellStatus {
-  if (records.length === 0) return "kosong";
-  const diminum = records.filter((r) => r.status === "diminum").length;
-  const terlewat = records.filter((r) => r.status === "terlewat").length;
-  if (diminum === records.length) return "diminum";
-  if (terlewat > 0) return "terlewat";
-  return "belum";
-}
+import {
+  aggregate,
+  CellStatus,
+  hitungKepatuhanObat,
+  STATUS_LABEL,
+  getStatusTone,
+  getStatusDotClass,
+  normalizeCellStatus,
+} from "@/utils/kepatuhan";
+import LegendDot from "../molecules/LegendDot";
 
 export default function KalenderKepatuhan({
   days,
@@ -90,23 +63,61 @@ export default function KalenderKepatuhan({
       byDate.set(d.tanggal, arr);
     }
 
-    const t = { diminum: 0, terlewat: 0, belum: 0 };
+    // Gunakan hitungKepatuhanObat agar tally berdasarkan unit yang sama
+    // seperti yang digunakan di kartu statistik (per-jadwal / per-dose).
+    const monthRecords = days.filter((d) => d.tanggal.startsWith(cursorKey));
+    const counts = hitungKepatuhanObat(monthRecords, today);
+    const t = {
+      diminum: counts.diminum,
+      terlewat: counts.terlewat,
+      belum: counts.tidakMinum,
+    };
+
     const out: {
       dd: number;
       dateStr: string;
-      status: CellStatus;
+      items: { status: CellStatus; time: string }[];
       isToday: boolean;
     }[] = [];
+
     for (let dd = 1; dd <= daysInMonth; dd++) {
       const dateStr = `${cursorKey}-${String(dd).padStart(2, "0")}`;
       const records = byDate.get(dateStr) ?? [];
-      let status = aggregate(records);
-      if (status === "diminum") t.diminum++;
-      else if (status === "terlewat") t.terlewat++;
-      else if (status === "belum") t.belum++;
-      if (status === "kosong" && dateStr > today) status = "depan";
-      out.push({ dd, dateStr, status, isToday: dateStr === today });
+      const isPastDate = dateStr < today;
+
+      // Build per-record items (status + time), keep chronological order
+      const items = records
+        .map((record) => {
+          const raw = normalizeCellStatus(aggregate([record]) ?? "kosong");
+          const status = raw === "kosong" && isPastDate ? "belum" : raw;
+          const time = record.jam_jadwal ?? "";
+          return { status, time };
+        })
+        .filter((it) => !!it.time) // only keep with time (optional)
+        .sort((a, b) => a.time.localeCompare(b.time));
+
+      // If no records -> show placeholder item (past => belum if scheduled, otherwise kosong; future => depan)
+      if (items.length === 0) {
+        const hasScheduledOnDate = monthRecords.some(
+          (r) => r.tanggal === dateStr,
+        );
+
+        if (hasScheduledOnDate) {
+          items.push({
+            status: isPastDate ? "belum" : "depan",
+            time: "",
+          });
+        } else {
+          items.push({
+            status: "kosong",
+            time: "",
+          });
+        }
+      }
+
+      out.push({ dd, dateStr, items, isToday: dateStr === today });
     }
+
     return { cells: out, firstWeekday: first, tally: t };
   }, [days, cursor, cursorKey, today]);
 
@@ -126,7 +137,7 @@ export default function KalenderKepatuhan({
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <h2 className="min-w-[9.5rem] text-center text-base font-semibold text-brand-950 sm:min-w-[10rem] sm:text-left">
+          <h2 className="min-w-38 text-center text-base font-semibold text-brand-950 sm:min-w-40 sm:text-left">
             {BULAN[cursor.m]} {cursor.y}
           </h2>
           <button
@@ -152,24 +163,21 @@ export default function KalenderKepatuhan({
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
           <LegendDot className="bg-brand-600" label="Diminum" />
           <LegendDot className="bg-red-500" label="Telat lapor" />
-          <LegendDot className="bg-slate-200" label="Belum lapor" />
+          <LegendDot className="bg-slate-200" label="Tidak lapor" />
         </div>
       </div>
 
-      {/* Ringkasan bulan terpilih */}
-      {adaJadwal && (
-        <div className="mt-4 flex flex-wrap gap-2 text-xs">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 font-medium text-brand-700">
-            <CheckIcon className="h-3.5 w-3.5" /> {tally.diminum} diminum
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 font-medium text-red-600">
-            <ClockIcon className="h-3.5 w-3.5" /> {tally.terlewat} telat lapor
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-500">
-            <MinusIcon className="h-3.5 w-3.5" /> {tally.belum} belum lapor
-          </span>
-        </div>
-      )}
+      <div className="mt-4 flex flex-wrap gap-2 text-xs">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 font-medium text-brand-700">
+          <CheckIcon className="h-3.5 w-3.5" /> {tally.diminum} diminum
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 font-medium text-red-600">
+          <ClockIcon className="h-3.5 w-3.5" /> {tally.terlewat} telat lapor
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-500">
+          <MinusIcon className="h-3.5 w-3.5" /> {tally.belum} tidak lapor
+        </span>
+      </div>
 
       {/* Header hari */}
       <div className="mt-4 grid grid-cols-7 gap-1.5 sm:gap-2">
@@ -193,23 +201,51 @@ export default function KalenderKepatuhan({
         {cells.map((c) => {
           const base =
             "relative flex min-h-14 flex-col rounded-lg p-1.5 text-xs font-semibold sm:min-h-20 sm:rounded-xl sm:p-2 sm:text-sm";
+
+          // determine primary status for cell tone/icon (prioritize terlewat > belum > diminum)
+          const primary =
+            c.items.find((it) => it.status === "terlewat") ??
+            c.items.find((it) => it.status === "belum") ??
+            c.items.find((it) => it.status === "diminum") ??
+            c.items.find((it) => it.status === "depan") ??
+            c.items[0];
+
           const tone =
-            c.status === "kosong" || c.status === "depan"
+            c.items.length === 1 && c.items[0].status === "kosong"
               ? "bg-slate-50 text-slate-400"
-              : STATUS_STYLE[c.status];
+              : getStatusTone(primary.status);
           const ring = c.isToday
             ? " outline outline-2 outline-offset-1 outline-brand-500"
             : "";
+
+          // Tentukan label status berdasarkan tanggal:
+          // - Tanggal < kemarin (lebih dari 1 hari lalu): gunakan "tidak lapor"
+          // - Tanggal kemarin atau hari ini: gunakan "belum lapor"
+          const yesterday = new Date(
+            new Date(today).getTime() - 24 * 60 * 60 * 1000,
+          )
+            .toISOString()
+            .split("T")[0];
+          const isYesterdayOrLater = c.dateStr >= yesterday;
+
+          const getItemLabel = (it: { status: CellStatus; time: string }) => {
+            if (it.status === "belum") {
+              return isYesterdayOrLater ? "belum lapor" : "tidak lapor";
+            }
+            return STATUS_LABEL[it.status];
+          };
+
           const title =
-            c.status === "kosong" || c.status === "depan"
+            c.items.length === 1 && c.items[0].status === "kosong"
               ? `${formatTanggalID(c.dateStr)} · tidak ada jadwal`
-              : `${formatTanggalID(c.dateStr)} · ${
-                  c.status === "belum"
-                    ? "belum lapor"
-                    : c.status === "terlewat"
-                      ? "telat lapor"
-                      : c.status
-                }`;
+              : `${formatTanggalID(c.dateStr)} · ${c.items
+                  .map((it) =>
+                    it.time
+                      ? `Jam ${it.time} · ${getItemLabel(it)}`
+                      : getItemLabel(it),
+                  )
+                  .join(" / ")}`;
+
           return (
             <div
               key={c.dateStr}
@@ -217,15 +253,34 @@ export default function KalenderKepatuhan({
               className={`${base} ${tone}${ring}`}
             >
               <span className="leading-none">{c.dd}</span>
-              {c.status === "diminum" && (
+
+              {/* primary icon */}
+              {primary.status === "diminum" && (
                 <CheckIcon className="absolute right-1 top-1 hidden h-3.5 w-3.5 opacity-80 sm:block" />
               )}
-              {c.status === "terlewat" && (
+              {primary.status === "terlewat" && (
                 <ClockIcon className="absolute right-1 top-1 hidden h-3.5 w-3.5 opacity-80 sm:block" />
               )}
-              {c.status === "belum" && (
+              {primary.status === "belum" && (
                 <MinusIcon className="absolute right-1 top-1 hidden h-3.5 w-3.5 opacity-70 sm:block" />
               )}
+
+              <div className="mt-auto flex flex-wrap gap-1.5">
+                {c.items.length > 1 &&
+                  c.items.map((it, idx) => (
+                    <span
+                      key={`${it.time}-${idx}-${it.status}`}
+                      title={
+                        it.time
+                          ? `Jam ${it.time} · ${getItemLabel(it)}`
+                          : getItemLabel(it)
+                      }
+                      className={`h-2.5 w-2.5 rounded-full border-black border ${getStatusDotClass(
+                        it.status,
+                      )}`}
+                    />
+                  ))}
+              </div>
             </div>
           );
         })}
@@ -239,14 +294,5 @@ export default function KalenderKepatuhan({
         </p>
       )}
     </div>
-  );
-}
-
-function LegendDot({ className, label }: { className: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className={`h-3 w-3 rounded-full ${className}`} />
-      {label}
-    </span>
   );
 }

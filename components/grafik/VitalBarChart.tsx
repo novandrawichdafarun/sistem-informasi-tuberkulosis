@@ -1,15 +1,11 @@
 "use client";
 
+import { fmt } from "@/utils/number";
 // Grafik batang SVG reusable (satu seri) + tooltip hover.
 // Baseline domain non-nol supaya variasi nilai fisiologis (berat/suhu) terlihat;
 // sumbu-Y diberi label agar tetap jujur. Mendukung nilai null (batang kosong).
 
 import { useRef, useState } from "react";
-
-function fmt(v: number | null) {
-  if (v == null) return "-";
-  return Number.isInteger(v) ? String(v) : v.toFixed(1);
-}
 
 export default function VitalBarChart({
   labels,
@@ -39,7 +35,10 @@ export default function VitalBarChart({
   const valid = values.filter((v): v is number => v != null);
   let lo = valid.length ? Math.min(...valid) : 0;
   let hi = valid.length ? Math.max(...valid) : 1;
-  const pad = Math.max((hi - lo) * 0.2, hi === lo ? Math.abs(hi) * 0.1 || 1 : 0);
+  const pad = Math.max(
+    (hi - lo) * 0.2,
+    hi === lo ? Math.abs(hi) * 0.1 || 1 : 0,
+  );
   lo = Math.max(0, lo - pad);
   hi = hi + pad;
   if (hi <= lo) hi = lo + 1;

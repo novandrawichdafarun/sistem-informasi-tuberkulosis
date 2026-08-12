@@ -1,5 +1,6 @@
 "use client";
 
+import { fmt } from "@/utils/number";
 // Grafik garis SVG reusable + tooltip hover. Mendukung banyak seri,
 // area fill opsional, dan nilai null (garis putus).
 
@@ -11,11 +12,6 @@ export type ChartSeries = {
   values: (number | null)[];
   area?: boolean;
 };
-
-function fmt(v: number | null) {
-  if (v == null) return "-";
-  return Number.isInteger(v) ? String(v) : v.toFixed(1);
-}
 
 export default function LineChart({
   labels,
@@ -51,7 +47,10 @@ export default function LineChart({
   let lo = min ?? (allValues.length ? Math.min(...allValues) : 0);
   let hi = max ?? (allValues.length ? Math.max(...allValues) : 1);
   if (min === undefined && max === undefined && allValues.length) {
-    const pad = Math.max((hi - lo) * 0.15, hi === lo ? Math.abs(hi) * 0.1 || 1 : 0);
+    const pad = Math.max(
+      (hi - lo) * 0.15,
+      hi === lo ? Math.abs(hi) * 0.1 || 1 : 0,
+    );
     lo = lo - pad;
     hi = hi + pad;
   }
@@ -155,7 +154,9 @@ export default function LineChart({
                       )
                       .join(" ");
                     const area = `${line} L ${x(seg[seg.length - 1].i).toFixed(1)} ${(padT + innerH).toFixed(1)} L ${x(seg[0].i).toFixed(1)} ${(padT + innerH).toFixed(1)} Z`;
-                    return <path key={gi} d={area} fill={s.color} opacity="0.1" />;
+                    return (
+                      <path key={gi} d={area} fill={s.color} opacity="0.1" />
+                    );
                   })}
                 {segs.map((seg, gi) => {
                   const line = seg
@@ -165,7 +166,13 @@ export default function LineChart({
                     )
                     .join(" ");
                   return (
-                    <path key={gi} d={line} fill="none" stroke={s.color} strokeWidth="2.5" />
+                    <path
+                      key={gi}
+                      d={line}
+                      fill="none"
+                      stroke={s.color}
+                      strokeWidth="2.5"
+                    />
                   );
                 })}
                 {s.values.map((v, i) =>
@@ -230,8 +237,14 @@ export default function LineChart({
         <div className="mt-2 flex flex-wrap justify-center gap-4">
           {series.map((s, i) =>
             s.name ? (
-              <span key={i} className="flex items-center gap-1.5 text-xs text-slate-500">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
+              <span
+                key={i}
+                className="flex items-center gap-1.5 text-xs text-slate-500"
+              >
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ background: s.color }}
+                />
                 {s.name}
               </span>
             ) : null,
