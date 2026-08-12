@@ -119,7 +119,7 @@ export const sendOtpEmail = async (params: SendOtpEmailParams) => {
                 <p style="margin: 0 0 12px 0; color: ${BRAND_COLORS.textMuted}; font-size: 14px; font-weight: 600;">Butuh Bantuan?</p>
                 <p style="margin: 0; color: ${BRAND_COLORS.textMuted}; font-size: 13px; line-height: 1.6;">
                   Hubungi tim support kami:<br/>
-                  <a href="mailto:support@nu-tbcare.com" style="color: ${BRAND_COLORS.primary}; text-decoration: none; font-weight: 600;">support@nu-tbcare.com</a>
+                  <a href="mailto:vandrasurabaya@gmail.com" style="color: ${BRAND_COLORS.primary}; text-decoration: none; font-weight: 600;">support@nu-tbcare.com</a>
                 </p>
               </div>
 
