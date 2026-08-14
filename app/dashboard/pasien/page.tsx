@@ -3,7 +3,7 @@ import { PasienData } from "@/types/pasien";
 import PasienTableView from "@/components/pasien/PasienTableView";
 
 export const metadata = {
-  title: "Manajemen Pasien | NU-TBCare",
+  title: "Manajemen Pasien | NU-TBCARE",
 };
 
 export default async function ManajemenPasienPage() {

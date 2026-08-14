@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NU-TBCare",
+  title: "NU-TBCARE",
   description: "Aplikasi pelaporan mandiri dan pemantauan pasien Tuberkulsis",
+  verification: {
+    google: "wuK7hkII0eyubJI_vQFeele024A0Zb7gXme8m-t1ANs",
+  },
 };
 
 export default function RootLayout({

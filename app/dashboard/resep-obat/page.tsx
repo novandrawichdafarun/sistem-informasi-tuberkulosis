@@ -2,7 +2,7 @@ import { getDaftarResepAction } from "@/actions/resep";
 import { getDaftarObatAction } from "@/actions/obat";
 import ResepTableView from "@/components/resep/ResepTableView";
 
-export const metadata = { title: "Resep & Jadwal Obat | NU-TBCare" };
+export const metadata = { title: "Resep & Jadwal Obat | NU-TBCARE" };
 
 export default async function ResepObatPage() {
   const [resepRes, obatRes] = await Promise.all([

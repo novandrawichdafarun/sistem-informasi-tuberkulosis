@@ -14,7 +14,7 @@ import InfoStat from "@/components/card/InfoStat";
 import { hitungKepatuhanObat } from "@/utils/kepatuhan";
 import { PillIcon, CheckIcon, CloseIcon } from "@/components/asset/icons";
 
-export const metadata = { title: "Laporan Obat Harian | NU-TBCare" };
+export const metadata = { title: "Laporan Obat Harian | NU-TBCARE" };
 
 export default async function LaporanObatPage() {
   const [jadwalRes, kepatuhanRes] = await Promise.all([

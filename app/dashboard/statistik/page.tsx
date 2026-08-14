@@ -5,7 +5,7 @@ import LineChart from "@/components/grafik/LineChart";
 import ChartCard from "@/components/card/ChartCard";
 import BarChart from "@/components/grafik/BarChart";
 
-export const metadata = { title: "Statistik | NU-TBCare" };
+export const metadata = { title: "Statistik | NU-TBCARE" };
 
 export default async function StatistikPage() {
   const res = await getStatistikAdminAction();

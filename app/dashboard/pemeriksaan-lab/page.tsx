@@ -9,7 +9,7 @@ export async function generateMetadata() {
   return {
     title:
       session?.user?.role === "pasien"
-        ? "Pemeriksaan Medis | NU-TBCare"
+        ? "Pemeriksaan Medis | NU-TBCARE"
         : "Manajemen Pemeriksaan Lab | NU-TBCARE",
   };
 }

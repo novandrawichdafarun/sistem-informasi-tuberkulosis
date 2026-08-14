@@ -8,7 +8,7 @@ import Section from "@/components/molecules/Section";
 import Info from "@/components/molecules/Info";
 import Donut from "@/components/grafik/Donut";
 
-export const metadata = { title: "Detail Pasien | NU-TBCare" };
+export const metadata = { title: "Detail Pasien | NU-TBCARE" };
 
 export default async function PasienDetailPage({
   params,

@@ -9,8 +9,8 @@ export async function generateMetadata() {
   return {
     title:
       session?.user?.role === "pasien"
-        ? "Pemeriksaan Klinis | NU-TBCare"
-        : "Manajemen Pemeriksaan Klinis | PantauTB",
+        ? "Pemeriksaan Klinis | NU-TBCARE"
+        : "Manajemen Pemeriksaan Klinis | NU-TBCARE",
   };
 }
 

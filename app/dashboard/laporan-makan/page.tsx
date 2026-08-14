@@ -3,7 +3,7 @@ import { authOptions } from "../../api/auth/[...nextauth]/route";
 import PasienLaporanMakanView from "@/components/Laporan/PasienLaporanMakanView";
 import AdminLaporanMakanView from "@/components/Laporan/AdminLaporanMakanView";
 
-export const metadata = { title: "Laporan Makanan | NU-TBCare" };
+export const metadata = { title: "Laporan Makanan | NU-TBCARE" };
 
 export default async function LaporanMakanPage() {
   const session = await getServerSession(authOptions);

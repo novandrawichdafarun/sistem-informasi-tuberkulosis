@@ -14,7 +14,7 @@ import {
 } from "@/components/asset/icons";
 import { kategori } from "@/utils/number";
 
-export const metadata = { title: "Riwayat Kepatuhan | NU-TBCare" };
+export const metadata = { title: "Riwayat Kepatuhan | NU-TBCARE" };
 
 export default async function RiwayatKepatuhanPage() {
   // Ambil rentang 1 tahun agar kalender bisa digeser antar-bulan.

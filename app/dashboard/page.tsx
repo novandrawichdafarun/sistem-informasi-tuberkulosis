@@ -20,7 +20,7 @@ const EMPTY_SUMMARY: RingkasanKepatuhan = {
   days: [],
 };
 
-export const metadata = { title: "Beranda | NU-TBCare" };
+export const metadata = { title: "Beranda | NU-TBCARE" };
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);

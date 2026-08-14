@@ -121,7 +121,7 @@ export default async function Home() {
           className="animate-fade-up mt-5 max-w-2xl text-base leading-7 text-brand-900/60 sm:text-lg"
           style={{ animationDelay: "0.7s" }}
         >
-          NU-TBCare membantu pasien melaporkan kepatuhan pengobatan secara
+          NU-TBCARE membantu pasien melaporkan kepatuhan pengobatan secara
           mandiri dan memudahkan petugas memantau perkembangannya semua dalam
           satu sistem sederhana.
         </p>

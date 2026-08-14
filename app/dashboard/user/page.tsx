@@ -3,7 +3,7 @@ import UserTableView from "@/components/user/UserTableView";
 import { UserData } from "@/types/user";
 
 export const metadata = {
-  title: "Manajemen User | NU-TBCare",
+  title: "Manajemen User | NU-TBCARE",
 };
 
 export default async function ManajemenUserPage() {

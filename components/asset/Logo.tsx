@@ -28,7 +28,7 @@ export default function Logo({
   const mark = (
     <Image
       src="/logo.png"
-      alt="Logo NU-TBCare"
+      alt="Logo NU-TBCARE"
       width={INTRINSIC_W}
       height={INTRINSIC_H}
       quality={100}
@@ -47,7 +47,7 @@ export default function Logo({
     >
       <Image
         src="/logo.png"
-        alt="Logo NU-TBCare"
+        alt="Logo NU-TBCARE"
         fill
         sizes={`${px * 2}px`}
         quality={100}
