@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "NU-TBCARE",
-  description: "Aplikasi pelaporan mandiri dan pemantauan pasien Tuberkulsis",
+  description: "Aplikasi pelaporan mandiri dan pemantauan pasien Tuberkulosis",
   verification: {
     google: "wuK7hkII0eyubJI_vQFeele024A0Zb7gXme8m-t1ANs",
   },
@@ -32,6 +32,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 text-gray-900 h-full antialiased`}
     >
       <link rel="icon" href="/logo.png" />
+      <link rel="apple-touch-icon" href="/logo.png" />
       <body className="min-h-full flex flex-col">
         <AuthProvider>{children}</AuthProvider>
       </body>
