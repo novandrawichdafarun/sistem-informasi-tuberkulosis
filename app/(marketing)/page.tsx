@@ -90,7 +90,7 @@ export default async function Home() {
       <header className="animate-fade-up relative z-10 mx-auto flex w-full max-w-6xl items-center gap-3 px-6 py-6">
         <Logo size="md" />
         <span className="text-xl font-bold tracking-tight text-brand-800">
-          NU-TB<span className="text-brand-500">Care</span>
+          NU-TB<span className="text-brand-500">CARE</span>
         </span>
       </header>
 

@@ -62,7 +62,7 @@ export default function Logo({
       {badge ? badgeMark : mark}
       {withWordmark && (
         <span className="text-xl font-bold tracking-tight text-brand-800">
-          NU-TB<span className="text-brand-500">Care</span>
+          NU-TB<span className="text-brand-500">CARE</span>
         </span>
       )}
     </div>

@@ -16,9 +16,8 @@ Sebelum memulai, pastikan perangkat Anda telah menginstal hal-hal berikut:
 
 - Node.js 18 atau versi yang lebih baru
 - npm, pnpm, yarn, atau bun
-- Akun Supabase Cloud
-- Akses ke project Supabase tim
-- Akses ke repositori GitHub tim
+- Laragon (untuk menjalankan server lokal MySQL)
+- Git (untuk mengakses repositori)
 
 ### 2. Clone Repository dan Instal Dependensi
 
@@ -49,23 +48,30 @@ copy .env.example .env.local
 Setelah file dibuat, isi nilai konfigurasi berikut:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-role-key
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-NEXT_PUBLIC_SUPABASE_PASSWORD=your-supabase-password
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=nutbcare_db_local
 ```
 
 Jika file `.env.example` belum tersedia, buat file `.env.local` secara manual dan isi variabel di atas sesuai konfigurasi project tim Anda.
 
-### 4. Hubungkan Supabase CLI ke Cloud
+### 4. Hubungkan Database MySQL ke Local
 
-Pastikan Anda telah login ke akun Supabase dan memiliki akses ke project tim. Jalankan perintah ini untuk menautkan ke database cloud:
+Pastikan MySQL berjalan di komputer Anda. Gunakan Laragon atau server MySQL lokal lainnya. Buat database baru dengan nama `nutbcare_db_local` (atau sesuai konfigurasi di `.env.local`).
+
+Jalankan Laragon, buka terminal MySQL, dan buat database dengan mengimport file SQL yang tersedia di folder `database/`:
 
 ```bash
-npx supabase login
-npx supabase link --project-ref <id-proyek-supabase-cloud>
+mysql -u root -p
+create database nutbcare_db_local;
+use nutbcare_db_local;
+
+source database/schema-mysql.sql;
 ```
+
+atau gunakan GUI seperti phpMyAdmin atau MySQL Workbench untuk mengimpor file SQL.
 
 ### 5. Jalankan Aplikasi
 
@@ -92,17 +98,15 @@ sistem-informasi-tuberkulosis/
 ├─ action/                   # Fungsi aksi server-side untuk pemrosesan data
 ├─ app/                      # Route dan layout aplikasi berbasis Next.js App Router
 ├─ components/               # Komponen UI yang dapat digunakan kembali
+├─ database/                 # Konfigurasi koneksi MySQL (Connection Pool)
 ├─ docs/                     # Dokumentasi proyek dan panduan penggunaan aplikasi
+├─ libs/                     # Library internal maupun eksternal yang digunakan dalam proyek
 ├─ public/                   # Aset statis seperti gambar, ikon, dan file publik
 ├─ schemas/                  # Skema validasi data menggunakan Zod
 ├─ services/                 # Layer pemanggilan API dan layanan bisnis
 ├─ style/                    # File CSS global dan tema
-├─ supabase/
-│  └─ migrations/            # File migrasi database
-│  └─ seeders/               # File seeder database
 ├─ types/                    # Definisi tipe TypeScript
 ├─ utils/                    # Fungsi utilitas dan helper
-│  └─ supabase/              # Konfigurasi database
 ├─ .env.example              # Contoh file environment
 ├─ .gitignore                # File untuk mengabaikan file tertentu saat commit
 ├─ AGENTS.md                 # Next.js Agent Rules
@@ -119,20 +123,21 @@ Penjelasan singkat
 
 - app/ digunakan untuk mendefinisikan halaman dan layout aplikasi.
 - components/ berisi komponen UI yang bersifat reusable.
+- database/ berisi konfigurasi koneksi database dan skema database beserta data dummy.
+- libs/ berisi library internal maupun eksternal yang digunakan dalam proyek.
 - services/ berisi logika bisnis dan pemanggilan API.
 - types/ berisi definisi tipe data TypeScript.
 - utils/ berisi helper, utilitas, dan konfigurasi umum.
-- migrations/ wajib digunakan untuk setiap perubahan skema database.
 
 ---
 
 ## 🗄️ Schema Database
 
-Skema database dikelola menggunakan PostgreSQL melalui Supabase. Semua tabel sebaiknya dibuat dan diubah melalui migrasi.
+Skema database dikelola menggunakan sistem relasional MySQL. Semua perubahan struktur tabel didokumentasikan melalui file kueri SQL.
 
 ![ERD Sistem TB](docs/ERD%20Sistem%20TB.png)
 
-Relasi Inti
+Relasi Inti:
 
 - Tabel pasien memiliki relasi one-to-many dengan tabel episode pengobatan.
 - Tabel episode pengobatan memiliki relasi one-to-many dengan tabel pemeriksaan klinis, pemeriksaan lab, dan resep pengobatan.
@@ -141,12 +146,12 @@ Relasi Inti
 - Tabel obat memiliki relasi one-to-many dengan tabel detail obat.
 - Tabel Jadwal Minum Obat memiliki relasi one-to-one dengan tabel medication log (catatan kepatuhan).
 
-Aturan Umum Schema
+Aturan Umum Schema:
 
-- Gunakan `uuid` untuk primary key.
-- Gunakan `TIMESTAMP WITH TIME ZONE` untuk kolom tanggal dan waktu.
-- Beri `NOT NULL` pada kolom yang wajib diisi.
-- Tambahkan indeks pada kolom yang sering dipakai untuk filter atau join.
+- Gunakan INT AUTO_INCREMENT atau VARCHAR(255) untuk primary key (tergantung kebutuhan UUID atau ID urut).
+- Gunakan DATETIME untuk kolom tanggal dan waktu (wajib selaras dengan zona waktu Z atau UTC pada pengaturan aplikasi).
+- Beri NOT NULL pada kolom yang wajib diisi.
+- Tambahkan indeks (KEY atau INDEX) pada kolom yang sering dipakai untuk memfilter atau menggabungkan (join) tabel.
 
 ---
 
@@ -219,9 +224,9 @@ Untuk menjaga konsistensi kode dan kualitas pengembangan, ikuti pedoman berikut.
    - Jangan membagikan file `.env.local` ke publik atau ke pihak yang tidak berwenang.
 
 5. Database
-   - Semua perubahan skema database harus dilakukan melalui migrasi.
-   - Jangan mengubah struktur tabel langsung melalui dashboard Supabase tanpa dokumentasi dan review.
-   - Semua perubahan database harus tercatat di folder /supabase/migrations.
+   - Semua perubahan skema database harus didokumentasikan.
+   - Jangan mengubah struktur tabel secara sepihak tanpa memberitahu tim dan tanpa file kueri.
+   - Semua perubahan atau penambahan tabel baru harus tercatat dan disimpan di folder /database.
 
 ---
 
@@ -229,7 +234,7 @@ Untuk menjaga konsistensi kode dan kualitas pengembangan, ikuti pedoman berikut.
 
 - Data pasien merupakan data sensitif. Jangan membagikan informasi pribadi pasien di forum, issue, pull request, atau media komunikasi lain yang tidak aman.
 - Jangan pernah mengunggah file `.env.local`, `.env`, token, atau kredensial lain ke repository GitHub.
-- Hindari menjalankan perintah yang dapat menghapus atau merusak data, seperti `npx supabase db reset`, `npx supabase db seed`, `npx supabase db push`, dll, ecuali Anda benar-benar memahami dampaknya dan telah mendapat persetujuan.
+- Hindari menggunakan library atau modul yang tidak terverifikasi atau tidak memiliki lisensi yang jelas.
 - Setiap perubahan skema database wajib disertai migrasi yang terdokumentasi dan dilakukan melalui review yang tepat.
 - Pastikan untuk melakukan `git pull` sebelum memulai pengembangan guna menghindari konflik integrasi dan memastikan Anda bekerja pada versi proyek terbaru.
 - Sebelum mengirimkan Pull Request, pastikan fitur telah diuji secara lokal dan tidak menimbulkan regresi pada sistem.
