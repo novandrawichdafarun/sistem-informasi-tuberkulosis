@@ -30,8 +30,7 @@ export default function ObatTableView({ data }: Props) {
     return data.filter(
       (o) =>
         o.nama_obat.toLowerCase().includes(q) ||
-        (o.kategori_obat || "").toLowerCase().includes(q) ||
-        (o.jenis_obat || "").toLowerCase().includes(q),
+        (o.dosis || "").toLowerCase().includes(q),
     );
   }, [data, debouncedQuery]);
 
@@ -42,7 +41,7 @@ export default function ObatTableView({ data }: Props) {
           <TableSearchInput
             value={query}
             onChange={setQuery}
-            placeholder="Cari nama / kategori obat..."
+            placeholder="Cari nama / dosis obat..."
           />
         </div>
         <div className="flex justify-end w-auto">
@@ -55,7 +54,6 @@ export default function ObatTableView({ data }: Props) {
             <thead className="bg-gray-50 border-b border-gray-200 text-gray-600">
               <tr>
                 <th className="px-4 py-3 font-semibold">Nama Obat</th>
-                <th className="px-4 py-3 font-semibold">Kategori & Jenis</th>
                 <th className="px-4 py-3 font-semibold">Dosis</th>
                 <th className="px-4 py-3 font-semibold">Deskripsi</th>
                 <th className="px-4 py-3 font-semibold text-center">status</th>
@@ -69,16 +67,8 @@ export default function ObatTableView({ data }: Props) {
                   className="hover:bg-gray-50 transition-colors group"
                 >
                   <td className="px-4 py-3">
-                    <div className="font-medium text-gray-800">
+                    <div className="font-bold text-gray-800">
                       {obat.nama_obat}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-blue-700">
-                      {obat.kategori_obat}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {obat.jenis_obat}
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -111,7 +101,7 @@ export default function ObatTableView({ data }: Props) {
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-gray-500">
+                  <td colSpan={5} className="p-6 text-center text-gray-500">
                     {data.length === 0
                       ? "Belum ada data obat"
                       : "Obat tidak ditemukan."}

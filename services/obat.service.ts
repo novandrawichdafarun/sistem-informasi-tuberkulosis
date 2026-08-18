@@ -16,9 +16,9 @@ export const getDaftarObat = async (
 
     const pool = getMySQLPool();
     const [rows] = await pool.execute<RowDataPacket[]>({
-      sql: `SELECT id_obat, nama_obat, jenis_obat, kategori_obat,
-              deskripsi, dosis, is_active, created_at
-       FROM obat ORDER BY created_at DESC`,
+      sql: `SELECT id_obat, nama_obat, 
+      deskripsi, dosis, is_active, created_at
+      FROM obat ORDER BY created_at DESC`,
     });
     return { success: true, data: rows as unknown as ObatData[] };
   } catch (error) {
@@ -48,12 +48,10 @@ export const createObat = async (
     }
 
     await pool.execute({
-      sql: `INSERT INTO obat (nama_obat, jenis_obat, kategori_obat, deskripsi, dosis, is_active)
+      sql: `INSERT INTO obat (nama_obat, deskripsi, dosis, is_active)
           VALUES (?, ?, ?, ?, ?, ?)`,
       values: [
         payload.nama_obat,
-        payload.jenis_obat,
-        payload.kategori_obat,
         payload.deskripsi ?? null,
         payload.dosis ?? null,
         payload.is_active ?? true,

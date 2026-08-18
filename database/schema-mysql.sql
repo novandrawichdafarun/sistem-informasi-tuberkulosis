@@ -126,7 +126,7 @@ CREATE TABLE episode_pengobatan (
   id_episode      INT         NOT NULL AUTO_INCREMENT,
   id_pasien       INT         NOT NULL,
   tanggal_mulai   DATE        NOT NULL,
-  tanggal_selesai DATE        DEFAULT NULL,
+  tanggal_selesai DATE        NOT NULL,
   tipe_pasien     VARCHAR(50) DEFAULT NULL,
   status_episode  VARCHAR(20) NOT NULL DEFAULT 'aktif',
   created_at      DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -175,7 +175,6 @@ CREATE TABLE pemeriksaan_lab (
   kualitas_sample      VARCHAR(50)  DEFAULT NULL,
   -- Hasil Molekuler (TCM)
   dna_bakteri_tb       VARCHAR(50)  NOT NULL,
-  status_resistensi    VARCHAR(50)  NOT NULL,
   -- Hasil Umum (Rontgen/Mantoux/IGRA)
   hasil_tes            CHAR(1)      NOT NULL,
   -- Hasil BTA
@@ -199,10 +198,8 @@ CREATE TABLE diagnosis (
   id_diagnosis           INT          NOT NULL AUTO_INCREMENT,
   id_episode             INT          NOT NULL,
   tanggal_diagnosis      DATE         NOT NULL,
-  klasifikasi_anatomi    VARCHAR(50)  DEFAULT NULL,
+  klasifikasi_anatomi    VARCHAR(50)  NOT NULL,
   lokasi_anatomi         VARCHAR(100) DEFAULT NULL,
-  klasifikasi_resistensi VARCHAR(50)  NOT NULL,
-  tipe_resistensi        VARCHAR(50)  DEFAULT NULL,
   dasar_diagnosis        VARCHAR(50)  DEFAULT NULL,
   catatan_klinis         TEXT         DEFAULT NULL,
   created_at             DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -239,8 +236,6 @@ CREATE TABLE resep_pengobatan (
 CREATE TABLE obat (
   id_obat       INT          NOT NULL AUTO_INCREMENT,
   nama_obat     VARCHAR(100) NOT NULL,
-  jenis_obat    VARCHAR(50)  NOT NULL,
-  kategori_obat VARCHAR(50)  NOT NULL,
   deskripsi     TEXT         DEFAULT NULL,
   dosis         VARCHAR(100) DEFAULT NULL,
   is_active     TINYINT(1)   NOT NULL DEFAULT 1,

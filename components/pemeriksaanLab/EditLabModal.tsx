@@ -109,7 +109,7 @@ export default function EditLabModal({
               </h4>
             </div>
 
-            <div>
+            <div className="col-span-1 md:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 DNA bakteri *
               </label>
@@ -119,20 +119,6 @@ export default function EditLabModal({
                 placeholder="Isi beban kuman"
                 required
                 defaultValue={data.dna_bakteri_tb}
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Status Resistensi *
-              </label>
-              <input
-                type="text"
-                name="status_resistensi"
-                placeholder="Resisten / Sensitif / Indeterminate"
-                required
-                defaultValue={data.status_resistensi}
                 className={inputClass}
               />
             </div>

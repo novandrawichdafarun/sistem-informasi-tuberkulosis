@@ -101,43 +101,6 @@ export default function TambahDiagnosisModal({
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Klasifikasi Resistensi *
-              </label>
-              <select
-                name="klasifikasi_resistensi"
-                required
-                className={selectClass}
-              >
-                <option value="">-- Klaifikasikan Resistensi --</option>
-                <option value="TB-SO (Sensitif Obat)">
-                  TB-SO (Sensitif Obat)
-                </option>
-                <option value="TB-RO (Resisten Obat)">
-                  TB-RO (Resisten Obat)
-                </option>
-                <option value="Terduga TB-RO">Terduga TB-RO</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Tipe Resistensi
-              </label>
-              <input
-                type="text"
-                name="tipe_resistensi"
-                list="opsi-tipe-resistensi"
-                placeholder="Kosongkan jika SO"
-                className={inputClass}
-              />
-              <datalist id="opsi-tipe-resistensi">
-                <option value="Monoresisten Rifampisin (TB-RR)" />
-                <option value="MDR-TB" />
-                <option value="XDR-TB" />
-              </datalist>
-            </div>
-
             <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
               <h4 className="text-sm font-semibold text-gray-600">
                 Dasar & Catatan Diagnosa

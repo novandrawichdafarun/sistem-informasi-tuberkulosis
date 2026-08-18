@@ -60,14 +60,6 @@ export default function RiwayatLabSubRow({ riwayat }: Props) {
                   </span>
                 </div>
                 <div>
-                  Status:{" "}
-                  <span
-                    className={`font-semibold mt-0.5 ${lab.status_resistensi.toLowerCase().includes("resisten") ? "text-red-600" : "text-green-600"}`}
-                  >
-                    {lab.status_resistensi}
-                  </span>
-                </div>
-                <div>
                   Jenis Sample:{" "}
                   <span className="font-medium">{lab.jenis_sample || "-"}</span>
                 </div>

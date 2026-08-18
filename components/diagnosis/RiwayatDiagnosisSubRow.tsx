@@ -29,7 +29,6 @@ export default function RiwayatDiagnosisSubRow({ riwayat }: Props) {
           <tr>
             <th className="px-4 py-2 border-b">Tanggal & Kode</th>
             <th className="px-4 py-2 border-b">Detail Diagnosa</th>
-            <th className="px-4 py-2 border-b">Resistensi</th>
             <th className="px-4 py-2 border-b">Dasar Diagnosa</th>
             <th className="px-4 py-2 border-b text-center">Opsi</th>
           </tr>
@@ -47,20 +46,10 @@ export default function RiwayatDiagnosisSubRow({ riwayat }: Props) {
               </td>
               <td className="px-4 py-3">
                 <div className="font-medium text-blue-700">
-                  {diagnosis.klasifikasi_anatomi || "-"}
+                  {diagnosis.klasifikasi_anatomi}
                 </div>
                 <div className="text-xs text-gray-500">
                   {diagnosis.lokasi_anatomi || "-"}
-                </div>
-              </td>
-              <td className="px-4 py-3">
-                <div
-                  className={`text-xs font-semibold mt-0.5 ${diagnosis.klasifikasi_resistensi.toLowerCase().includes("resisten") ? "text-red-600" : "text-green-600"}`}
-                >
-                  {diagnosis.klasifikasi_resistensi}
-                </div>
-                <div className="text-sm font-medium text-gray-800">
-                  {diagnosis.tipe_resistensi || "-"}
                 </div>
               </td>
               <td className="px-4 py-3">

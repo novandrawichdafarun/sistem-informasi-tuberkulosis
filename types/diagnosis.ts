@@ -6,9 +6,6 @@ export interface DiagnosisData {
   klasifikasi_anatomi: string;
   lokasi_anatomi?: string | null;
 
-  klasifikasi_resistensi: string;
-  tipe_resistensi?: string | null;
-
   dasar_diagnosis?: string | null;
   catatan_klinis?: string | null;
   created_at: string;
@@ -18,11 +15,8 @@ export interface CreateDiagnosisPayload {
   id_episode: number;
   tanggal_diagnosis: string;
 
-  klasifikasi_anatomi?: string | null;
+  klasifikasi_anatomi: string;
   lokasi_anatomi?: string | null;
-
-  klasifikasi_resistensi: string;
-  tipe_resistensi?: string | null;
 
   dasar_diagnosis?: string | null;
   catatan_klinis?: string | null;

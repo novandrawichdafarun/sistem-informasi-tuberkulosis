@@ -38,12 +38,6 @@ const basePemeriksaanLabSchema = {
     .min(1, "DNA Bakteri tidak boleh kosong")
     .max(50, "DNA Bakteri maksimal 50 karakter"),
 
-  status_resistensi: z
-    .string()
-    .trim()
-    .min(1, "Status Resistensi tidak boleh kosong")
-    .max(50, "Status Resistensi maksimal 50 karakter"),
-
   hasil_tes: z
     .string()
     .trim()

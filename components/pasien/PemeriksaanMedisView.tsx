@@ -41,10 +41,9 @@ export default async function PemeriksaanMedisView() {
                 <tr>
                   <th className="px-4 py-3">Periode Tes</th>
                   <th className="px-4 py-3">Jenis Tes</th>
-                  <th className="px-4 py-3">Sample</th>
-                  <th className="px-4 py-3">DNA / Resistensi</th>
+                  <th className="px-4 py-3">Detail Tes</th>
                   <th className="px-4 py-3">Hasil Tes</th>
-                  <th className="px-4 py-3">BTA</th>
+                  <th className="px-4 py-3">Hasil BTA</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-600">
@@ -64,26 +63,10 @@ export default async function PemeriksaanMedisView() {
                     <td className="px-4 py-3 text-xs">
                       <div>Jenis: {lab.jenis_sample}</div>
                       <div>Kualitas: {lab.kualitas_sample}</div>
-                    </td>
-                    <td className="px-4 py-3 text-xs">
                       <div>
                         DNA:{" "}
                         <span className="font-medium text-slate-800">
                           {lab.dna_bakteri_tb}
-                        </span>
-                      </div>
-                      <div>
-                        Status:{" "}
-                        <span
-                          className={`font-semibold ${
-                            lab.status_resistensi
-                              .toLowerCase()
-                              .includes("resisten")
-                              ? "text-red-600"
-                              : "text-green-600"
-                          }`}
-                        >
-                          {lab.status_resistensi}
                         </span>
                       </div>
                     </td>

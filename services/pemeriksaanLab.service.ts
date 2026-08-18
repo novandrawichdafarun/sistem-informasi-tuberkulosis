@@ -39,7 +39,6 @@ export const getDaftarPemeriksaanLab = async (
                 'jenis_sample', pl.jenis_sample,
                 'kualitas_sample', pl.kualitas_sample,
                 'dna_bakteri_tb', pl.dna_bakteri_tb,
-                'status_resistensi', pl.status_resistensi,
                 'hasil_tes', pl.hasil_tes,
                 'hasil_bta', pl.hasil_bta,
                 'berkas_pendukung_url', pl.berkas_pendukung_url,
@@ -115,7 +114,7 @@ export const getPemeriksaanLabByUser = async (
     const [rows] = await pool.execute<RowDataPacket[]>({
       sql: `SELECT pl.id_tes, pl.id_episode, pl.jenis_tes, pl.tanggal_tes,
               pl.periode_pemeriksaan, pl.jenis_sample, pl.kualitas_sample,
-              pl.dna_bakteri_tb, pl.status_resistensi, pl.hasil_tes,
+              pl.dna_bakteri_tb, pl.hasil_tes,
               pl.hasil_bta, pl.berkas_pendukung_url, pl.created_at
       FROM pemeriksaan_lab pl
       JOIN episode_pengobatan e ON pl.id_episode = e.id_episode

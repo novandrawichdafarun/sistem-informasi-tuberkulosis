@@ -17,15 +17,12 @@ const baseDiagnosisSchema = {
       { message: "Tanggal diagnosis tidak boleh melebihi hari ini" },
     ),
 
-  klasifikasi_anatomi: optionalString(50),
-  lokasi_anatomi: optionalString(100),
-
-  klasifikasi_resistensi: z
+  klasifikasi_anatomi: z
     .string()
     .trim()
-    .min(1, "Klasifikasi resistensi tidak boleh kososng")
-    .max(50, "Klasifikasi Resistensi maksimal 50 karakter"),
-  tipe_resistensi: optionalString(50),
+    .min(1, "Klasifikasi Jenis TB tidak boleh kososng")
+    .max(50, "Klasifikasi Jenis TB maksimal 50 karakter"),
+  lokasi_anatomi: optionalString(100),
 
   dasar_diagnosis: optionalString(50),
   catatan_klinis: optionalString(255),

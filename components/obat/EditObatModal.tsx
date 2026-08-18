@@ -90,42 +90,6 @@ export default function EditObatModal({ data }: EditObatModalProps) {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Jenis Obat *
-                  </label>
-                  <select
-                    name="jenis_obat"
-                    required
-                    defaultValue={data.jenis_obat ?? ""}
-                    className={selectClass}
-                  >
-                    <option value="">-- Pilih Jenis Obat --</option>
-                    <option value="KDT (Kombinasi Dosis Tetap)">
-                      KDT (Kombinasi Dosis Tetap)
-                    </option>
-                    <option value="Tunggal">Tunggal</option>
-                    <option value="Injeksi">Injeksi</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Kategori Obat *
-                  </label>
-                  <select
-                    name="kategori_obat"
-                    required
-                    defaultValue={data.kategori_obat ?? ""}
-                    className={selectClass}
-                  >
-                    <option value="">-- Pilih Kategori Obat --</option>
-                    <option value="Lini Pertama">Lini Pertama</option>
-                    <option value="Lini Kedua">Lini Kedua</option>
-                    <option value="Suplement">Suplement</option>
-                  </select>
-                </div>
-
                 <div className="col-span-1 md:col-span-2 pt-2 pb-1 border-t border-gray-100">
                   <h4 className="text-sm font-semibold text-gray-600">
                     Informasi Tambahan

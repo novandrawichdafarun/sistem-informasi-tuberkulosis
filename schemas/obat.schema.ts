@@ -10,18 +10,6 @@ const baseObatSchema = {
     .max(100, "Nama obat maksimal 100 karakter")
     .regex(nameRegex, "Nama hanya boleh berisi huruf dan tanda baca umum"),
 
-  jenis_obat: z
-    .string()
-    .trim()
-    .min(1, "Jenis obat wajib disis")
-    .max(50, "Jenis obat maksimal 50 karakter"),
-
-  kategori_obat: z
-    .string()
-    .trim()
-    .min(1, "Kategori obat wajib diisi")
-    .max(50, "Kategori obat maksimal 50 karakter"),
-
   deskripsi: optionalString(255),
   dosis: optionalString(100),
   is_active: z.boolean().default(true),

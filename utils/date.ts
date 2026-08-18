@@ -31,11 +31,44 @@ export const BULAN = [
   "Desember",
 ];
 
+export const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+function wibPartsToEpochMs(
+  y: number,
+  m: number,
+  d: number,
+  h = 0,
+  min = 0,
+  s = 0,
+): number {
+  return Date.UTC(y, m - 1, d, h, min, s) - WIB_OFFSET_MS;
+}
+
+function epochMsToWIBParts(ms: number) {
+  const shifted = new Date(ms + WIB_OFFSET_MS);
+  return {
+    y: shifted.getUTCFullYear(),
+    m: shifted.getUTCMonth() + 1,
+    d: shifted.getUTCDate(),
+    h: shifted.getUTCHours(),
+    min: shifted.getUTCMinutes(),
+    s: shifted.getUTCSeconds(),
+  };
+}
+
+export function toWIBDateStr(value: Date | number | string): string {
+  const ms =
+    value instanceof Date
+      ? value.getTime()
+      : typeof value === "number"
+        ? value
+        : new Date(value).getTime();
+  const { y, m, d } = epochMsToWIBParts(ms);
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+
 export function todayISO(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
+  return toWIBDateStr(Date.now());
 }
 
 // Tambah `n` hari ke tanggal "YYYY-MM-DD" (aman dari zona waktu, pakai UTC).
@@ -68,11 +101,7 @@ export function buildMonths(n = 6): MonthMeta[] {
 }
 
 export function isoDaysAgo(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
+  return toWIBDateStr(Date.now() - days * 24 * 60 * 60 * 1000);
 }
 
 export function formatTanggalID(
@@ -147,21 +176,18 @@ export const parseDailyFrequency = (value: string) => {
 };
 
 export function isReportLate(
-  tanggalMinum: string,
-  waktuMinum: string,
+  tanggalMinum: string, // "YYYY-MM-DD"
+  waktuMinum: string, // "HH:MM:SS" atau "HH:MM"
   toleranceHours: number = 1,
 ): boolean {
-  const scheduleDateTimeString = `${tanggalMinum}T${waktuMinum}`;
-  const scheduledTime = new Date(scheduleDateTimeString);
+  const [y, m, d] = tanggalMinum.split("-").map(Number);
+  const [h, min, s] = waktuMinum.split(":").map(Number);
 
+  const scheduledMs = wibPartsToEpochMs(y, m, d, h, min, s || 0);
   const toleranceMilliseconds = toleranceHours * 60 * 60 * 1000;
+  const maxValidMs = scheduledMs + toleranceMilliseconds;
 
-  const maxValidTime = new Date(
-    scheduledTime.getTime() + toleranceMilliseconds,
-  );
-  const currentTime = new Date();
-
-  return currentTime > maxValidTime;
+  return Date.now() > maxValidMs;
 }
 
 export function formatRemainingTime(ms: number) {

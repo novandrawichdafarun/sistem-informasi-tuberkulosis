@@ -106,7 +106,7 @@ export default function TambahLabModal({
               </h4>
             </div>
 
-            <div>
+            <div className="col-span-1 md:col-span-2">
               <label className="block text-sm font-medium text-gray-700">
                 DNA bakteri *
               </label>
@@ -114,19 +114,6 @@ export default function TambahLabModal({
                 type="text"
                 name="dna_bakteri_tb"
                 placeholder="Isi beban kuman"
-                required
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Status Resistensi *
-              </label>
-              <input
-                type="text"
-                name="status_resistensi"
-                placeholder="Resisten / Sensitif / Indeterminate"
                 required
                 className={inputClass}
               />
@@ -165,11 +152,7 @@ export default function TambahLabModal({
               <label className="block text-sm font-medium text-gray-700">
                 Hasil Tes Umum *
               </label>
-              <select
-                name="hasil_tes"
-                required
-                className={selectClass}
-              >
+              <select name="hasil_tes" required className={selectClass}>
                 <option value="P">Positif</option>
                 <option value="N">Negatif</option>
               </select>

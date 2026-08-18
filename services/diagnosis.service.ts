@@ -35,8 +35,6 @@ export const getDaftarDiagnosis = async (
                 'tanggal_diagnosis', d.tanggal_diagnosis,
                 'klasifikasi_anatomi', d.klasifikasi_anatomi,
                 'lokasi_anatomi', d.lokasi_anatomi,
-                'klasifikasi_resistensi', d.klasifikasi_resistensi,
-                'tipe_resistensi', d.tipe_resistensi,
                 'dasar_diagnosis', d.dasar_diagnosis,
                 'catatan_klinis', d.catatan_klinis,
                 'created_at', d.created_at

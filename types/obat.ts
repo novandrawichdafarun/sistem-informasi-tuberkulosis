@@ -1,8 +1,6 @@
 export interface ObatData {
   id_obat: number;
   nama_obat: string;
-  jenis_obat: string | null;
-  kategori_obat: string | null;
   deskripsi: string | null;
   dosis: string | null;
   is_active: boolean;
@@ -11,8 +9,6 @@ export interface ObatData {
 
 export interface CreateObatPayload {
   nama_obat: string;
-  jenis_obat?: string;
-  kategori_obat?: string;
   dosis?: string;
   deskripsi?: string;
   is_active: boolean;

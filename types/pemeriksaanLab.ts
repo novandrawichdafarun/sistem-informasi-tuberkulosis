@@ -9,7 +9,6 @@ export interface PemeriksaanLabData {
   kualitas_sample?: string | null;
 
   dna_bakteri_tb: string;
-  status_resistensi: string;
 
   hasil_tes: string;
   hasil_bta?: string | null;
@@ -27,7 +26,6 @@ export interface CreatePemeriksaanLabPayload {
   kualitas_sample?: string | null;
 
   dna_bakteri_tb: string;
-  status_resistensi: string;
 
   hasil_tes: string;
   hasil_bta?: string | null;

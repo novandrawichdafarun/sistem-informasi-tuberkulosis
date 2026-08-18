@@ -2,7 +2,7 @@ export interface EpisodePengobatanData {
   id_episode: number;
   id_pasien: number;
   tanggal_mulai: string; // Format: YYYY-MM-DD
-  tanggal_selesai: string | null;
+  tanggal_selesai: string;
   tipe_pasien: string; // Positif TB / Negatif TB / dll
   status_episode: "aktif" | "selesai";
   created_at: string;
@@ -45,7 +45,7 @@ export interface TutupEpisodePayload {
 export interface EditEpisodePayload {
   id_episode: number;
   tanggal_mulai: string;
-  tanggal_selesai?: string | null;
+  tanggal_selesai: string;
   tipe_pasien: string;
   hasil_akhir?: EditHasilAkhirPayload;
 }
