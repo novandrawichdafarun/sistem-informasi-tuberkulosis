@@ -59,7 +59,6 @@ export default function ObatItemForm({
             <span className="font-medium text-gray-800">{obat.nama_obat}</span>
             <span className="text-xs text-gray-400">
               {`${obat.dosis} mg` || ""}
-              {obat.jenis_obat ? ` · ${obat.jenis_obat}` : ""}
             </span>
           </div>
           {!obat.is_active && (

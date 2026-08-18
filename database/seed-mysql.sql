@@ -63,13 +63,13 @@ VALUES
 -- 3. TABEL obat (4 obat lini pertama OAT)
 -- =====================================================================
 INSERT IGNORE INTO obat (
-  id_obat, nama_obat, jenis_obat, kategori_obat, deskripsi, dosis, is_active, created_at
+  id_obat, nama_obat, kategori_obat, deskripsi, dosis, is_active, created_at
 )
 VALUES
-  (1, 'Rifampisin',   'KDT', 'Lini Pertama', 'Obat anti TB lini pertama', '300', 1, NOW()),
-  (2, 'Isoniazid',    'KDT', 'Lini Pertama', 'Obat anti TB lini pertama', '300', 1, NOW()),
-  (3, 'Pyrazinamide', 'KDT', 'Lini Pertama', 'Obat anti TB lini pertama', '500', 1, NOW()),
-  (4, 'Ethambutol',   'KDT', 'Lini Pertama', 'Obat anti TB lini pertama', '400', 1, NOW());
+  (1, 'Rifampisin',   'KDT', 'Obat anti TB lini pertama', '300', 1, NOW()),
+  (2, 'Isoniazid',    'KDT', 'Obat anti TB lini pertama', '300', 1, NOW()),
+  (3, 'Pyrazinamide', 'KDT', 'Obat anti TB lini pertama', '500', 1, NOW()),
+  (4, 'Ethambutol',   'KDT', 'Obat anti TB lini pertama', '400', 1, NOW());
 
 -- =====================================================================
 -- 4. TABEL episode_pengobatan
@@ -93,8 +93,8 @@ VALUES
 -- =====================================================================
 INSERT IGNORE INTO pemeriksaan_lab (
   id_tes, id_episode, jenis_tes, tanggal_tes, periode_pemeriksaan,
-  jenis_sample, kualitas_sample, dna_bakteri_tb, status_resistensi,
-  hasil_tes, hasil_bta, catatan_lab, berkas_pendukung_url, created_at
+  jenis_sample, kualitas_sample, dna_bakteri_tb, hasil_tes, 
+  hasil_bta, catatan_lab, berkas_pendukung_url, created_at
 )
 VALUES
   (
@@ -106,7 +106,6 @@ VALUES
     'Sputum (dahak)',
     'Purulen',
     'High',
-    'Sensitif',
     'P',
     '2+',
     'Hasil TCM menunjukkan beban kuman tinggi',
@@ -142,8 +141,7 @@ VALUES
 -- =====================================================================
 INSERT IGNORE INTO diagnosis (
   id_diagnosis, id_episode, tanggal_diagnosis, klasifikasi_anatomi,
-  lokasi_anatomi, klasifikasi_resistensi, tipe_resistensi,
-  dasar_diagnosis, catatan_klinis, created_at
+  lokasi_anatomi, dasar_diagnosis, catatan_klinis, created_at
 )
 VALUES
   (
@@ -151,8 +149,6 @@ VALUES
     1,
     '2025-01-12',
     'TB Paru',
-    NULL,
-    'TB-SO',
     NULL,
     'Terkonfirmasi Bakteriologis (TCM/BTA+)',
     'Pasien terdiagnosis TB paru dengan gejala klasik dan hasil TCM positif',

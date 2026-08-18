@@ -84,7 +84,6 @@ Table pemeriksaan_lab {
   kualitas_sample varchar(50) [note: 'Purulen / Mukoid / Saliva']
 
   dna_bakteri_tb varchar(50) [not null, note: 'Isi beban kuman khusus TCM: High, Medium, Low, Very Low, Trace']
-  status_resistensi varchar(50) [not null, note: 'Resisten / Sensitif / Indeterminate']
 
   hasil_tes varchar(1) [not null, note: 'P / N']
   hasil_bta varchar(100) [note: 'Negatif / Scanty / 1+ / 2+ / 3+']
@@ -100,8 +99,6 @@ Table diagnosis {
   tanggal_diagnosis date [not null]
   klasifikasi_anatomi varchar(50) [note: 'TB Paru / TB Ekstra Paru']
   lokasi_anatomi varchar(100) [note: 'Jika Ekstraparu, sebutkan: Kelenjar getah bening / Pleura / Meninges / Tulang']
-  klasifikasi_resistensi varchar(50) [not null, note: 'TB-SO / TB-RO / Terduga TB-RO']
-  tipe_resistensi varchar(50) [note: 'Monoresisten Rifampisin (TB-RR) / MDR-TB / XDR-TB / Null jika SO']
   dasar_diagnosis varchar(50) [note: 'Terkonfirmasi Bakteriologis (TCM/BTA+) / Terdiagnosis Klinis (Gejala + Rontgen)']
   catatan_klinis text
   created_at timestamp [default: 'now()', not null]
@@ -121,7 +118,6 @@ Table resep_pengobatan {
 Table obat {
   id_obat integer [pk, increment]
   nama_obat varchar(100) [not null]
-  jenis_obat varchar(50) [not null, note: 'KDT / Tunggal / Injeksi']
   kategori_obat varchar(50) [not null, note: 'Lini Pertama, Lini Kedua, Suplement']
   deskripsi text
   dosis varchar(100)
