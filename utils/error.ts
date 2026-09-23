@@ -1,7 +1,7 @@
 import { ActionResponse } from "@/types/action";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
-const shouldLogError = process.env.NODE_ENV !== "production";
+const shouldLogError = process.env.NEXT_PUBLIC_LIMIT_EXPORT !== "true";
 
 export function handleActionError<T = void>(
   error: unknown,
