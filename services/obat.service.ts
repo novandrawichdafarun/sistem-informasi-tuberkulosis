@@ -49,7 +49,7 @@ export const createObat = async (
 
     await pool.execute({
       sql: `INSERT INTO obat (nama_obat, deskripsi, dosis, is_active)
-          VALUES (?, ?, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?)`,
       values: [
         payload.nama_obat,
         payload.deskripsi ?? null,
