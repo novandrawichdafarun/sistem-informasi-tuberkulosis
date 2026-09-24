@@ -30,8 +30,9 @@ export const getExportData = async (
 
     if (selectedModules.pasienEpisode) {
       const [rows] = await pool.execute<RowDataPacket[]>({
-        sql: `SELECT p.nama_lengkap AS nama_pasien, p.id_pasien, p.usia, p.jenis_kelamin, 
-              e.id_episode, e.tanggal_mulai, e.tanggal_selesai, h.status_akhir 
+        sql: `SELECT p.nama_lengkap AS nama_pasien, p.usia, p.jenis_kelamin, 
+              p.domisili, p.no_telp, p.pendidikan, p.pekerjaan, p.pendapatan,
+              e.tanggal_mulai, e.tanggal_selesai, e.tipe_pasien, e.status_episode, h.status_akhir 
               FROM pasien p 
               LEFT JOIN episode_pengobatan e ON p.id_pasien = e.id_pasien 
               LEFT JOIN hasil_akhir h ON e.id_episode = h.id_episode 
@@ -44,8 +45,8 @@ export const getExportData = async (
 
     if (selectedModules.klinis) {
       const [rows] = await pool.execute<RowDataPacket[]>({
-        sql: `SELECT p.nama_lengkap AS nama_pasien, k.id_periksa, k.id_episode, 
-              k.tanggal_periksa, k.keluhan, k.tensi, k.berat_badan 
+        sql: `SELECT p.nama_lengkap AS nama_pasien, k.tanggal_periksa, k.keluhan, 
+              k.tensi, k.suhu, k.pernapasan, k.nadi, k.saturasi_o2, k.tinggi_badan, k.berat_badan 
               FROM pemeriksaan_klinis k 
               JOIN episode_pengobatan e ON k.id_episode = e.id_episode 
               JOIN pasien p ON e.id_pasien = p.id_pasien 
@@ -57,8 +58,8 @@ export const getExportData = async (
 
     if (selectedModules.lab) {
       const [rows] = await pool.execute<RowDataPacket[]>({
-        sql: `SELECT p.nama_lengkap AS nama_pasien, l.id_tes, l.id_episode, 
-              l.jenis_tes, l.tanggal_tes, l.hasil_tes, l.hasil_bta 
+        sql: `SELECT p.nama_lengkap AS nama_pasien, l.jenis_tes, l.tanggal_tes, l.periode_pemeriksaan, l.jenis_sample,
+              l.kualitas_sample, l.dna_bakteri_tb, l.hasil_tes, l.hasil_bta, l.catatan_lab 
               FROM pemeriksaan_lab l 
               JOIN episode_pengobatan e ON l.id_episode = e.id_episode 
               JOIN pasien p ON e.id_pasien = p.id_pasien 
@@ -70,8 +71,8 @@ export const getExportData = async (
 
     if (selectedModules.diagnosis) {
       const [rows] = await pool.execute<RowDataPacket[]>({
-        sql: `SELECT p.nama_lengkap AS nama_pasien, d.id_diagnosis, d.id_episode, 
-              d.tanggal_diagnosis, d.klasifikasi_anatomi, d.lokasi_anatomi 
+        sql: `SELECT p.nama_lengkap AS nama_pasien, d.tanggal_diagnosis, 
+              d.klasifikasi_anatomi, d.lokasi_anatomi, d.dasar_diagnosis, d.catatan_klinis
               FROM diagnosis d 
               JOIN episode_pengobatan e ON d.id_episode = e.id_episode 
               JOIN pasien p ON e.id_pasien = p.id_pasien 
@@ -84,7 +85,7 @@ export const getExportData = async (
 
     if (selectedModules.makan) {
       const [rows] = await pool.execute<RowDataPacket[]>({
-        sql: `SELECT p.nama_lengkap AS nama_pasien, m.id_laporan, m.id_episode, 
+        sql: `SELECT p.nama_lengkap AS nama_pasien,
               m.waktu_makan, m.karbo, m.protein, m.serat 
               FROM laporan_makan m 
               JOIN episode_pengobatan e ON m.id_episode = e.id_episode 
@@ -97,8 +98,9 @@ export const getExportData = async (
 
     if (selectedModules.obat) {
       const [rows] = await pool.execute<RowDataPacket[]>({
-        sql: `SELECT p.nama_lengkap AS nama_pasien, j.id_jadwal, j.tanggal_jadwal, 
-              j.jam_jadwal, o.nama_obat, d.aturan_pakai, l.status AS status_kepatuhan 
+        sql: `SELECT p.nama_lengkap AS nama_pasien, j.tanggal_jadwal, j.jam_jadwal, 
+              o.nama_obat, d.aturan_pakai, l.status AS status_kepatuhan, l.reported_at AS waktu_minum, 
+              l.reported_by AS dilaporkan_oleh, l.catatan_kepatuhan
               FROM jadwal_minum_obat j 
               JOIN detail_obat d ON j.id_detail_obat = d.id_detail_obat 
               JOIN obat o ON d.id_obat = o.id_obat 

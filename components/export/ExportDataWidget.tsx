@@ -10,9 +10,6 @@ export default function ExportDataWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  //Todo: Testing
-  const isTestingMode = process.env.NEXT_PUBLIC_LIMIT_EXPORT !== "true";
-
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState(todayISO);
   const [modules, setModules] = useState({
@@ -72,13 +69,6 @@ export default function ExportDataWidget() {
           <h3 className="mb-4 text-sm font-semibold text-brand-950">
             Filter Ekspor Data
           </h3>
-
-          {/* Todo: Testing */}
-          {isTestingMode && (
-            <div className="mb-4 rounded-md bg-yellow-50 p-3 text-xl text-yellow-700">
-              Fitur masih dalam pengujian.
-            </div>
-          )}
 
           {error && (
             <div className="mb-4 rounded-md bg-red-50 p-3 text-xs text-red-600">
@@ -141,7 +131,7 @@ export default function ExportDataWidget() {
 
           <button
             onClick={handleExport}
-            disabled={isLoading || isTestingMode}
+            disabled={isLoading}
             className="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:bg-emerald-300"
           >
             {isLoading ? "Memproses Data..." : "Unduh File Excel"}
