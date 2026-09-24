@@ -156,9 +156,10 @@ export const bukaEpisode = async (
     const insertData = { ...payload, status_episode: "aktif" };
     const columns = Object.keys(insertData);
     const placeholders = columns.map(() => "?").join(", ");
-    const values = columns.map(
-      (c) => (insertData as Record<string, unknown>)[c],
-    );
+    const values = columns.map((c) => {
+      const value = (payload as unknown as Record<string, unknown>)[c];
+      return value === undefined ? null : value;
+    });
 
     await pool.execute({
       sql: `INSERT INTO episode_pengobatan (${columns.join(", ")}) VALUES (${placeholders})`,

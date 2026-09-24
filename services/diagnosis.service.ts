@@ -132,7 +132,7 @@ export const createDiagnosis = async (
     const columns = Object.keys(payloadRecord);
     const placeholders = columns.map(() => "?").join(", ");
     const values = columns.map((c) => {
-      const value = payloadRecord[c];
+      const value = (payload as unknown as Record<string, unknown>)[c];
       return value === undefined ? null : value;
     });
 
@@ -177,9 +177,10 @@ export const updateDiagnosis = async (
       return { success: true, message: "Tidak ada perubahan." };
     }
     const setClause = columns.map((c) => `${c} = ?`).join(", ");
-    const values = columns.map(
-      (c) => (updateData as Record<string, unknown>)[c],
-    );
+    const values = columns.map((c) => {
+      const value = (payload as unknown as Record<string, unknown>)[c];
+      return value === undefined ? null : value;
+    });
 
     await pool.execute({
       sql: `UPDATE diagnosis SET ${setClause} WHERE id_diagnosis = ?`,
@@ -191,6 +192,7 @@ export const updateDiagnosis = async (
       message: "Data Diagnosis Pasien berhasil diperbarui!",
     };
   } catch (error) {
+    console.error("[Error]", error);
     return handleServiceError(
       error,
       "Terjadi kesalahan internal saat memperbarui data.",

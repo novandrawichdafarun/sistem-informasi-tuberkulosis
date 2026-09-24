@@ -49,7 +49,7 @@ export default function DeleteDiagnosisButton({
         onConfirm={handleConfirm}
         isDeleting={isDeleting}
         title="Hapus Diagnosis"
-        message="Yakin ingin menghapus data diagnosis ini? Tindakan ini tidak dapat dibatalkan."
+        message="Yakin ingin menghapus data diagnosis ini?"
         errorMessage={error}
       />
     </>
