@@ -87,12 +87,13 @@ export default function TambahObatModal() {
 
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    Dosis/mg
+                    Dosis/mg *
                   </label>
                   <input
                     type="number"
                     name="dosis"
                     placeholder="Contoh: 300, 150/75/400/275"
+                    required
                     className={inputClass}
                   />
                 </div>

@@ -9,7 +9,6 @@ import {
   cencelBtnClass,
   editBtnClass,
   inputClass,
-  selectClass,
 } from "@/utils/classTailwind";
 
 interface EditObatModalProps {
@@ -98,11 +97,12 @@ export default function EditObatModal({ data }: EditObatModalProps) {
 
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    Dosis/mg
+                    Dosis/mg *
                   </label>
                   <input
                     type="number"
                     name="dosis"
+                    required
                     defaultValue={data.dosis || ""}
                     placeholder="Contoh: 300, 150/75/400/275"
                     className={inputClass}

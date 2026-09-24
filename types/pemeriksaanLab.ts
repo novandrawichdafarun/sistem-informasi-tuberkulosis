@@ -5,14 +5,14 @@ export interface PemeriksaanLabData {
   tanggal_tes: string;
   periode_pemeriksaan: string;
 
-  jenis_sample?: string | null;
-  kualitas_sample?: string | null;
+  jenis_sample?: string;
+  kualitas_sample?: string;
 
   dna_bakteri_tb: string;
 
   hasil_tes: string;
-  hasil_bta?: string | null;
-  berkas_pendukung_url?: string | null;
+  hasil_bta?: string;
+  berkas_pendukung_url?: string;
   created_at: string;
 }
 
@@ -22,13 +22,13 @@ export interface CreatePemeriksaanLabPayload {
   tanggal_tes: string;
   periode_pemeriksaan: string;
 
-  jenis_sample?: string | null;
-  kualitas_sample?: string | null;
+  jenis_sample?: string;
+  kualitas_sample?: string;
 
   dna_bakteri_tb: string;
 
   hasil_tes: string;
-  hasil_bta?: string | null;
+  hasil_bta?: string;
   berkas_pendukung_url?: string; //! Nanti bisa digunakan jika fitur upload file ditambahkan
 }
 

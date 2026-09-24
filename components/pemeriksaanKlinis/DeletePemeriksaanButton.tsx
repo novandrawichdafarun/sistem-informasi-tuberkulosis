@@ -36,7 +36,7 @@ export default function DeletePemeriksaanButton({
       <button
         onClick={() => setIsOpen(true)}
         title="Hapus Pemeriksaan Klinis"
-        className="inline-flex p-2 items-center bg-red-100 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition shadow-sm"
+        className="flex p-2 items-center bg-red-100 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition shadow-sm"
       >
         <DeleteIcon className="w-4 h-4" />
       </button>
@@ -50,7 +50,11 @@ export default function DeletePemeriksaanButton({
         onConfirm={handleConfirm}
         isDeleting={isDeleting}
         title="Hapus Pemeriksaan Klinis"
-        message="Yakin ingin menghapus data pemeriksaan klinis ini? Tindakan ini tidak dapat dibatalkan."
+        message={
+        <>
+          Yakin ingin menghapus data pemeriksaan klinis ini?
+        </>
+        }
         errorMessage={error}
       />
     </>

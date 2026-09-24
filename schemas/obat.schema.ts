@@ -1,3 +1,4 @@
+import { optionalNumber } from "@/utils/number";
 import { nameRegex } from "@/utils/regex";
 import { optionalString } from "@/utils/string";
 import z from "zod";
@@ -11,7 +12,7 @@ const baseObatSchema = {
     .regex(nameRegex, "Nama hanya boleh berisi huruf dan tanda baca umum"),
 
   deskripsi: optionalString(255),
-  dosis: optionalString(100),
+  dosis: optionalNumber(0, 1000, "dosis"),
   is_active: z.boolean().default(true),
 };
 

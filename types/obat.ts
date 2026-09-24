@@ -2,14 +2,14 @@ export interface ObatData {
   id_obat: number;
   nama_obat: string;
   deskripsi: string | null;
-  dosis: string | null;
+  dosis: number;
   is_active: boolean;
   created_at: string;
 }
 
 export interface CreateObatPayload {
   nama_obat: string;
-  dosis?: string;
+  dosis: number;
   deskripsi?: string;
   is_active: boolean;
 }

@@ -154,9 +154,10 @@ export const createPemeriksaanLab = async (
 
     const columns = Object.keys(payload);
     const placeholders = columns.map(() => "?").join(", ");
-    const values = columns.map(
-      (c) => (payload as unknown as Record<string, unknown>)[c],
-    );
+    const values = columns.map((c) => {
+      const value = (payload as unknown as Record<string, unknown>)[c];
+      return value === undefined ? null : value;
+    });
 
     await pool.execute({
       sql: `INSERT INTO pemeriksaan_lab (${columns.join(", ")}) VALUES (${placeholders})`,
@@ -196,9 +197,10 @@ export const updatePemeriksaanLab = async (
       return { success: true, message: "Tidak ada perubahan." };
     }
     const setClause = columns.map((c) => `${c} = ?`).join(", ");
-    const values = columns.map(
-      (c) => (updateData as Record<string, unknown>)[c],
-    );
+    const values = columns.map((c) => {
+      const value = (updateData as Record<string, unknown>)[c];
+      return value === undefined ? null : value;
+    });
 
     await pool.execute({
       sql: `UPDATE pemeriksaan_lab SET ${setClause} WHERE id_tes = ?`,

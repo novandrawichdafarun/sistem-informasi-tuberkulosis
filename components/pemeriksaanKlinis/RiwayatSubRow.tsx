@@ -54,8 +54,10 @@ export default function RiwayatSubRow({
       </td>
       <td className="px-4 py-3">
         <div>Tensi: {periksa.tensi || "-"}</div>
-        <div>Suhu: {`${periksa.suhu}°C` || "-"}</div>
-        <div>Nadi: {`${periksa.nadi}/menit` || "-"}</div>
+        <div>Suhu: {periksa.suhu != null ? `${periksa.suhu}°C` : "-"}</div>
+        <div>Nadi: {periksa.nadi != null ? `${periksa.nadi}/menit` : "-"}</div>
+        <div>Pernapasasn: {periksa.pernapasan != null ? `${periksa.pernapasan}/menit` : "-"}</div>
+        <div>Saturasi O2: {periksa.saturasi_o2 != null ? `${periksa.saturasi_o2}%` : "-"}</div>
       </td>
       <td className="px-4 py-3 text-gray-600 max-w-65 whitespace-normal wrap-break-word leading-relaxed">
         {periksa.keluhan || "-"}

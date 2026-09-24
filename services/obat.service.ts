@@ -43,19 +43,22 @@ export const createObat = async (
       sql: "SELECT id_obat FROM obat WHERE nama_obat = ? AND dosis = ? LIMIT 1",
       values: [payload.nama_obat, payload.dosis],
     });
+
     if (existingRows.length > 0) {
       return { success: false, error: "Obat sudah terdaftar di sistem!" };
     }
 
+    const payloadRecord = payload as unknown as Record<string, unknown>;
+    const columns = Object.keys(payloadRecord);
+    const placeholders = columns.map(() => "?").join(", ");
+    const values = columns.map((c) => {
+      const value = (payloadRecord as Record<string, unknown>)[c];
+      return value === undefined ? null : value;
+    });
+
     await pool.execute({
-      sql: `INSERT INTO obat (nama_obat, deskripsi, dosis, is_active)
-          VALUES (?, ?, ?, ?)`,
-      values: [
-        payload.nama_obat,
-        payload.deskripsi ?? null,
-        payload.dosis ?? null,
-        payload.is_active ?? true,
-      ],
+      sql: `INSERT INTO obat (${columns.join(", ")}) VALUES (${placeholders})`,
+      values,
     });
     return { success: true, message: "Obat berhasil ditambahkan!" };
   } catch (error) {
@@ -90,9 +93,10 @@ export const updateObat = async (
       return { success: true, message: "Tidak ada perubahan." };
     }
     const setClause = columns.map((c) => `${c} = ?`).join(", ");
-    const values = columns.map(
-      (c) => (updateData as Record<string, unknown>)[c],
-    );
+    const values = columns.map((c) => {
+      const value = (updateData as Record<string, unknown>)[c];
+      return value === undefined ? null : value;
+    })
 
     await pool.execute({
       sql: `UPDATE obat SET ${setClause} WHERE id_obat = ?`,

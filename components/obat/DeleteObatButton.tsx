@@ -9,9 +9,11 @@ import ConfirmDeleteModal from "../molecules/ConfirmDeleteModal";
 export default function DeleteObatButton({
   id_obat,
   nama,
+  dosis,
 }: {
   id_obat: number;
   nama: string;
+  dosis: number;
 }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -54,8 +56,10 @@ export default function DeleteObatButton({
         message={
           <>
             Hapus obat{" "}
-            <span className="font-semibold text-gray-700">{nama}</span> dari
-            master obat?
+            <span className="font-semibold text-gray-700">
+              {nama} {dosis + " mg"}
+            </span>{" "}
+            dari master obat?
           </>
         }
         errorMessage={error}

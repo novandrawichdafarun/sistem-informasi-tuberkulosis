@@ -29,8 +29,7 @@ export default function ObatTableView({ data }: Props) {
     if (!q) return data;
     return data.filter(
       (o) =>
-        o.nama_obat.toLowerCase().includes(q) ||
-        (o.dosis || "").toLowerCase().includes(q),
+        o.nama_obat.toLowerCase().includes(q)
     );
   }, [data, debouncedQuery]);
 
@@ -41,7 +40,7 @@ export default function ObatTableView({ data }: Props) {
           <TableSearchInput
             value={query}
             onChange={setQuery}
-            placeholder="Cari nama / dosis obat..."
+            placeholder="Cari nama obat..."
           />
         </div>
         <div className="flex justify-end w-auto">
@@ -93,6 +92,7 @@ export default function ObatTableView({ data }: Props) {
                       <DeleteObatButton
                         id_obat={obat.id_obat}
                         nama={obat.nama_obat}
+                        dosis={obat.dosis}
                       />
                     </div>
                   </td>

@@ -196,9 +196,15 @@ export const updatePemeriksaanKlinis = async (
     }
     const { id_periksa, ...updateData } = payload;
     const columns = Object.keys(updateData);
-    const updateDataRecord = updateData as unknown as Record<string, unknown>;
+    if (columns.length === 0) {
+      return { success: true, message: "Tidak ada perubahan." };
+    }
+
     const setClause = columns.map((c) => `${c} = ?`).join(", ");
-    const values = columns.map((c) => updateDataRecord[c]);
+    const values = columns.map((c) => {
+      const value = (updateData as Record<string, unknown>)[c];
+      return value === undefined ? null : value;
+    });
 
     await pool.execute({
       sql: `UPDATE pemeriksaan_klinis SET ${setClause} WHERE id_periksa = ?`,

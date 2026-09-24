@@ -17,7 +17,7 @@ const basePemeriksaanSchema = {
       },
       { message: "Tanggal tidak boleh melebihi hari ini" },
     ),
-  keluhan: optionalString(1000),
+  keluhan: optionalString(255),
 
   tensi: z.preprocess(
     (val) => (val === "" ? undefined : val),

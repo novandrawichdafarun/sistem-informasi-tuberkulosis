@@ -186,11 +186,7 @@ export default function EditPemeriksaanModal({
             >
               Batal
             </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className={editBtnClass}
-            >
+            <button type="submit" disabled={isPending} className={editBtnClass}>
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </button>
           </div>
