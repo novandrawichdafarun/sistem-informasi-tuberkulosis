@@ -96,7 +96,7 @@ export const updateObat = async (
     const values = columns.map((c) => {
       const value = (updateData as Record<string, unknown>)[c];
       return value === undefined ? null : value;
-    })
+    });
 
     await pool.execute({
       sql: `UPDATE obat SET ${setClause} WHERE id_obat = ?`,
