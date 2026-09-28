@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.3.3",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^1.27.0",
     "mysql2": "^3.23.3",
