@@ -1,4 +1,4 @@
-import { Shimmer } from "@/components/skeletons/Skeletons";
+import { Shimmer } from "../../components/skeletons/Skeletons";
 
 /**
  * Skeleton loading untuk welcome page (root). Meniru layout asli:

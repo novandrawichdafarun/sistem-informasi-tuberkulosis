@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Logo from "@/components/asset/Logo";
+import Logo from "../../components/asset/Logo";
 import PointerSpotlight from "@/components/marketing/PointerSpotlight";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";

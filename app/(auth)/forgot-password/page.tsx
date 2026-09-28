@@ -5,7 +5,7 @@ import {
   requestOtpAction,
   verifyOtpAction,
   resetPasswordAction,
-} from "@/actions/auth";
+} from "../../../actions/auth";
 import Link from "next/link";
 
 const STEPS = [

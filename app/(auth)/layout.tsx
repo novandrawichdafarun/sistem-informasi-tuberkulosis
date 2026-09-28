@@ -1,4 +1,4 @@
-import Logo from "@/components/asset/Logo";
+import Logo from "../../components/asset/Logo";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";

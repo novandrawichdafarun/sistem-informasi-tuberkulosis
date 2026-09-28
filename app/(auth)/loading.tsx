@@ -1,4 +1,4 @@
-import { Shimmer } from "@/components/skeletons/Skeletons";
+import { Shimmer } from "../../components/skeletons/Skeletons";
 
 /**
  * Skeleton loading untuk halaman di grup (auth) — login & lupa kata sandi.
