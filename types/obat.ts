@@ -14,7 +14,10 @@ export interface CreateObatPayload {
   is_active: boolean;
 }
 
-export interface UpdateObatPayload extends CreateObatPayload {
+export interface UpdateObatPayload extends Omit<
+  CreateObatPayload,
+  "is_active"
+> {
   id_obat: number;
 }
 

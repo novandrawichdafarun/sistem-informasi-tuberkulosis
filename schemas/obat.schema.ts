@@ -12,9 +12,16 @@ const baseObatSchema = {
 
   deskripsi: optionalString(255),
   dosis: z
-    .number()
-    .min(0, "Dosis obat tidak boleh minus")
-    .max(1000, "Dosis terlalu tinggi"),
+    .string()
+    .trim()
+    .min(1, "Dosis wajib diisi")
+    .transform((val) => Number(val))
+    .pipe(
+      z
+        .number({ error: "Dosis harus berupa angka" })
+        .min(0, "Dosis obat tidak boleh minus")
+        .max(1000, "Dosis terlalu tinggi"),
+    ),
   is_active: z.boolean().default(true),
 };
 
@@ -22,7 +29,9 @@ export const createObatSchema = z.object({
   ...baseObatSchema,
 });
 
-export const updateObatSchema = z.object({
-  ...baseObatSchema,
-  id_obat: z.coerce.number().positive("ID Episode tidak valid"),
-});
+export const updateObatSchema = z
+  .object(baseObatSchema)
+  .omit({ is_active: true })
+  .extend({
+    id_obat: z.coerce.number().positive("ID Obat tidak valid"),
+  });
